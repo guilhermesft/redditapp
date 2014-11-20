@@ -27,6 +27,7 @@ public class BaseRedditApiJsonRequestTest extends AndroidTestCase {
     public void testParseParams(){
         BaseRedditApiJsonRequest fakeRequest = new BaseRedditApiJsonRequest(FAKE_BASE_URL, null, null, null, null);
         Map<String, String> params = fakeRequest.parserParamsToString(mFakeParams);
+        assertEquals(mFakeParams.size(), params.size());
         assertEquals("1", params.get("int"));
         assertEquals("1.0", params.get("double"));
         assertEquals("string", params.get("string"));
@@ -37,10 +38,10 @@ public class BaseRedditApiJsonRequestTest extends AndroidTestCase {
         Uri requestUrl = Uri.parse(fakeRequest.getUrl());
         assertEquals("http", requestUrl.getScheme());
         assertEquals("www.reddit.com", requestUrl.getAuthority());
-        assertEquals("dev/api", requestUrl.getPath());
+        assertEquals("/dev/api", requestUrl.getPath());
         assertEquals(3, requestUrl.getQueryParameterNames().size());
-        assertEquals(1, Integer.getInteger(requestUrl.getQueryParameter("int")).intValue());
-        assertEquals(1.0, Double.valueOf(requestUrl.getQueryParameter("double")).doubleValue());
+        assertEquals(1, Integer.parseInt(requestUrl.getQueryParameter("int")));
+        assertEquals(1.0, Double.parseDouble(requestUrl.getQueryParameter("double")));
         assertEquals("string", requestUrl.getQueryParameter("string"));
         }
 }

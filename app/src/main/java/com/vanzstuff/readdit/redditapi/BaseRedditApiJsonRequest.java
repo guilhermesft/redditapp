@@ -1,6 +1,8 @@
 package com.vanzstuff.readdit.redditapi;
 
 import android.net.Uri;
+import android.util.ArrayMap;
+import android.util.Log;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Response;
@@ -41,13 +43,16 @@ public class BaseRedditApiJsonRequest extends JsonObjectRequest {
      * @return a map with string values
      */
     public Map<String, String> parserParamsToString(Map<String, Object> objParams){
-        Map<String, String> parserParams = Collections.emptyMap();
+        if( objParams == null || objParams.size() == 0)
+            return Collections.emptyMap();
+        Map<String, String> parserParams = new ArrayMap<String, String>(objParams.size());
         if(objParams != null ) {
             for (String key : objParams.keySet()) {
                 parserParams.put(key, String.valueOf(objParams.get(key)));
             }
         }
         return parserParams;
+
     }
 
     @Override
