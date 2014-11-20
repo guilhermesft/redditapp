@@ -1,4 +1,4 @@
-package com.vanzstuff.redditapp.data;
+package com.vanzstuff.redditapp.data.test;
 
 import android.test.AndroidTestCase;
 

@@ -1,4 +1,4 @@
-package com.vanzstuff.redditapp.mock;
+package com.vanzstuff.redditapp.mock.test;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
