@@ -18,23 +18,24 @@ import org.json.JSONObject;
  */
 public class BaseRedditApiJsonRequest extends JsonObjectRequest {
 
+    protected static final String BASE_URL = "http://www.reddit.com";
     private Map<String, String> mParams;
 
-    public BaseRedditApiJsonRequest(int method, String url, JSONObject jsonRequest, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
-        this(method, url, jsonRequest, listener, errorListener, null);
+    public BaseRedditApiJsonRequest(int method, String path, JSONObject jsonRequest, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
+        this(method, path, jsonRequest, listener, errorListener, null);
     }
 
-    public BaseRedditApiJsonRequest(int method, String url, JSONObject jsonRequest, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, Map<String, Object> params) {
-        super(method, url, jsonRequest, listener, errorListener);
+    public BaseRedditApiJsonRequest(int method, String path, JSONObject jsonRequest, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, Map<String, Object> params) {
+        super(method, Uri.parse(BASE_URL).buildUpon().appendPath(path).build().toString(), jsonRequest, listener, errorListener);
         mParams = parserParamsToString(params);
     }
 
-    public BaseRedditApiJsonRequest(String url, JSONObject jsonRequest, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
-        this(url, jsonRequest, listener, errorListener, null);
+    public BaseRedditApiJsonRequest(String path, JSONObject jsonRequest, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
+        this(path, jsonRequest, listener, errorListener, null);
     }
 
-    public BaseRedditApiJsonRequest(String url, JSONObject jsonRequest, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, Map<String, Object> params) {
-        this(jsonRequest == null ? Method.GET : Method.POST,url, jsonRequest, listener, errorListener, params);
+    public BaseRedditApiJsonRequest(String path, JSONObject jsonRequest, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, Map<String, Object> params) {
+        this(jsonRequest == null ? Method.GET : Method.POST,path, jsonRequest, listener, errorListener, params);
     }
 
     /**
@@ -71,6 +72,14 @@ public class BaseRedditApiJsonRequest extends JsonObjectRequest {
             url = uriBuilder.build().toString();
         }
         return url;
+    }
 
+    @Override
+    public byte[] getBody() {
+        StringBuilder builder = new StringBuilder();
+        for(String key : mParams.keySet()){
+            builder.append(key + "=" + mParams.get(key) + "&");
+        }
+        return builder.substring(0, builder.length()-1).getBytes();
     }
 }
