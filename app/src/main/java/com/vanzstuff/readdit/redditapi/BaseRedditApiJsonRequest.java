@@ -7,6 +7,7 @@ import android.util.Log;
 import com.android.volley.AuthFailureError;
 import com.android.volley.Response;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.vanzstuff.readdit.Utils;
 
 import java.util.Map;
 import java.util.Collections;
@@ -27,7 +28,7 @@ public class BaseRedditApiJsonRequest extends JsonObjectRequest {
 
     public BaseRedditApiJsonRequest(int method, String path, JSONObject jsonRequest, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, Map<String, Object> params) {
         super(method, Uri.parse(BASE_URL).buildUpon().appendPath(path).build().toString(), jsonRequest, listener, errorListener);
-        mParams = parserParamsToString(params);
+        mParams = Utils.parserParamsToString(params);
     }
 
     public BaseRedditApiJsonRequest(String path, JSONObject jsonRequest, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
@@ -38,23 +39,7 @@ public class BaseRedditApiJsonRequest extends JsonObjectRequest {
         this(jsonRequest == null ? Method.GET : Method.POST,path, jsonRequest, listener, errorListener, params);
     }
 
-    /**
-     * Convert all parameteres in objParams to a valid string to use in the request
-     * @param objParams map with parameteres object to convert
-     * @return a map with string values
-     */
-    public Map<String, String> parserParamsToString(Map<String, Object> objParams){
-        if( objParams == null || objParams.size() == 0)
-            return Collections.emptyMap();
-        Map<String, String> parserParams = new ArrayMap<String, String>(objParams.size());
-        if(objParams != null ) {
-            for (String key : objParams.keySet()) {
-                parserParams.put(key, String.valueOf(objParams.get(key)));
-            }
-        }
-        return parserParams;
 
-    }
 
     @Override
     protected Map<String, String> getParams() throws AuthFailureError {
@@ -81,5 +66,10 @@ public class BaseRedditApiJsonRequest extends JsonObjectRequest {
             builder.append(key + "=" + mParams.get(key) + "&");
         }
         return builder.substring(0, builder.length()-1).getBytes();
+    }
+
+    @Override
+    public String getBodyContentType() {
+        return "application/x-www-form-urlencoded";
     }
 }
