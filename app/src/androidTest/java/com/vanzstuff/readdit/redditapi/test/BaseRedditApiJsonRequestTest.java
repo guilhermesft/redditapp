@@ -9,7 +9,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.vanzstuff.readdit.redditapi.BaseRedditApiJsonRequest;
-import com.vanzstuff.redditapp.mock.test.HttpStackMock;
+import com.vanzstuff.readditapp.test.mocks.HttpStackMock;
 
 import org.apache.http.HttpStatus;
 import org.apache.http.ProtocolVersion;
