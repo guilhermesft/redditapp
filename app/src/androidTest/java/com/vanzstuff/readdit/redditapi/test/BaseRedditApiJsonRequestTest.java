@@ -8,6 +8,7 @@ import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
+import com.vanzstuff.readdit.Utils;
 import com.vanzstuff.readdit.redditapi.BaseRedditApiJsonRequest;
 import com.vanzstuff.readditapp.test.mocks.HttpStackMock;
 
@@ -40,7 +41,7 @@ public class BaseRedditApiJsonRequestTest extends AndroidTestCase {
 
     public void testParseParams(){
         BaseRedditApiJsonRequest fakeRequest = new BaseRedditApiJsonRequest(FAKE_PATH, null, null, null, null);
-        Map<String, String> params = fakeRequest.parserParamsToString(mFakeParams);
+        Map<String, String> params = Utils.parserParamsToString(mFakeParams);
         assertEquals(mFakeParams.size(), params.size());
         assertEquals("1", params.get("int"));
         assertEquals("1.0", params.get("double"));
