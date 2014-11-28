@@ -27,6 +27,7 @@ public class BaseRedditApiJsonRequestTest extends AndroidTestCase {
 
     private Map<String, Object> mFakeParams;
     private HttpStackMock mMockStack;
+    private RequestQueue mQueue;
     private final static String FAKE_PATH = "dev/api";
 
 
@@ -37,18 +38,17 @@ public class BaseRedditApiJsonRequestTest extends AndroidTestCase {
         mFakeParams.put("double", 1.0);
         mFakeParams.put("string", "string");
         mMockStack = new HttpStackMock();
+        mQueue =  Volley.newRequestQueue(getContext(), mMockStack);
+        mQueue.start();
     }
 
-    public void testParseParams(){
-        BaseRedditApiJsonRequest fakeRequest = new BaseRedditApiJsonRequest(FAKE_PATH, null, null, null, null);
-        Map<String, String> params = Utils.parserParamsToString(mFakeParams);
-        assertEquals(mFakeParams.size(), params.size());
-        assertEquals("1", params.get("int"));
-        assertEquals("1.0", params.get("double"));
-        assertEquals("string", params.get("string"));
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
+        mQueue.stop();
     }
 
-    public void testGetUrl(){
+    public void testGet(){
         BaseRedditApiJsonRequest fakeRequest = new BaseRedditApiJsonRequest(FAKE_PATH, null, null, null, mFakeParams);
         Uri requestUrl = Uri.parse(fakeRequest.getUrl());
         assertEquals("http", requestUrl.getScheme());
@@ -60,8 +60,7 @@ public class BaseRedditApiJsonRequestTest extends AndroidTestCase {
         assertEquals("string", requestUrl.getQueryParameter("string"));
         }
 
-    public void testPostUrl() throws AuthFailureError {
-        RequestQueue queue = Volley.newRequestQueue(getContext(), mMockStack);
+    public void testPost() throws AuthFailureError {
         mMockStack.setResponse(new BasicHttpResponse(new BasicStatusLine(new ProtocolVersion("HTTP", 1,1), HttpStatus.SC_OK, "OK")));
         BaseRedditApiJsonRequest fakeRequest = new BaseRedditApiJsonRequest(Request.Method.POST, FAKE_PATH, null, null, null, mFakeParams);
         Uri requestUrl = Uri.parse(fakeRequest.getUrl());
@@ -69,12 +68,28 @@ public class BaseRedditApiJsonRequestTest extends AndroidTestCase {
         assertEquals("www.reddit.com", requestUrl.getAuthority());
         assertEquals("/dev/api", requestUrl.getPath());
         assertEquals(0, requestUrl.getQueryParameterNames().size());
-        queue.start();
-        queue.add(fakeRequest);
+        mQueue.start();
+        mQueue.add(fakeRequest);
         while (mMockStack.getLastRequest() == null);
         assertNotNull(mMockStack.getLastRequest().getBody());
         String body = new String(mMockStack.getLastRequest().getBody());
         MoreAsserts.assertContainsRegex("(int=1|double=1\\.0|string=string)&(int=1|double=1\\.0|string=string)&(int=1|double=1\\.0|string=string)", body);
+    }
+
+    public void testHeaders() throws AuthFailureError {
+        mMockStack.setResponse(new BasicHttpResponse(new BasicStatusLine(new ProtocolVersion("HTTP", 1,1), HttpStatus.SC_OK, "OK")));
+        BaseRedditApiJsonRequest fakeRequest = new BaseRedditApiJsonRequest(Request.Method.POST, FAKE_PATH, null, null, null, mFakeParams);
+        mQueue.add(fakeRequest);
+        while (mMockStack.getLastRequest() == null);
+        assertEquals( "bearer " + Utils.getAccessToken(), mMockStack.getLastRequest().getHeaders().get("Authorization"));
+    }
+
+    public void testBodyContentType() throws AuthFailureError {
+        mMockStack.setResponse(new BasicHttpResponse(new BasicStatusLine(new ProtocolVersion("HTTP", 1,1), HttpStatus.SC_OK, "OK")));
+        BaseRedditApiJsonRequest fakeRequest = new BaseRedditApiJsonRequest(Request.Method.POST, FAKE_PATH, null, null, null, mFakeParams);
+        mQueue.add(fakeRequest);
+        while (mMockStack.getLastRequest() == null);
+        assertEquals("application/x-www-form-urlencoded", mMockStack.getLastRequest().getBodyContentType());
     }
 
 }

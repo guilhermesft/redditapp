@@ -1,26 +1,24 @@
 package com.vanzstuff.readdit.redditapi;
 
-import android.util.ArrayMap;
 import android.util.Base64;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Response;
-import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.apache.http.auth.Credentials;
 import org.json.JSONObject;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Collections;
 
 /**
  * Created by vanz on 25/11/14.
  */
 public class AuthorizationRequest extends BaseRedditApiJsonRequest {
 
-    private static final String HEADER_AUTHORIZATION =  "Authorization";
     public static final String PARAM_GRANT_TYPE = "grant_type";
     public static final String PARAM_DEVICE_ID = "device_id";
+    public static final String PARAM_AUTHORIZATION_CODE = "authorization_code";
     public static final String DEFAULT_GRANT_TYPE = "https://oauth.reddit.com/grants/installed_client";
     private Credentials mCredentials;
 
@@ -31,10 +29,11 @@ public class AuthorizationRequest extends BaseRedditApiJsonRequest {
 
     @Override
     public Map<String, String> getHeaders() throws AuthFailureError {
-        ArrayMap<String, String> params = new ArrayMap<String, String>();
+        HashMap<String, String> params = new HashMap<String, String>();
         String creds = String.format("%s:%s", mCredentials.getUserPrincipal().getName(),mCredentials.getPassword());
         String auth = "Basic " + Base64.encodeToString(creds.getBytes(), Base64.DEFAULT);
         params.put(HEADER_AUTHORIZATION, auth);
         return params;
     }
 }
+

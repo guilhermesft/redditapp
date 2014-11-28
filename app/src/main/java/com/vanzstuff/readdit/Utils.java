@@ -1,14 +1,15 @@
 package com.vanzstuff.readdit;
 
-import android.util.ArrayMap;
-
 import java.util.Collections;
 import java.util.Map;
+import java.util.HashMap;
 
 /**
  * Created by vanz on 24/11/14.
  */
 public class Utils {
+
+    private static String ACCESS_TOKEN;
 
     public static final boolean stringNotNullOrEmpty(String s){
         return !(s == null || s.isEmpty());
@@ -22,7 +23,7 @@ public class Utils {
     public static Map<String, String> parserParamsToString(Map<String, Object> objParams){
         if( objParams == null || objParams.size() == 0)
             return Collections.emptyMap();
-        Map<String, String> parserParams = new ArrayMap<String, String>(objParams.size());
+        Map<String, String> parserParams = new HashMap<String, String>(objParams.size());
         if(objParams != null ) {
             for (String key : objParams.keySet()) {
                 parserParams.put(key, String.valueOf(objParams.get(key)));
@@ -30,5 +31,13 @@ public class Utils {
         }
         return parserParams;
 
+    }
+
+    public static String getAccessToken() {
+        return ACCESS_TOKEN;
+    }
+
+    public static void setAccessToken(String token) {
+        ACCESS_TOKEN = token;
     }
 }

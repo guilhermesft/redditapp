@@ -10,7 +10,6 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
-import com.vanzstuff.readdit.VolleyWrapper;
 import com.vanzstuff.readdit.redditapi.AuthorizationRequest;
 import com.vanzstuff.readditapp.test.mocks.HttpStackMock;
 
@@ -20,6 +19,7 @@ import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -39,7 +39,7 @@ public class AuthorizationRequestTest extends AndroidTestCase {
         mMockStack = new HttpStackMock();
         mQueue = Volley.newRequestQueue(getContext(), mMockStack);
         mQueue.start();
-        mFakeParams= new ArrayMap<String, Object>();
+        mFakeParams= new HashMap<String, Object>();
         mFakeParams.put(AuthorizationRequest.PARAM_DEVICE_ID, java.util.UUID.randomUUID().toString());
         mFakeParams.put(AuthorizationRequest.PARAM_GRANT_TYPE, AuthorizationRequest.DEFAULT_GRANT_TYPE);
     }

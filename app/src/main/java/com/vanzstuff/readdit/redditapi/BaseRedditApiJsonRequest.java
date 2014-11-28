@@ -8,6 +8,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.vanzstuff.readdit.Utils;
 
 import java.util.Map;
+import java.util.HashMap;
 
 import org.json.JSONObject;
 
@@ -16,7 +17,8 @@ import org.json.JSONObject;
  */
 public class BaseRedditApiJsonRequest extends JsonObjectRequest {
 
-    protected static final String DEFAULT_BASE_URL = "http://www.reddit.com";
+    protected static final String DEFAULT_BASE_URL = "https://oauth.reddit.com";
+    protected static final String HEADER_AUTHORIZATION = "Authorization";
     private Map<String, String> mParams;
 
     public BaseRedditApiJsonRequest(int method, String path, JSONObject jsonRequest, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
@@ -37,10 +39,8 @@ public class BaseRedditApiJsonRequest extends JsonObjectRequest {
     }
 
     public BaseRedditApiJsonRequest(int method, String path, JSONObject jsonRequest, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, Map<String, Object> params) {
-        this(method, path, jsonRequest, listener, errorListener);
+        this(method, DEFAULT_BASE_URL, path, jsonRequest, listener, errorListener, params);
     }
-
-
 
     @Override
     protected Map<String, String> getParams() throws AuthFailureError {
@@ -72,5 +72,13 @@ public class BaseRedditApiJsonRequest extends JsonObjectRequest {
     @Override
     public String getBodyContentType() {
         return "application/x-www-form-urlencoded";
+    }
+
+    @Override
+    public Map<String, String> getHeaders() throws AuthFailureError {
+        HashMap<String, String> params = new HashMap<String, String>();
+        //TODO - Where should retrieve the access token?
+        params.put(HEADER_AUTHORIZATION, Utils.getAccessToken());
+        return params;
     }
 }
