@@ -13,9 +13,10 @@ public class MessageRequest extends BaseRedditApiJsonRequest implements Listing{
 
     public static final String PARAM_MARK = "mark";
     public static final String PARAM_MID = "mid";
-    public static final String URL_MESSAGE_INBOX = "/message/inbox";
-    public static final String URL_MESSAGE_UNREAD = "/message/unread";
-    public static final String URL_MESSAGE_SENT = "/message/sent";
+    public static final String PATH_MESSAGE_INBOX = "/message/inbox";
+    public static final String PATH_MESSAGE_UNREAD = "/message/unread";
+    public static final String PATH_MESSAGE_SENT = "/message/sent";
+    public static final String DEFAULT_SHOW = "all";
 
 
     public MessageRequest(String path, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, Map<String, Object> params) {
