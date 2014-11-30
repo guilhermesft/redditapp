@@ -71,14 +71,14 @@ public class BaseRedditApiJsonRequest extends JsonObjectRequest {
 
     @Override
     public String getBodyContentType() {
-        return "application/x-www-form-urlencoded";
+        return "application/x-www-form-urlencoded; charset=UTF-8";
     }
 
     @Override
     public Map<String, String> getHeaders() throws AuthFailureError {
         HashMap<String, String> params = new HashMap<String, String>();
         //TODO - Where should retrieve the access token?
-        params.put(HEADER_AUTHORIZATION, Utils.getAccessToken());
+        params.put(HEADER_AUTHORIZATION, "bearer " +  Utils.getAccessToken());
         return params;
     }
 }

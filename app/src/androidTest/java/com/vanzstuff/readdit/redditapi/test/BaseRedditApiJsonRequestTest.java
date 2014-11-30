@@ -51,9 +51,9 @@ public class BaseRedditApiJsonRequestTest extends AndroidTestCase {
     public void testGet(){
         BaseRedditApiJsonRequest fakeRequest = new BaseRedditApiJsonRequest(FAKE_PATH, null, null, null, mFakeParams);
         Uri requestUrl = Uri.parse(fakeRequest.getUrl());
-        assertEquals("http", requestUrl.getScheme());
-        assertEquals("www.reddit.com", requestUrl.getAuthority());
-        assertEquals("/dev/api", requestUrl.getPath());
+        assertEquals("https", requestUrl.getScheme());
+        assertEquals("oauth.reddit.com", requestUrl.getAuthority());
+        assertEquals("/" + FAKE_PATH, requestUrl.getPath());
         assertEquals(3, requestUrl.getQueryParameterNames().size());
         assertEquals(1, Integer.parseInt(requestUrl.getQueryParameter("int")));
         assertEquals(1.0, Double.parseDouble(requestUrl.getQueryParameter("double")));
@@ -64,9 +64,9 @@ public class BaseRedditApiJsonRequestTest extends AndroidTestCase {
         mMockStack.setResponse(new BasicHttpResponse(new BasicStatusLine(new ProtocolVersion("HTTP", 1,1), HttpStatus.SC_OK, "OK")));
         BaseRedditApiJsonRequest fakeRequest = new BaseRedditApiJsonRequest(Request.Method.POST, FAKE_PATH, null, null, null, mFakeParams);
         Uri requestUrl = Uri.parse(fakeRequest.getUrl());
-        assertEquals("http", requestUrl.getScheme());
-        assertEquals("www.reddit.com", requestUrl.getAuthority());
-        assertEquals("/dev/api", requestUrl.getPath());
+        assertEquals("https", requestUrl.getScheme());
+        assertEquals("oauth.reddit.com", requestUrl.getAuthority());
+        assertEquals("/" + FAKE_PATH, requestUrl.getPath());
         assertEquals(0, requestUrl.getQueryParameterNames().size());
         mQueue.start();
         mQueue.add(fakeRequest);
@@ -89,7 +89,7 @@ public class BaseRedditApiJsonRequestTest extends AndroidTestCase {
         BaseRedditApiJsonRequest fakeRequest = new BaseRedditApiJsonRequest(Request.Method.POST, FAKE_PATH, null, null, null, mFakeParams);
         mQueue.add(fakeRequest);
         while (mMockStack.getLastRequest() == null);
-        assertEquals("application/x-www-form-urlencoded", mMockStack.getLastRequest().getBodyContentType());
+        assertEquals("application/x-www-form-urlencoded; charset=UTF-8", mMockStack.getLastRequest().getBodyContentType());
     }
 
 }
