@@ -1,5 +1,6 @@
 package com.vanzstuff.readdit;
 
+import java.lang.reflect.Array;
 import java.util.Collections;
 import java.util.Map;
 import java.util.HashMap;
@@ -26,7 +27,19 @@ public class Utils {
         Map<String, String> parserParams = new HashMap<String, String>(objParams.size());
         if(objParams != null ) {
             for (String key : objParams.keySet()) {
-                parserParams.put(key, String.valueOf(objParams.get(key)));
+                if ( objParams.get(key).getClass().isArray()){
+                    StringBuilder listParam = new StringBuilder();
+                    for( Object obj : (Object[]) objParams.get(key)){
+                        if ( obj instanceof String)
+                            listParam.append((String)obj);
+                        else
+                            listParam.append(String.valueOf(obj));
+                        listParam.append(",");
+                    }
+                    parserParams.put(key, listParam.substring(0, listParam.length()-1).toString());
+                }else {
+                    parserParams.put(key, String.valueOf(objParams.get(key)));
+                }
             }
         }
         return parserParams;
