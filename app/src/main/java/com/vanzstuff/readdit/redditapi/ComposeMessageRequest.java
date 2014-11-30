@@ -18,6 +18,8 @@ public class ComposeMessageRequest extends BaseRedditApiJsonRequest {
     public static final String PARAM_TEXT = "text";
     public static final String PARAM_TO = "to";
     public static final String PARAM_UH = "uh";
+    public static final String PARAM_API_TYPE = "api_type";
+    public static final String DEFAULT_API_TYPE = "json";
 
     public ComposeMessageRequest(Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, Map<String, Object> params) {
         super(Method.POST, "/api/compose", null, listener, errorListener, params);
