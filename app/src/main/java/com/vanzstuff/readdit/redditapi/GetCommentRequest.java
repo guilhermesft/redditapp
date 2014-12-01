@@ -42,20 +42,14 @@ public class GetCommentRequest extends BaseRedditApiJsonRequest {
             params.put(PARAM_LIMIT, limit);
         if(Utils.stringNotNullOrEmpty(sortOrder)){
             boolean validSort = false;
-            if (PARAM_SORT_CONFIDENCE.equals(sortOrder))
-                validSort = true;
-            else if (PARAM_SORT_TOP.equals(sortOrder))
-                validSort = true;
-            else if (PARAM_SORT_NEW.equals(sortOrder))
-                validSort = true;
-            else if (PARAM_SORT_HOT.equals(sortOrder))
-                validSort = true;
-            else if (PARAM_SORT_CONTROVERSIAL.equals(sortOrder))
-                validSort = true;
-            else if (PARAM_SORT_OLD.equals(sortOrder))
-                validSort = true;
-            else if (PARAM_SORT_RANDOM.equals(sortOrder))
-                validSort = true;
+            if (PARAM_SORT_CONFIDENCE.equals(sortOrder) ||
+                PARAM_SORT_TOP.equals(sortOrder) ||
+                PARAM_SORT_NEW.equals(sortOrder) ||
+                PARAM_SORT_HOT.equals(sortOrder) ||
+                PARAM_SORT_CONTROVERSIAL.equals(sortOrder) ||
+                PARAM_SORT_OLD.equals(sortOrder) ||
+                PARAM_SORT_RANDOM.equals(sortOrder))
+                    validSort = true;
             if(validSort)
                 params.put(PARAM_SORT, sortOrder);
         }

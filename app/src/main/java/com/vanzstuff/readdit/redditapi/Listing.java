@@ -10,6 +10,7 @@ public interface Listing {
     public static final String PARAM_COUNT = "count";
     public static final String PARAM_LIMIT = "limit";
     public static final String PARAM_SHOW = "show";
+    public static final String DEFAULT_SHOW = "all";
 
 }
 
