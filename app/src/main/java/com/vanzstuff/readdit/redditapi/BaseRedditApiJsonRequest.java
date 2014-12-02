@@ -13,6 +13,7 @@ import java.util.HashMap;
 import org.json.JSONObject;
 
 /**
+ * Base class for Reddit API requests
  * Created by vanz on 18/11/14.
  */
 public class BaseRedditApiJsonRequest extends JsonObjectRequest {

@@ -7,6 +7,8 @@ import org.json.JSONObject;
 import java.util.Map;
 
 /**
+ * Request to vote on a thing
+ * http://www.reddit.com/dev/api#POST_api_vote
  * Created by vanz on 21/11/14.
  */
 public class VoteRequest extends BaseRedditApiJsonRequest {

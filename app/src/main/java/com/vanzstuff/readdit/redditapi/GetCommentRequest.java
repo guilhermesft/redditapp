@@ -10,6 +10,8 @@ import org.json.JSONObject;
 import java.util.Map;
 
 /**
+ * Request to retrieve the comment tree for a given article
+ * http://www.reddit.com/dev/api#GET_comments_{article}
  * Created by vanz on 24/11/14.
  */
 public class GetCommentRequest extends BaseRedditApiJsonRequest {
@@ -28,12 +30,12 @@ public class GetCommentRequest extends BaseRedditApiJsonRequest {
     public static final String PARAM_SORT_OLD = "old";
     public static final String PARAM_SORT_RANDOM = "random";
 
-    public static GetCommentRequest newInstance(String subreddit, String article, String linkArticle, String comment, int context, int depth, int limit, String sortOrder,  Response.Listener<JSONObject> listener, Response.ErrorListener errorListener){
+    public static GetCommentRequest newInstance(String subreddit, String article, String ID36Article, String ID36comment, int context, int depth, int limit, String sortOrder,  Response.Listener<JSONObject> listener, Response.ErrorListener errorListener){
         Map<String,Object> params = new ArrayMap<String, Object>();
-        if(Utils.stringNotNullOrEmpty(linkArticle))
-            params.put(PARAM_ARTICLE, linkArticle);
-        if(Utils.stringNotNullOrEmpty(comment))
-            params.put(PARAM_COMMENT, comment);
+        if(Utils.stringNotNullOrEmpty(ID36Article))
+            params.put(PARAM_ARTICLE, ID36Article);
+        if(Utils.stringNotNullOrEmpty(ID36comment))
+            params.put(PARAM_COMMENT, ID36comment);
         if(context >= 0 && context <= 8)
             params.put(PARAM_CONTEXT, context);
         if( depth > 0)

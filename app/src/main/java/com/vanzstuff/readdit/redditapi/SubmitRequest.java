@@ -7,6 +7,8 @@ import org.json.JSONObject;
 import java.util.Map;
 
 /**
+ * Request used to submit a link to a subreddit
+ * http://www.reddit.com/dev/api#POST_api_submit
  * Created by vanz on 24/11/14.
  */
 public class SubmitRequest extends BaseRedditApiJsonRequest {
@@ -31,6 +33,6 @@ public class SubmitRequest extends BaseRedditApiJsonRequest {
     public static final String THEN_COMMENTS = "comments";
 
     public SubmitRequest(Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, Map<String, Object> params) {
-        super(Method.POST, "/api/submit", null, listener, errorListener, params);
+        super(Method.POST, "api/submit", null, listener, errorListener, params);
     }
 }

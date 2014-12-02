@@ -7,6 +7,8 @@ import org.json.JSONObject;
 import java.util.Map;
 
 /**
+ * Request used to handle message composition
+ * http://www.reddit.com/dev/api#POST_api_compose
  * Created by vanz on 24/11/14.
  */
 public class ComposeMessageRequest extends BaseRedditApiJsonRequest {
@@ -22,7 +24,7 @@ public class ComposeMessageRequest extends BaseRedditApiJsonRequest {
     public static final String DEFAULT_API_TYPE = "json";
 
     public ComposeMessageRequest(Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, Map<String, Object> params) {
-        super(Method.POST, "/api/compose", null, listener, errorListener, params);
+        super(Method.POST, "api/compose", null, listener, errorListener, params);
     }
 
 }

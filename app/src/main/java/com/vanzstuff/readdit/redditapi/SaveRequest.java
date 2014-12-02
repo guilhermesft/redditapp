@@ -7,6 +7,8 @@ import org.json.JSONObject;
 import java.util.Map;
 
 /**
+ * Request to save a link or comment
+ * http://www.reddit.com/dev/api#POST_api_save
  * Created by vanz on 21/11/14.
  */
 public class SaveRequest extends BaseRedditApiJsonRequest {

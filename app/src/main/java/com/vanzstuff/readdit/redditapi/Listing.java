@@ -1,6 +1,8 @@
 package com.vanzstuff.readdit.redditapi;
 
 /**
+ * Interface provides to the request the protocol for control pagination
+ * http://www.reddit.com/dev/api#listings
  * Created by vanz on 24/11/14.
  */
 public interface Listing {

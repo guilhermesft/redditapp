@@ -7,6 +7,8 @@ import org.json.JSONObject;
 import java.util.Map;
 
 /**
+ * Request to unhide a link
+ * http://www.reddit.com/dev/api#POST_api_unhide
  * Created by vanz on 24/11/14.
  */
 public class UnhideRequest extends BaseRedditApiJsonRequest {
@@ -15,7 +17,7 @@ public class UnhideRequest extends BaseRedditApiJsonRequest {
     public static final String PARAM_UH = "uh";
 
     public UnhideRequest(Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, Map<String, Object> params) {
-        super(Method.POST, "/api/unhide", null, listener, errorListener, params);
+        super(Method.POST, "api/unhide", null, listener, errorListener, params);
     }
 
 }

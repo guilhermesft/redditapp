@@ -70,7 +70,7 @@ public class SubredditRequestTest extends AndroidTestCase{
         assertEquals("oauth.reddit.com", requestUrl.getAuthority());
         assertEquals( "/subreddits/popular", requestUrl.getPath());
         assertEquals("application/x-www-form-urlencoded; charset=UTF-8", mMockStack.getLastRequest().getBodyContentType());
-        assertEquals(6, requestUrl.getQueryParameterNames().size());
+        assertEquals(5, requestUrl.getQueryParameterNames().size());
         assertEquals(mFakeParams.get(SubredditRequest.PARAM_SHOW), requestUrl.getQueryParameter(SubredditRequest.PARAM_SHOW));
         assertEquals(mFakeParams.get(SubredditRequest.PARAM_LIMIT), Integer.parseInt(requestUrl.getQueryParameter(SubredditRequest.PARAM_LIMIT)));
         assertEquals(mFakeParams.get(SubredditRequest.PARAM_COUNT), Integer.parseInt(requestUrl.getQueryParameter(SubredditRequest.PARAM_COUNT)));
