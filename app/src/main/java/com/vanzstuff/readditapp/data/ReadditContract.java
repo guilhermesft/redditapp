@@ -81,25 +81,9 @@ public class ReadditContract {
     }
 
     /**
-     * table stores the subreddit of tagged/saved posts by the user
-     */
-    public static final class Subreddit implements BaseColumns{
-
-        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_SUBREDDIT).build();
-        public static final String CONTENT_TYPE = "subreddit";
-
-        public static Uri buildSubredditUri(long id){
-            return ContentUris.withAppendedId(CONTENT_URI, id);
-        }
-        public static final String TABLE_NAME = "subreddit";
-        public static final String COLUMN_NAME = "name";
-
-    }
-
-    /**
      * table stores all user subscribes
      */
-    public static final class Subscribe implements BaseColumns{
+    public static final class Subreddit implements BaseColumns{
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_SUBSCRIBE).build();
         public static final String CONTENT_TYPE = "subscribe";
 

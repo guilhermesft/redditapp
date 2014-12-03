@@ -6,12 +6,9 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 
 import com.vanzstuff.redditapp.data.ReadditContract;
-
-import java.sql.SQLException;
 
 /**
  * Created by vanz on 01/12/14.
@@ -22,8 +19,7 @@ public class DatabaseContentProvider extends ContentProvider {
     private static final int TAG = 100;
     private static final int POST = 101;
     private static final int COMMENT = 102;
-    private static final int SUBREDDIT = 103;
-    private static final int SUBSCRIBE = 104;
+    private static final int SUBREDDIT = 104;
 
     private static final UriMatcher sUriMatcher = buildUriMatcher();
 
@@ -34,8 +30,7 @@ public class DatabaseContentProvider extends ContentProvider {
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.Tag.CONTENT_TYPE,  TAG);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.Post.CONTENT_TYPE,  POST);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.Comment.CONTENT_TYPE,  COMMENT);
-        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.Subreddit.CONTENT_TYPE,  SUBREDDIT);
-        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.Subscribe.CONTENT_TYPE,  SUBSCRIBE);
+        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.Subreddit.CONTENT_TYPE, SUBREDDIT);
         return matcher;
     }
 
@@ -81,16 +76,6 @@ public class DatabaseContentProvider extends ContentProvider {
                         sortOrder);
                 break;
             }
-            case SUBSCRIBE:{
-                cursor = db.query(ReadditContract.Subscribe.TABLE_NAME,
-                        projection,
-                        selection,
-                        selectionArgs,
-                        null,
-                        null,
-                        sortOrder);
-                break;
-            }
             case SUBREDDIT:{
                 cursor = db.query(ReadditContract.Subreddit.TABLE_NAME,
                         projection,
@@ -120,8 +105,6 @@ public class DatabaseContentProvider extends ContentProvider {
                 return ReadditContract.Comment.CONTENT_TYPE;
             case SUBREDDIT:
                 return ReadditContract.Subreddit.CONTENT_TYPE;
-            case SUBSCRIBE:
-                return ReadditContract.Subscribe.CONTENT_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -157,18 +140,10 @@ public class DatabaseContentProvider extends ContentProvider {
                     throw new android.database.SQLException("Failed to insert row into " + uri);
                 break;
             }
-            case SUBREDDIT: {
+            case SUBREDDIT:{
                 long id = db.insert(ReadditContract.Subreddit.TABLE_NAME, null, values);
                 if (id > 0)
-                    returnUri = ReadditContract.Subreddit.buildSubredditUri(id);
-                else
-                    throw new android.database.SQLException("Failed to insert row into " + uri);
-                break;
-            }
-            case SUBSCRIBE:{
-                long id = db.insert(ReadditContract.Subscribe.TABLE_NAME, null, values);
-                if (id > 0)
-                    returnUri = ReadditContract.Subscribe.buildSubscribeUri(id);
+                    returnUri = ReadditContract.Subreddit.buildSubscribeUri(id);
                 else
                     throw new android.database.SQLException("Failed to insert row into " + uri);
                 break;
@@ -198,10 +173,6 @@ public class DatabaseContentProvider extends ContentProvider {
                 rowsDeleted = db.delete(ReadditContract.Comment.TABLE_NAME, selection, selectionArgs);
                 break;
             }
-            case SUBSCRIBE:{
-                rowsDeleted = db.delete(ReadditContract.Subscribe.TABLE_NAME, selection, selectionArgs);
-                break;
-            }
             case SUBREDDIT:{
                 rowsDeleted = db.delete(ReadditContract.Subreddit.TABLE_NAME, selection, selectionArgs);
                 break;
@@ -228,10 +199,6 @@ public class DatabaseContentProvider extends ContentProvider {
             }
             case COMMENT:{
                 rowsUpdated = db.update(ReadditContract.Comment.TABLE_NAME, values, selection, selectionArgs );
-                break;
-            }
-            case SUBSCRIBE:{
-                rowsUpdated = db.update(ReadditContract.Subscribe.TABLE_NAME, values, selection, selectionArgs );
                 break;
             }
             case SUBREDDIT:{

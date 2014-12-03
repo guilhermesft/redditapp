@@ -23,14 +23,11 @@ public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
         final String CREATE_TAG = "CREATE TABLE " + ReadditContract.Tag.TABLE_NAME + " ( " +
                 ReadditContract.Tag._ID + " INTEGER PRIMARY KEY, " +
                 ReadditContract.Tag.COLUMN_NAME + " TEXT NOT NULL );";
-        final String CREATE_SUBREDDIT = "CREATE TABLE " + ReadditContract.Subreddit.TABLE_NAME + " ( " +
-                ReadditContract.Subreddit._ID + " INTEGER PRIMARY KEY, " +
-                ReadditContract.Subreddit.COLUMN_NAME + " TEXT NOT NULL UNIQUE);";
         final String CREATE_POST = "CREATE TABLE " + ReadditContract.Post.TABLE_NAME + " ( " +
                 ReadditContract.Post._ID + " INTERGER PRIMARY KEY, " +
                 ReadditContract.Post.COLUMN_CONTENT + " TEXT NOT NULL, " +
-                ReadditContract.Post.COLUMN_DATE + " TEXT NOT NULL, " + //TODO text type is the best choice?
-                ReadditContract.Post.COLUMN_SUBREDDIT + "INTEGER REFERENCES " + ReadditContract.Subreddit.TABLE_NAME + " ( " + ReadditContract.Subreddit._ID + " )," +
+                ReadditContract.Post.COLUMN_DATE + " INTERGER NOT NULL, " + //TODO text type is the best choice?
+                ReadditContract.Post.COLUMN_SUBREDDIT + " TEXT NOT NULL, " +
                 ReadditContract.Post.COLUMN_USER +  " TEXT NOT NULL," +
                 ReadditContract.Post.COLUMN_VOTES + " INTEGER DEFAULT 0);";
         final String CREATE_TAG_X_POST = "CREATE TABLE " + ReadditContract.TagXPost.TABLE_NAME + " ( " +
@@ -41,15 +38,14 @@ public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
                 ReadditContract.Comment._ID + " INTEGER PRIMARY KEY," +
                 ReadditContract.Comment.COLUMN_PARENT + " INTEGER REFERENCES " + ReadditContract.Comment.TABLE_NAME + " ( " + ReadditContract.Comment._ID + " )," +
                 ReadditContract.Comment.COLUMN_CONTENT + " TEXT NOT NULL," +
-                ReadditContract.Comment.COLUMN_DATE + " TEXT NOT NULL, " +
+                ReadditContract.Comment.COLUMN_DATE + " INTERGER NOT NULL, " +
                 ReadditContract.Comment.COLUMN_USER + " TEXT NOT NULL, " +
                 ReadditContract.Comment.COLUMN_POST + " INTEGER REFERENCES " + ReadditContract.Post.TABLE_NAME + " ( " + ReadditContract.Post._ID + " ));";
-        final String CREATE_SUBSCRIBE = "CREATE TABLE " + ReadditContract.Subscribe.TABLE_NAME + " ( " +
-                ReadditContract.Subscribe._ID + " INTEGER PRIMARY KEY, " +
-                ReadditContract.Subscribe.COLUMN_SUBREDDIT + " TEXT NOT NULL );";
+        final String CREATE_SUBSCRIBE = "CREATE TABLE " + ReadditContract.Subreddit.TABLE_NAME + " ( " +
+                ReadditContract.Subreddit._ID + " INTEGER PRIMARY KEY, " +
+                ReadditContract.Subreddit.COLUMN_SUBREDDIT + " TEXT NOT NULL );";
 
         db.execSQL(CREATE_TAG);
-        db.execSQL(CREATE_SUBREDDIT);
         db.execSQL(CREATE_POST);
         db.execSQL(CREATE_TAG_X_POST);
         db.execSQL(CREATE_COMMENT);
