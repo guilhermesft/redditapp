@@ -11,11 +11,14 @@ import android.net.Uri;
 
 import com.vanzstuff.redditapp.data.ReadditContract;
 
+import java.sql.SQLException;
+
 /**
  * Created by vanz on 01/12/14.
  */
 public class DatabaseContentProvider extends ContentProvider {
 
+    /* Possibles matches for UriMatcher */
     private static final int TAG = 100;
     private static final int POST = 101;
     private static final int COMMENT = 102;
@@ -23,12 +26,17 @@ public class DatabaseContentProvider extends ContentProvider {
     private static final int SUBSCRIBE = 104;
 
     private static final UriMatcher sUriMatcher = buildUriMatcher();
-    private static SQLiteQueryBuilder sQueryBuilder;
 
     private SQLiteOpenHelper mOpenHelper;
 
     private static UriMatcher buildUriMatcher() {
-        return null;
+        final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
+        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.Tag.CONTENT_TYPE,  TAG);
+        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.Post.CONTENT_TYPE,  POST);
+        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.Comment.CONTENT_TYPE,  COMMENT);
+        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.Subreddit.CONTENT_TYPE,  SUBREDDIT);
+        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.Subscribe.CONTENT_TYPE,  SUBSCRIBE);
+        return matcher;
     }
 
     @Override
@@ -39,7 +47,65 @@ public class DatabaseContentProvider extends ContentProvider {
 
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        return null;
+        final SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+        final int match = sUriMatcher.match(uri);
+        Cursor cursor;
+        switch (match){
+            case TAG:{
+                cursor = db.query(ReadditContract.Tag.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder);
+                break;
+            }
+            case POST:{
+                cursor = db.query(ReadditContract.Post.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder);
+                break;
+            }
+            case COMMENT:{
+                cursor = db.query(ReadditContract.Comment.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder);
+                break;
+            }
+            case SUBSCRIBE:{
+                cursor = db.query(ReadditContract.Subscribe.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder);
+                break;
+            }
+            case SUBREDDIT:{
+                cursor = db.query(ReadditContract.Subreddit.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder);
+                break;
+            }
+            default:
+                throw new UnsupportedOperationException("Unknown URI: " + uri);
+        }
+        cursor.setNotificationUri(getContext().getContentResolver(), uri);
+        return cursor;
     }
 
     @Override
@@ -65,49 +131,116 @@ public class DatabaseContentProvider extends ContentProvider {
     public Uri insert(Uri uri, ContentValues values) {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         final int match = sUriMatcher.match(uri);
+        Uri returnUri;
         switch (match){
             case TAG: {
                 long id = db.insert(ReadditContract.Tag.TABLE_NAME, null, values);
-                if (id > 0){
-                    return ReadditContract.Tag.buildTagUri(id);
-                }
+                if (id > 0)
+                    returnUri = ReadditContract.Tag.buildTagUri(id);
+                else
+                    throw new android.database.SQLException("Failed to insert row into " + uri);
+                break;
             }
             case POST:{
                 long id = db.insert(ReadditContract.Post.TABLE_NAME, null, values);
-                if (id > 0){
-                    return ReadditContract.Post.buildPostUri(id);
-                }
+                if (id > 0)
+                    returnUri = ReadditContract.Post.buildPostUri(id);
+                else
+                    throw new android.database.SQLException("Failed to insert row into " + uri);
+                break;
             }
             case COMMENT:{
                 long id = db.insert(ReadditContract.Comment.TABLE_NAME, null, values);
-                if (id > 0){
-                    return ReadditContract.Comment.buildCommentUri(id);
-                }
+                if (id > 0)
+                    returnUri = ReadditContract.Comment.buildCommentUri(id);
+                else
+                    throw new android.database.SQLException("Failed to insert row into " + uri);
+                break;
             }
             case SUBREDDIT: {
                 long id = db.insert(ReadditContract.Subreddit.TABLE_NAME, null, values);
-                if (id > 0) {
-                    return ReadditContract.Subreddit.buildSubredditUri(id);
-                }
+                if (id > 0)
+                    returnUri = ReadditContract.Subreddit.buildSubredditUri(id);
+                else
+                    throw new android.database.SQLException("Failed to insert row into " + uri);
+                break;
             }
             case SUBSCRIBE:{
                 long id = db.insert(ReadditContract.Subscribe.TABLE_NAME, null, values);
-                if (id > 0) {
-                    return ReadditContract.Subscribe.buildSubscribeUri(id);
-                }
+                if (id > 0)
+                    returnUri = ReadditContract.Subscribe.buildSubscribeUri(id);
+                else
+                    throw new android.database.SQLException("Failed to insert row into " + uri);
+                break;
             }
             default:
-                throw new UnsupportedOperationException("Unsopported URI: " + uri);
+                throw new UnsupportedOperationException("Unknown URI: " + uri);
         }
+        getContext().getContentResolver().notifyChange(returnUri, null);
+        return returnUri;
     }
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        return 0;
+        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        final int match = sUriMatcher.match(uri);
+        int rowsDeleted = 0;
+        switch (match){
+            case TAG:{
+                rowsDeleted = db.delete(ReadditContract.Tag.TABLE_NAME, selection, selectionArgs);
+                break;
+            }
+            case POST:{
+                rowsDeleted = db.delete(ReadditContract.Post.TABLE_NAME, selection, selectionArgs);
+                break;
+            }
+            case COMMENT:{
+                rowsDeleted = db.delete(ReadditContract.Comment.TABLE_NAME, selection, selectionArgs);
+                break;
+            }
+            case SUBSCRIBE:{
+                rowsDeleted = db.delete(ReadditContract.Subscribe.TABLE_NAME, selection, selectionArgs);
+                break;
+            }
+            case SUBREDDIT:{
+                rowsDeleted = db.delete(ReadditContract.Subreddit.TABLE_NAME, selection, selectionArgs);
+                break;
+            }
+            default:
+                throw new UnsupportedOperationException("Unknown URI: " + uri);
+        }
+        return rowsDeleted;
     }
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        return 0;
+        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        final int match = sUriMatcher.match(uri);
+        int rowsUpdated = 0;
+        switch (match){
+            case TAG:{
+                rowsUpdated = db.update(ReadditContract.Tag.TABLE_NAME, values, selection, selectionArgs );
+                break;
+            }
+            case POST:{
+                rowsUpdated = db.update(ReadditContract.Post.TABLE_NAME, values, selection, selectionArgs );
+                break;
+            }
+            case COMMENT:{
+                rowsUpdated = db.update(ReadditContract.Comment.TABLE_NAME, values, selection, selectionArgs );
+                break;
+            }
+            case SUBSCRIBE:{
+                rowsUpdated = db.update(ReadditContract.Subscribe.TABLE_NAME, values, selection, selectionArgs );
+                break;
+            }
+            case SUBREDDIT:{
+                rowsUpdated = db.update(ReadditContract.Subreddit.TABLE_NAME, values, selection, selectionArgs );
+                break;
+            }
+            default:
+                throw new UnsupportedOperationException("Unknown URI: " + uri);
+        }
+        return rowsUpdated;
     }
 }
