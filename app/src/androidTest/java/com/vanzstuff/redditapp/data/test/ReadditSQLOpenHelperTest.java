@@ -3,6 +3,7 @@ package com.vanzstuff.redditapp.data.test;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.test.AndroidTestCase;
+import android.test.RenamingDelegatingContext;
 
 import com.vanzstuff.readditapp.data.ReadditSQLOpenHelper;
 import com.vanzstuff.redditapp.data.ReadditContract;
@@ -17,8 +18,8 @@ public class ReadditSQLOpenHelperTest extends AndroidTestCase{
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        getContext().deleteDatabase("readdit.db");
-        mDBHelper= new ReadditSQLOpenHelper(getContext());
+        RenamingDelegatingContext context = new RenamingDelegatingContext(getContext(), "test_");
+        mDBHelper= new ReadditSQLOpenHelper(context);
     }
 
     @Override
@@ -36,11 +37,11 @@ public class ReadditSQLOpenHelperTest extends AndroidTestCase{
             if ( cursor.getString(1).equals(ReadditContract.Subreddit.TABLE_NAME)){
                 assertEquals("CREATE TABLE subscribe ( _id INTEGER PRIMARY KEY, subreddit TEXT NOT NULL )", cursor.getString(4));
             }else if (cursor.getString(1).equals(ReadditContract.Comment.TABLE_NAME)){
-                assertEquals("CREATE TABLE comment ( _id INTEGER PRIMARY KEY,parent INTEGER REFERENCES comment ( _id ),content TEXT NOT NULL,date INTERGER NOT NULL, user TEXT NOT NULL, post INTEGER REFERENCES post ( _id ))", cursor.getString(4));
+                assertEquals("CREATE TABLE comment ( _id INTEGER PRIMARY KEY,parent INTEGER REFERENCES comment ( _id ),content TEXT NOT NULL,date INTEGER NOT NULL, user TEXT NOT NULL, post INTEGER REFERENCES post ( _id ))", cursor.getString(4));
             }else if( cursor.getString(1).equals(ReadditContract.Post.TABLE_NAME)) {
-                assertEquals("CREATE TABLE post ( _id INTERGER PRIMARY KEY, content TEXT NOT NULL, date INTERGER NOT NULL, subreddit TEXT NOT NULL, user TEXT NOT NULL,votes INTEGER DEFAULT 0)", cursor.getString(4));
+                assertEquals("CREATE TABLE post ( _id INTEGER PRIMARY KEY, content TEXT NOT NULL, date INTEGER NOT NULL, subreddit TEXT NOT NULL, user TEXT NOT NULL,votes INTEGER DEFAULT 0)", cursor.getString(4));
             }else if(cursor.getString(1).equals(ReadditContract.Tag.TABLE_NAME)) {
-                assertEquals("CREATE TABLE tag ( _id INTEGER PRIMARY KEY, name TEXT NOT NULL )", cursor.getString(4));
+                assertEquals("CREATE TABLE tag ( _id INTEGER PRIMARY KEY, name TEXT UNIQUE NOT NULL )", cursor.getString(4));
             }else if(cursor.getString(1).equals(ReadditContract.TagXPost.TABLE_NAME)) {
                 assertEquals("CREATE TABLE tag_x_post ( tag INTEGER REFERENCES tag( _id) , post INTEGER REFERENCES post( _id), PRIMARY KEY ( tag, post ))", cursor.getString(4));
             }else if (cursor.getString(1).equals("android_metadata")) {

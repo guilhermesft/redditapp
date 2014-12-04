@@ -22,11 +22,11 @@ public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         final String CREATE_TAG = "CREATE TABLE " + ReadditContract.Tag.TABLE_NAME + " ( " +
                 ReadditContract.Tag._ID + " INTEGER PRIMARY KEY, " +
-                ReadditContract.Tag.COLUMN_NAME + " TEXT NOT NULL );";
+                ReadditContract.Tag.COLUMN_NAME + " TEXT UNIQUE NOT NULL );";
         final String CREATE_POST = "CREATE TABLE " + ReadditContract.Post.TABLE_NAME + " ( " +
-                ReadditContract.Post._ID + " INTERGER PRIMARY KEY, " +
+                ReadditContract.Post._ID + " INTEGER PRIMARY KEY, " +
                 ReadditContract.Post.COLUMN_CONTENT + " TEXT NOT NULL, " +
-                ReadditContract.Post.COLUMN_DATE + " INTERGER NOT NULL, " + //TODO text type is the best choice?
+                ReadditContract.Post.COLUMN_DATE + " INTEGER NOT NULL, " +
                 ReadditContract.Post.COLUMN_SUBREDDIT + " TEXT NOT NULL, " +
                 ReadditContract.Post.COLUMN_USER +  " TEXT NOT NULL," +
                 ReadditContract.Post.COLUMN_VOTES + " INTEGER DEFAULT 0);";
@@ -38,7 +38,7 @@ public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
                 ReadditContract.Comment._ID + " INTEGER PRIMARY KEY," +
                 ReadditContract.Comment.COLUMN_PARENT + " INTEGER REFERENCES " + ReadditContract.Comment.TABLE_NAME + " ( " + ReadditContract.Comment._ID + " )," +
                 ReadditContract.Comment.COLUMN_CONTENT + " TEXT NOT NULL," +
-                ReadditContract.Comment.COLUMN_DATE + " INTERGER NOT NULL, " +
+                ReadditContract.Comment.COLUMN_DATE + " INTEGER NOT NULL, " +
                 ReadditContract.Comment.COLUMN_USER + " TEXT NOT NULL, " +
                 ReadditContract.Comment.COLUMN_POST + " INTEGER REFERENCES " + ReadditContract.Post.TABLE_NAME + " ( " + ReadditContract.Post._ID + " ));";
         final String CREATE_SUBSCRIBE = "CREATE TABLE " + ReadditContract.Subreddit.TABLE_NAME + " ( " +
