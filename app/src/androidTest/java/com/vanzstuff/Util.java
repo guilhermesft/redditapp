@@ -1,4 +1,7 @@
-package com.vanzstuff.readditapp.test.mocks;
+package com.vanzstuff;
+
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 
 import java.util.Map;
 import java.util.HashMap;

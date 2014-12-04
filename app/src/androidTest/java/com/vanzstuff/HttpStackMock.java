@@ -1,4 +1,4 @@
-package com.vanzstuff.readditapp.test.mocks;
+package com.vanzstuff;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
