@@ -1,6 +1,8 @@
 package com.vanzstuff.redditapp.data.test;
 
 import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.test.MoreAsserts;
 import android.test.ProviderTestCase2;
@@ -13,11 +15,25 @@ import com.vanzstuff.redditapp.data.ReadditContract;
  */
 public class DatabaseContentProviderTest extends ProviderTestCase2<DatabaseContentProvider> {
 
+    public static final String TEST_DATABASE_NAME = "test.readdit.db";
+    private ContentValues mTagFakeValues;
+
     /**
      * Constructor.
      */
     public DatabaseContentProviderTest() {
         super(DatabaseContentProvider.class, ReadditContract.CONTENT_AUTHORITY);
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        cleanDatabase();
+    }
+
+    private void cleanDatabase() {
+        SQLiteDatabase db = SQLiteDatabase.openDatabase(getContext().getDatabasePath(TEST_DATABASE_NAME).getPath(), null, SQLiteDatabase.OPEN_READWRITE);
+        db.delete(ReadditContract.Tag.TABLE_NAME, null, null);
     }
 
     /**
@@ -39,8 +55,6 @@ public class DatabaseContentProviderTest extends ProviderTestCase2<DatabaseConte
      * Test the method insert of the DatabaseContentProvider
      */
     public void testInsert(){
-        //TODO
-        //TODO validate data inserted
         //teste insert new tags
         ContentValues insertValues = new ContentValues();
         insertValues.put(ReadditContract.Tag.COLUMN_NAME, "fake");
@@ -48,6 +62,17 @@ public class DatabaseContentProviderTest extends ProviderTestCase2<DatabaseConte
         assertEquals(ReadditContract.CONTENT_AUTHORITY, retUri.getAuthority());
         assertEquals(ReadditContract.Tag.CONTENT_TYPE, retUri.getPathSegments().get(0));
         MoreAsserts.assertMatchesRegex("\\d+", retUri.getPathSegments().get(1));
+        SQLiteDatabase db = SQLiteDatabase.openDatabase(getContext().getDatabasePath(TEST_DATABASE_NAME).getPath(), null, SQLiteDatabase.OPEN_READONLY);
+        Cursor cursor = db.query(ReadditContract.Tag.TABLE_NAME,
+                new String[]{ReadditContract.Tag._ID,
+                        ReadditContract.Tag.COLUMN_NAME},
+                ReadditContract.Tag._ID + "=?",
+                new String[]{String.valueOf(retUri.getPathSegments().get(1))},
+                null, null, null, null);
+        assertEquals(1, cursor.getCount());
+        assertTrue(cursor.moveToFirst());
+        assertEquals(insertValues.get(ReadditContract.Tag.COLUMN_NAME), cursor.getString(cursor.getColumnIndex(ReadditContract.Tag.COLUMN_NAME)));
+        cursor.close();
         //test insert post
         insertValues.clear();
         insertValues.put(ReadditContract.Post.COLUMN_DATE, java.util.Calendar.getInstance().getTimeInMillis());
@@ -60,6 +85,24 @@ public class DatabaseContentProviderTest extends ProviderTestCase2<DatabaseConte
         assertEquals(ReadditContract.Post.CONTENT_TYPE, retUri.getPathSegments().get(0));
         MoreAsserts.assertMatchesRegex("\\d+", retUri.getPathSegments().get(1));
         long postID = Long.parseLong(retUri.getPathSegments().get(1));
+        cursor = db.query(ReadditContract.Post.TABLE_NAME,
+                new String[]{ReadditContract.Post._ID,
+                        ReadditContract.Post.COLUMN_DATE,
+                        ReadditContract.Post.COLUMN_CONTENT,
+                        ReadditContract.Post.COLUMN_SUBREDDIT,
+                        ReadditContract.Post.COLUMN_USER,
+                        ReadditContract.Post.COLUMN_VOTES},
+                ReadditContract.Post._ID + "=?",
+                new String[]{String.valueOf(postID)},
+                null, null, null, null);
+        assertEquals(1, cursor.getCount());
+        assertTrue(cursor.moveToFirst());
+        assertEquals(insertValues.get(ReadditContract.Post.COLUMN_DATE), cursor.getLong(cursor.getColumnIndex(ReadditContract.Post.COLUMN_DATE)));
+        assertEquals(insertValues.get(ReadditContract.Post.COLUMN_CONTENT), cursor.getString(cursor.getColumnIndex(ReadditContract.Post.COLUMN_CONTENT)));
+        assertEquals(insertValues.get(ReadditContract.Post.COLUMN_SUBREDDIT), cursor.getString(cursor.getColumnIndex(ReadditContract.Post.COLUMN_SUBREDDIT)));
+        assertEquals(insertValues.get(ReadditContract.Post.COLUMN_USER), cursor.getString(cursor.getColumnIndex(ReadditContract.Post.COLUMN_USER)));
+        assertEquals(insertValues.get(ReadditContract.Post.COLUMN_VOTES), cursor.getInt(cursor.getColumnIndex(ReadditContract.Post.COLUMN_VOTES)));
+        cursor.close();
         //test insert comment\
         //insert comment without parent
         insertValues.clear();
@@ -72,6 +115,24 @@ public class DatabaseContentProviderTest extends ProviderTestCase2<DatabaseConte
         assertEquals(ReadditContract.Comment.CONTENT_TYPE, retUri.getPathSegments().get(0));
         MoreAsserts.assertMatchesRegex("\\d+", retUri.getPathSegments().get(1));
         long parentCommentID = Long.parseLong(retUri.getPathSegments().get(1));
+        cursor = db.query(ReadditContract.Comment.TABLE_NAME,
+                new String[]{ReadditContract.Comment._ID,
+                        ReadditContract.Comment.COLUMN_DATE,
+                        ReadditContract.Comment.COLUMN_CONTENT,
+                        ReadditContract.Comment.COLUMN_POST,
+                        ReadditContract.Comment.COLUMN_USER,
+                        ReadditContract.Comment.COLUMN_PARENT},
+                ReadditContract.Tag._ID + "=?",
+                new String[]{String.valueOf(retUri.getPathSegments().get(1))},
+                null, null, null, null);
+        assertEquals(1, cursor.getCount());
+        assertTrue(cursor.moveToFirst());
+        assertEquals(insertValues.get(ReadditContract.Comment.COLUMN_DATE), cursor.getLong(cursor.getColumnIndex(ReadditContract.Comment.COLUMN_DATE)));
+        assertEquals(insertValues.get(ReadditContract.Comment.COLUMN_CONTENT), cursor.getString(cursor.getColumnIndex(ReadditContract.Comment.COLUMN_CONTENT)));
+        assertEquals(insertValues.get(ReadditContract.Comment.COLUMN_POST), cursor.getLong(cursor.getColumnIndex(ReadditContract.Comment.COLUMN_POST)));
+        assertEquals(insertValues.get(ReadditContract.Comment.COLUMN_USER), cursor.getString(cursor.getColumnIndex(ReadditContract.Comment.COLUMN_USER)));
+        assertEquals(null, cursor.getString(cursor.getColumnIndex(ReadditContract.Comment.COLUMN_PARENT)));
+        cursor.close();
         //insert comment with parent
         insertValues.clear();
         insertValues.put(ReadditContract.Comment.COLUMN_DATE, java.util.Calendar.getInstance().getTimeInMillis());
@@ -84,6 +145,24 @@ public class DatabaseContentProviderTest extends ProviderTestCase2<DatabaseConte
         assertEquals(ReadditContract.Comment.CONTENT_TYPE, retUri.getPathSegments().get(0));
         MoreAsserts.assertMatchesRegex("\\d+", retUri.getPathSegments().get(1));
         insertValues.put(ReadditContract.Comment.COLUMN_USER, "fuser");
+        cursor = db.query(ReadditContract.Comment.TABLE_NAME,
+                new String[]{ReadditContract.Comment._ID,
+                        ReadditContract.Comment.COLUMN_DATE,
+                        ReadditContract.Comment.COLUMN_CONTENT,
+                        ReadditContract.Comment.COLUMN_POST,
+                        ReadditContract.Comment.COLUMN_USER,
+                        ReadditContract.Comment.COLUMN_PARENT},
+                ReadditContract.Tag._ID + "=?",
+                new String[]{String.valueOf(retUri.getPathSegments().get(1))},
+                null, null, null, null);
+        assertEquals(1, cursor.getCount());
+        assertTrue(cursor.moveToFirst());
+        assertEquals(insertValues.get(ReadditContract.Comment.COLUMN_DATE), cursor.getLong(cursor.getColumnIndex(ReadditContract.Comment.COLUMN_DATE)));
+        assertEquals(insertValues.get(ReadditContract.Comment.COLUMN_CONTENT), cursor.getString(cursor.getColumnIndex(ReadditContract.Comment.COLUMN_CONTENT)));
+        assertEquals(insertValues.get(ReadditContract.Comment.COLUMN_POST), cursor.getLong(cursor.getColumnIndex(ReadditContract.Comment.COLUMN_POST)));
+        assertEquals(insertValues.get(ReadditContract.Comment.COLUMN_USER), cursor.getString(cursor.getColumnIndex(ReadditContract.Comment.COLUMN_USER)));
+        assertEquals(insertValues.get(ReadditContract.Comment.COLUMN_PARENT), cursor.getLong(cursor.getColumnIndex(ReadditContract.Comment.COLUMN_PARENT)));
+        cursor.close();
         //test insert subreddit
         insertValues.clear();
         insertValues.put(ReadditContract.Subreddit.COLUMN_SUBREDDIT, "fakesubreddit");
@@ -91,5 +170,25 @@ public class DatabaseContentProviderTest extends ProviderTestCase2<DatabaseConte
         assertEquals(ReadditContract.CONTENT_AUTHORITY, retUri.getAuthority());
         assertEquals(ReadditContract.Subreddit.CONTENT_TYPE, retUri.getPathSegments().get(0));
         MoreAsserts.assertMatchesRegex("\\d+", retUri.getPathSegments().get(1));
+        cursor = db.query(ReadditContract.Subreddit.TABLE_NAME,
+                new String[]{ReadditContract.Subreddit._ID, ReadditContract.Subreddit.COLUMN_SUBREDDIT},
+                ReadditContract.Tag._ID + "=?",
+                new String[]{String.valueOf(retUri.getPathSegments().get(1))},
+                null, null, null, null);
+        assertEquals(1, cursor.getCount());
+        assertTrue(cursor.moveToFirst());
+        assertEquals(insertValues.get(ReadditContract.Subreddit.COLUMN_SUBREDDIT), cursor.getString(cursor.getColumnIndex(ReadditContract.Subreddit.COLUMN_SUBREDDIT)));
+        cursor.close();
+        db.close();
     }
+
+
+    /**
+     * Prepare fake data for delete, update and query test
+     */
+    private void prepareFakeData() {
+        mTagFakeValues = new ContentValues();
+        mTagFakeValues.put(ReadditContract.Tag.COLUMN_NAME, "tag1");
+    }
+
 }
