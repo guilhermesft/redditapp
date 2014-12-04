@@ -8,8 +8,8 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
+import com.vanzstuff.HttpStackMock;
 import com.vanzstuff.readdit.redditapi.AuthorizationRequest;
-import com.vanzstuff.readditapp.test.mocks.HttpStackMock;
 
 import org.apache.http.ProtocolVersion;
 import org.apache.http.message.BasicHttpResponse;
