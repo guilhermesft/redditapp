@@ -117,7 +117,7 @@ public class DatabaseContentProvider extends ContentProvider {
         Uri returnUri;
         switch (match){
             case TAG: {
-                long id = db.insert(ReadditContract.Tag.TABLE_NAME, null, values);
+                long id = db.insertOrThrow(ReadditContract.Tag.TABLE_NAME, null, values);
                 if (id > 0)
                     returnUri = ReadditContract.Tag.buildTagUri(id);
                 else
@@ -125,7 +125,7 @@ public class DatabaseContentProvider extends ContentProvider {
                 break;
             }
             case POST:{
-                long id = db.insert(ReadditContract.Post.TABLE_NAME, null, values);
+                long id = db.insertOrThrow(ReadditContract.Post.TABLE_NAME, null, values);
                 if (id > 0)
                     returnUri = ReadditContract.Post.buildPostUri(id);
                 else
@@ -133,7 +133,7 @@ public class DatabaseContentProvider extends ContentProvider {
                 break;
             }
             case COMMENT:{
-                long id = db.insert(ReadditContract.Comment.TABLE_NAME, null, values);
+                long id = db.insertOrThrow(ReadditContract.Comment.TABLE_NAME, null, values);
                 if (id > 0)
                     returnUri = ReadditContract.Comment.buildCommentUri(id);
                 else
@@ -141,7 +141,7 @@ public class DatabaseContentProvider extends ContentProvider {
                 break;
             }
             case SUBREDDIT:{
-                long id = db.insert(ReadditContract.Subreddit.TABLE_NAME, null, values);
+                long id = db.insertOrThrow(ReadditContract.Subreddit.TABLE_NAME, null, values);
                 if (id > 0)
                     returnUri = ReadditContract.Subreddit.buildSubscribeUri(id);
                 else
