@@ -18,7 +18,7 @@ public class ReadditSQLOpenHelperTest extends AndroidTestCase{
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        RenamingDelegatingContext context = new RenamingDelegatingContext(getContext(), "test_");
+        RenamingDelegatingContext context = new RenamingDelegatingContext(getContext(), "test.");
         mDBHelper= new ReadditSQLOpenHelper(context);
     }
 

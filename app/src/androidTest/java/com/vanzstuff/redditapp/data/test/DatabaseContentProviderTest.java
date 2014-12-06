@@ -4,10 +4,10 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
-import android.renderscript.ScriptIntrinsicYuvToRGB;
 import android.test.MoreAsserts;
 import android.test.ProviderTestCase2;
 
+import com.vanzstuff.readdit.redditapi.SubmitRequest;
 import com.vanzstuff.readditapp.data.DatabaseContentProvider;
 import com.vanzstuff.redditapp.data.ReadditContract;
 
@@ -16,7 +16,7 @@ import com.vanzstuff.redditapp.data.ReadditContract;
  */
 public class DatabaseContentProviderTest extends ProviderTestCase2<DatabaseContentProvider> {
 
-    public static final String TEST_DATABASE_NAME = "test.readdit.db";
+    public static final String DATABASE_NAME = "readdit.db";
     private ContentValues mTagFakeValues;
     private ContentValues mPostFakeValues;
     private ContentValues mCommentFakeValues;
@@ -32,11 +32,16 @@ public class DatabaseContentProviderTest extends ProviderTestCase2<DatabaseConte
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
         cleanDatabase();
     }
 
     private void cleanDatabase() {
-        SQLiteDatabase db = SQLiteDatabase.openDatabase(getContext().getDatabasePath(TEST_DATABASE_NAME).getPath(), null, SQLiteDatabase.OPEN_READWRITE);
+        SQLiteDatabase db = SQLiteDatabase.openDatabase(getMockContext().getDatabasePath(DATABASE_NAME).getPath(), null, SQLiteDatabase.OPEN_READWRITE);
         db.delete(ReadditContract.Tag.TABLE_NAME, null, null);
     }
 
@@ -66,7 +71,7 @@ public class DatabaseContentProviderTest extends ProviderTestCase2<DatabaseConte
         assertEquals(ReadditContract.CONTENT_AUTHORITY, retUri.getAuthority());
         assertEquals(ReadditContract.Tag.CONTENT_TYPE, retUri.getPathSegments().get(0));
         MoreAsserts.assertMatchesRegex("\\d+", retUri.getPathSegments().get(1));
-        SQLiteDatabase db = SQLiteDatabase.openDatabase(getContext().getDatabasePath(TEST_DATABASE_NAME).getPath(), null, SQLiteDatabase.OPEN_READONLY);
+        SQLiteDatabase db = SQLiteDatabase.openDatabase(getMockContext().getDatabasePath(DATABASE_NAME).getPath(), null, SQLiteDatabase.OPEN_READONLY);
         Cursor cursor = db.query(ReadditContract.Tag.TABLE_NAME,
                 new String[]{ReadditContract.Tag._ID,
                         ReadditContract.Tag.COLUMN_NAME},
@@ -191,10 +196,10 @@ public class DatabaseContentProviderTest extends ProviderTestCase2<DatabaseConte
      */
     public void testDelete(){
         prepareFakeData();
-        SQLiteDatabase db = SQLiteDatabase.openDatabase(getContext().getDatabasePath(TEST_DATABASE_NAME).getPath(), null, SQLiteDatabase.OPEN_READWRITE);
+        SQLiteDatabase db = SQLiteDatabase.openDatabase(getMockContext().getDatabasePath(DATABASE_NAME).getPath(), null, SQLiteDatabase.OPEN_READWRITE);
         long tagID = db.insertOrThrow(ReadditContract.Tag.TABLE_NAME, null, mTagFakeValues);
         assertEquals(1, db.query(ReadditContract.Tag.TABLE_NAME, null, null, null, null, null, null, null).getCount());
-        assertEquals(1, getProvider().delete(ReadditContract.Tag.CONTENT_URI, ReadditContract.Tag._ID + "=?", new String[]{String.valueOf(tagID)}));
+        assertEquals(1, getMockContentResolver().delete(ReadditContract.Tag.CONTENT_URI, ReadditContract.Tag._ID + "=?", new String[]{String.valueOf(tagID)}));
         Cursor cursor = db.query(ReadditContract.Tag.TABLE_NAME,
                 null,
                 ReadditContract.Tag._ID + "=?",
@@ -205,7 +210,7 @@ public class DatabaseContentProviderTest extends ProviderTestCase2<DatabaseConte
 
         long postID = db.insertOrThrow(ReadditContract.Post.TABLE_NAME, null, mPostFakeValues);
         assertEquals(1, db.query(ReadditContract.Post.TABLE_NAME, null, null, null, null, null, null, null).getCount());
-        assertEquals(1, getProvider().delete(ReadditContract.Post.CONTENT_URI, ReadditContract.Post._ID + "=?", new String[]{String.valueOf(postID)}));
+        assertEquals(1, getMockContentResolver().delete(ReadditContract.Post.CONTENT_URI, ReadditContract.Post._ID + "=?", new String[]{String.valueOf(postID)}));
         cursor = db.query(ReadditContract.Post.TABLE_NAME,
                 null,
                 ReadditContract.Post._ID + "=?",
@@ -216,7 +221,7 @@ public class DatabaseContentProviderTest extends ProviderTestCase2<DatabaseConte
 
         long commentID = db.insertOrThrow(ReadditContract.Comment.TABLE_NAME, null, mCommentFakeValues);
         assertEquals(1, db.query(ReadditContract.Post.TABLE_NAME, null, null, null, null, null, null, null).getCount());
-        assertEquals(1, getProvider().delete(ReadditContract.Comment.CONTENT_URI, ReadditContract.Comment._ID + "=?", new String[]{String.valueOf(commentID)}));
+        assertEquals(1, getMockContentResolver().delete(ReadditContract.Comment.CONTENT_URI, ReadditContract.Comment._ID + "=?", new String[]{String.valueOf(commentID)}));
         cursor = db.query(ReadditContract.Comment.TABLE_NAME,
                 null,
                 ReadditContract.Comment._ID + "=?",
@@ -227,7 +232,7 @@ public class DatabaseContentProviderTest extends ProviderTestCase2<DatabaseConte
 
         long subredditID = db.insertOrThrow(ReadditContract.Subreddit.TABLE_NAME, null, mSubredditFakeValues);
         assertEquals(1, db.query(ReadditContract.Subreddit.TABLE_NAME, null, null, null, null, null, null, null).getCount());
-        assertEquals(1, getProvider().delete(ReadditContract.Subreddit.CONTENT_URI, ReadditContract.Subreddit._ID + "=?", new String[]{String.valueOf(subredditID)}));
+        assertEquals(1, getMockContentResolver().delete(ReadditContract.Subreddit.CONTENT_URI, ReadditContract.Subreddit._ID + "=?", new String[]{String.valueOf(subredditID)}));
         cursor = db.query(ReadditContract.Subreddit.TABLE_NAME,
                 null,
                 ReadditContract.Subreddit._ID + "=?",
@@ -243,12 +248,12 @@ public class DatabaseContentProviderTest extends ProviderTestCase2<DatabaseConte
      */
     public void testUpdate(){
         prepareFakeData();
-        SQLiteDatabase db = SQLiteDatabase.openDatabase(getContext().getDatabasePath(TEST_DATABASE_NAME).getPath(), null, SQLiteDatabase.OPEN_READWRITE);
+        SQLiteDatabase db = SQLiteDatabase.openDatabase(getMockContext().getDatabasePath(DATABASE_NAME).getPath(), null, SQLiteDatabase.OPEN_READWRITE);
         long tagID = db.insertOrThrow(ReadditContract.Tag.TABLE_NAME, null, mTagFakeValues);
         assertEquals(1, db.query(ReadditContract.Tag.TABLE_NAME, null, null, null, null, null, null, null).getCount());
         ContentValues newFakeData = new ContentValues(mTagFakeValues);
         newFakeData.put(ReadditContract.Tag.COLUMN_NAME, "newName");
-        assertEquals(1, getProvider().update(ReadditContract.Tag.CONTENT_URI, newFakeData, ReadditContract.Tag._ID + "=?", new String[]{String.valueOf(tagID)}));
+        assertEquals(1, getMockContentResolver().update(ReadditContract.Tag.CONTENT_URI, newFakeData, ReadditContract.Tag._ID + "=?", new String[]{String.valueOf(tagID)}));
         Cursor cursor = db.query(ReadditContract.Tag.TABLE_NAME,
                 null,
                 ReadditContract.Tag._ID + "=?",
@@ -263,7 +268,7 @@ public class DatabaseContentProviderTest extends ProviderTestCase2<DatabaseConte
         assertEquals(1, db.query(ReadditContract.Post.TABLE_NAME, null, null, null, null, null, null, null).getCount());
         newFakeData = new ContentValues(mPostFakeValues);
         newFakeData.put(ReadditContract.Post.COLUMN_VOTES, 999);
-        assertEquals(1, getProvider().update(ReadditContract.Post.CONTENT_URI, newFakeData, ReadditContract.Post._ID + "=?", new String[]{String.valueOf(postID)}));
+        assertEquals(1, getMockContentResolver().update(ReadditContract.Post.CONTENT_URI, newFakeData, ReadditContract.Post._ID + "=?", new String[]{String.valueOf(postID)}));
         cursor = db.query(ReadditContract.Post.TABLE_NAME,
                 null,
                 ReadditContract.Post._ID + "=?",
@@ -282,7 +287,7 @@ public class DatabaseContentProviderTest extends ProviderTestCase2<DatabaseConte
         assertEquals(1, db.query(ReadditContract.Post.TABLE_NAME, null, null, null, null, null, null, null).getCount());
         newFakeData = new ContentValues(mCommentFakeValues);
         newFakeData.put(ReadditContract.Comment.COLUMN_USER, "newUser");
-        assertEquals(1, getProvider().update(ReadditContract.Comment.CONTENT_URI, newFakeData, ReadditContract.Comment._ID + "=?", new String[]{String.valueOf(commentID)}));
+        assertEquals(1, getMockContentResolver().update(ReadditContract.Comment.CONTENT_URI, newFakeData, ReadditContract.Comment._ID + "=?", new String[]{String.valueOf(commentID)}));
         cursor = db.query(ReadditContract.Comment.TABLE_NAME,
                 null,
                 ReadditContract.Comment._ID + "=?",
@@ -301,7 +306,7 @@ public class DatabaseContentProviderTest extends ProviderTestCase2<DatabaseConte
         assertEquals(1, db.query(ReadditContract.Subreddit.TABLE_NAME, null, null, null, null, null, null, null).getCount());
         newFakeData = new ContentValues(mSubredditFakeValues);
         newFakeData.put(ReadditContract.Subreddit.COLUMN_SUBREDDIT, "newSubreddit");
-        assertEquals(1, getProvider().update(ReadditContract.Subreddit.CONTENT_URI, newFakeData, ReadditContract.Subreddit._ID + "=?", new String[]{String.valueOf(subredditID)}));
+        assertEquals(1, getMockContentResolver().update(ReadditContract.Subreddit.CONTENT_URI, newFakeData, ReadditContract.Subreddit._ID + "=?", new String[]{String.valueOf(subredditID)}));
         cursor = db.query(ReadditContract.Subreddit.TABLE_NAME,
                 null,
                 ReadditContract.Subreddit._ID + "=?",
@@ -314,8 +319,45 @@ public class DatabaseContentProviderTest extends ProviderTestCase2<DatabaseConte
         db.close();
     }
 
+    public void testQuery(){
+        insertFakeData();
+        Cursor cursor = getMockContentResolver().query(ReadditContract.Tag.CONTENT_URI, null, null, null, null);
+        assertEquals(1, cursor.getCount());
+        assertEquals(mTagFakeValues.get(ReadditContract.Tag.COLUMN_NAME), cursor.getString(cursor.getColumnIndex(ReadditContract.Tag.COLUMN_NAME)));
+        cursor.close(); cursor = null;
+        cursor = getMockContentResolver().query(ReadditContract.Post.CONTENT_URI, null, null, null, null);
+        assertEquals(1, cursor.getCount());
+        assertEquals(mTagFakeValues.get(ReadditContract.Post.COLUMN_CONTENT), cursor.getString(cursor.getColumnIndex(ReadditContract.Post.COLUMN_CONTENT)));
+        assertEquals(mTagFakeValues.get(ReadditContract.Post.COLUMN_DATE), cursor.getLong(cursor.getColumnIndex(ReadditContract.Post.COLUMN_DATE)));
+        assertEquals(mTagFakeValues.get(ReadditContract.Post.COLUMN_SUBREDDIT), cursor.getString(cursor.getColumnIndex(ReadditContract.Post.COLUMN_SUBREDDIT)));
+        assertEquals(mTagFakeValues.get(ReadditContract.Post.COLUMN_USER), cursor.getString(cursor.getColumnIndex(ReadditContract.Post.COLUMN_USER)));
+        assertEquals(mTagFakeValues.get(ReadditContract.Post.COLUMN_VOTES), cursor.getInt(cursor.getColumnIndex(ReadditContract.Post.COLUMN_VOTES)));
+        assertEquals(1, cursor.getCount());
+        cursor.close(); cursor = null;
+        cursor = getMockContentResolver().query(ReadditContract.Comment.CONTENT_URI, null, null, null, null);
+        assertEquals(mCommentFakeValues.get(ReadditContract.Comment.COLUMN_CONTENT), cursor.getString(cursor.getColumnIndex(ReadditContract.Comment.COLUMN_CONTENT)));
+        assertEquals(mCommentFakeValues.get(ReadditContract.Comment.COLUMN_DATE), cursor.getLong(cursor.getColumnIndex(ReadditContract.Comment.COLUMN_DATE)));
+        assertEquals(mCommentFakeValues.get(ReadditContract.Comment.COLUMN_PARENT), cursor.getLong(cursor.getColumnIndex(ReadditContract.Comment.COLUMN_PARENT)));
+        assertEquals(mCommentFakeValues.get(ReadditContract.Comment.COLUMN_POST), cursor.getLong(cursor.getColumnIndex(ReadditContract.Comment.COLUMN_POST)));
+        assertEquals(mCommentFakeValues.get(ReadditContract.Comment.COLUMN_USER), cursor.getString(cursor.getColumnIndex(ReadditContract.Comment.COLUMN_USER)));
+        cursor.close(); cursor = null;
+        cursor = getMockContentResolver().query(ReadditContract.Subreddit.CONTENT_URI, null, null, null, null);
+        assertEquals(mSubredditFakeValues.get(ReadditContract.Subreddit.COLUMN_SUBREDDIT), cursor.getString(cursor.getColumnIndex(ReadditContract.Subreddit.COLUMN_SUBREDDIT)));
+        cursor.close(); cursor = null;
+    }
+
+    private void insertFakeData() {
+        prepareFakeData();
+        SQLiteDatabase db = SQLiteDatabase.openDatabase(getMockContext().getDatabasePath(DATABASE_NAME).getPath(), null, SQLiteDatabase.OPEN_READWRITE);
+        db.insertOrThrow(ReadditContract.Tag.TABLE_NAME, null, mTagFakeValues);
+        db.insertOrThrow(ReadditContract.Post.TABLE_NAME, null, mPostFakeValues);
+        db.insertOrThrow(ReadditContract.Comment.TABLE_NAME, null, mCommentFakeValues);
+        db.insertOrThrow(ReadditContract.Subreddit.TABLE_NAME, null, mSubredditFakeValues);
+    }
+
     /**
      * Prepare fake data for delete, update and query test
+     * TODO - remove method
      */
     private void prepareFakeData() {
         mTagFakeValues = new ContentValues();
