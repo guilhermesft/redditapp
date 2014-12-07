@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
+import android.webkit.MimeTypeMap;
 
 import com.vanzstuff.redditapp.data.ReadditContract;
 
@@ -23,14 +24,15 @@ public class DatabaseContentProvider extends ContentProvider {
 
     private static final UriMatcher sUriMatcher = buildUriMatcher();
 
+
     private SQLiteOpenHelper mOpenHelper;
 
     private static UriMatcher buildUriMatcher() {
         final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
-        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.Tag.CONTENT_TYPE,  TAG);
-        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.Post.CONTENT_TYPE,  POST);
-        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.Comment.CONTENT_TYPE,  COMMENT);
-        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.Subreddit.CONTENT_TYPE, SUBREDDIT);
+        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_TAG,  TAG);
+        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_POST,  POST);
+        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_COMMENT,  COMMENT);
+        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_SUBREDDIT, SUBREDDIT);
         return matcher;
     }
 

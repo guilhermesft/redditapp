@@ -16,7 +16,7 @@ public class ReadditContract {
     public static final String PATH_POST = "post";
     public static final String PATH_COMMENT = "comment";
     public static final String PATH_SUBREDDIT = "subreddit";
-    public static final String PATH_SUBSCRIBE = "subscribe";
+    private static final String MULTIPLE_ITEM_MIMETYPE = "vnd.android.cursor.dir/";
 
 
     /**
@@ -25,7 +25,7 @@ public class ReadditContract {
     public static final class Tag implements BaseColumns{
 
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_TAG).build();
-        public static final String CONTENT_TYPE = "tag";
+        public static final String CONTENT_TYPE = MULTIPLE_ITEM_MIMETYPE + CONTENT_AUTHORITY + "/" + PATH_TAG;
 
         public static Uri buildTagUri(long id){
             return ContentUris.withAppendedId(CONTENT_URI, id);
@@ -41,7 +41,7 @@ public class ReadditContract {
     public static final class Post implements BaseColumns{
 
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_POST).build();
-        public static final String CONTENT_TYPE = "post";
+        public static final String CONTENT_TYPE = MULTIPLE_ITEM_MIMETYPE +  CONTENT_AUTHORITY + "/" + PATH_POST;
 
         public static Uri buildPostUri(long id){
             return ContentUris.withAppendedId(CONTENT_URI, id);
@@ -66,7 +66,7 @@ public class ReadditContract {
      */
     public static final class Comment implements BaseColumns{
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_COMMENT).build();
-        public static final String CONTENT_TYPE = "comment";
+        public static final String CONTENT_TYPE = MULTIPLE_ITEM_MIMETYPE + CONTENT_AUTHORITY + "/" + PATH_COMMENT;
 
         public static Uri buildCommentUri(long id){
             return ContentUris.withAppendedId(CONTENT_URI, id);
@@ -84,8 +84,8 @@ public class ReadditContract {
      * table stores all user subscribes
      */
     public static final class Subreddit implements BaseColumns{
-        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_SUBSCRIBE).build();
-        public static final String CONTENT_TYPE = "subscribe";
+        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_SUBREDDIT).build();
+        public static final String CONTENT_TYPE = MULTIPLE_ITEM_MIMETYPE + CONTENT_AUTHORITY + "/" + PATH_SUBREDDIT;
 
         public static Uri buildSubscribeUri(long id){
             return ContentUris.withAppendedId(CONTENT_URI, id);
