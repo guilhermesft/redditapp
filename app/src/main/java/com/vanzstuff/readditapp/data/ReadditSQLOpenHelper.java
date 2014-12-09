@@ -43,7 +43,7 @@ public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
                 ReadditContract.Comment.COLUMN_POST + " INTEGER REFERENCES " + ReadditContract.Post.TABLE_NAME + " ( " + ReadditContract.Post._ID + " ));";
         final String CREATE_SUBSCRIBE = "CREATE TABLE " + ReadditContract.Subreddit.TABLE_NAME + " ( " +
                 ReadditContract.Subreddit._ID + " INTEGER PRIMARY KEY, " +
-                ReadditContract.Subreddit.COLUMN_SUBREDDIT + " TEXT NOT NULL );";
+                ReadditContract.Subreddit.COLUMN_NAME + " TEXT NOT NULL );";
 
         db.execSQL(CREATE_TAG);
         db.execSQL(CREATE_POST);

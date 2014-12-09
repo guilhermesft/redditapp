@@ -91,7 +91,7 @@ public class ReadditContract {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
 
-        public static final String TABLE_NAME = "subscribe";
-        public static final String COLUMN_SUBREDDIT = "subreddit";
+        public static final String TABLE_NAME = "subreddit";
+        public static final String COLUMN_NAME = "subreddit";
     }
 }

@@ -13,12 +13,15 @@ import com.vanzstuff.redditapp.data.ReadditContract;
  */
 public class ReadditSQLOpenHelperTest extends AndroidTestCase{
 
+    private static final String DATABASE_NAME = "readdit.db";
     private ReadditSQLOpenHelper mDBHelper;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         RenamingDelegatingContext context = new RenamingDelegatingContext(getContext(), "test.");
+        setContext(context);
+        getContext().getDatabasePath(DATABASE_NAME).delete();
         mDBHelper= new ReadditSQLOpenHelper(context);
     }
 
@@ -27,6 +30,7 @@ public class ReadditSQLOpenHelperTest extends AndroidTestCase{
         super.tearDown();
         mDBHelper.close();
         mDBHelper = null;
+        getContext().getDatabasePath(DATABASE_NAME).delete();
     }
 
     public void testOnCreate(){
@@ -35,7 +39,7 @@ public class ReadditSQLOpenHelperTest extends AndroidTestCase{
         assertEquals(6, cursor.getCount());
         while (cursor.moveToNext()){
             if ( cursor.getString(1).equals(ReadditContract.Subreddit.TABLE_NAME)){
-                assertEquals("CREATE TABLE subscribe ( _id INTEGER PRIMARY KEY, subreddit TEXT NOT NULL )", cursor.getString(4));
+                assertEquals("CREATE TABLE subreddit ( _id INTEGER PRIMARY KEY, subreddit TEXT NOT NULL )", cursor.getString(4));
             }else if (cursor.getString(1).equals(ReadditContract.Comment.TABLE_NAME)){
                 assertEquals("CREATE TABLE comment ( _id INTEGER PRIMARY KEY,parent INTEGER REFERENCES comment ( _id ),content TEXT NOT NULL,date INTEGER NOT NULL, user TEXT NOT NULL, post INTEGER REFERENCES post ( _id ))", cursor.getString(4));
             }else if( cursor.getString(1).equals(ReadditContract.Post.TABLE_NAME)) {
