@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.android.volley.toolbox.NetworkImageView;
+import com.vanzstuff.readdit.VolleyWrapper;
 import com.vanzstuff.redditapp.R;
 import com.vanzstuff.redditapp.data.ReadditContract;
 
@@ -40,16 +41,10 @@ public class PostListAdapter extends RecyclerView.Adapter<PostListAdapter.ViewHo
         holder.mTxtTime.setText(mCursor.getString(mCursor.getColumnIndex(ReadditContract.Post.COLUMN_DATE)));
         holder.mTxtVotes.setText(mCursor.getInt(mCursor.getColumnIndex(ReadditContract.Post.COLUMN_VOTES)));
         holder.mTxtThread.setText(mCursor.getInt(mCursor.getColumnIndex(ReadditContract.Post.COLUMN_THREADS)));
-        switch (getItemViewType(position)){
-            case POST_TYPE_IMAGE:{
-                break;
-            }
-            case POST_TYPE_TEXT:{
-                break;
-            }
-            case POST_TYPE_LINK:{
-                break;
-            }
+        if(getItemViewType(position) == POST_TYPE_IMAGE){
+            //TODO - verify if the image is not downloaded ( saved post )
+            holder.mImgPost.setImageUrl(mCursor.getString(mCursor.getColumnIndex(ReadditContract.Post.COLUMN_IMAGE)),
+                    VolleyWrapper.getInstance(null).getImageLoader());
         }
     }
 
