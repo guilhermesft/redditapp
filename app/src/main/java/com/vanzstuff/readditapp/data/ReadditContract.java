@@ -48,10 +48,12 @@ public class ReadditContract {
         }
 
         public static final String TABLE_NAME = "post";
+        public static final String COLUMN_TITLE = "title";
         public static final String COLUMN_SUBREDDIT = "subreddit";
         public static final String COLUMN_CONTENT = "content";
         public static final String COLUMN_USER = "user";
         public static final String COLUMN_VOTES = "votes";
+        public static final String COLUMN_THREADS = "threads";
         public static final String COLUMN_DATE = "date";
     }
 

@@ -153,7 +153,6 @@ public class DatabaseContentProvider extends ContentProvider {
             default:
                 throw new UnsupportedOperationException("Unknown URI: " + uri);
         }
-        getContext().getContentResolver().notifyChange(returnUri, null);
         return returnUri;
     }
 

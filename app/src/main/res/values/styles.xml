@@ -5,4 +5,12 @@
         <!-- Customize your theme here. -->
     </style>
 
+    <style name="post_item_title">
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="post_item_votes">
+        <item name="android:textSize">14sp</item>
+    </style>
+
 </resources>

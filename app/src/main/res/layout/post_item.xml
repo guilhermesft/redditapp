@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="@dimen/default_margin">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    <com.android.volley.toolbox.NetworkImageView
+        android:id="@+id/post_item_img"
+        android:layout_width="@dimen/post_image_width"
+        android:layout_height="@dimen/post_image_width"
+        android:src="@drawable/abc_btn_check_to_on_mtrl_015"/>
+
+    <TextView
+        android:id="@+id/post_item_title"
+        style="@style/post_item_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:text="Post title"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/post_item_votes"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="999"/>
+        <TextView
+            android:id="@+id/post_item_thread"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="999"/>
+        <TextView
+            android:id="@+id/post_item_user"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="vanz at hell"/>
+        <TextView
+            android:id="@+id/post_item_time"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="666 days ago"/>
+
+        </LinearLayout>
+
+</LinearLayout>
