@@ -14,7 +14,7 @@ import com.vanzstuff.redditapp.data.ReadditContract;
 /**
  * Created by vanz on 01/12/14.
  */
-public class DatabaseContentProvider extends ContentProvider {
+public class RedditData extends ContentProvider {
 
     /* Possibles matches for UriMatcher */
     private static final int TAG = 100;

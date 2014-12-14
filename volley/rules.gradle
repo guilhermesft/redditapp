@@ -2,10 +2,6 @@ apply plugin: 'android-library'
 
 android {
     sourceSets {
-        defaultConfig {
-            testPackageName 'com.android.volley.tests'
-        }
-
         main {
             assets.srcDirs       = ['assets']
             res.srcDirs          = ['res']

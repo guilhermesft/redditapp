@@ -7,13 +7,13 @@ import android.net.Uri;
 import android.test.MoreAsserts;
 import android.test.ProviderTestCase2;
 
-import com.vanzstuff.readditapp.data.DatabaseContentProvider;
+import com.vanzstuff.readditapp.data.RedditData;
 import com.vanzstuff.redditapp.data.ReadditContract;
 
 /**
  * Created by vanz on 02/12/14.
  */
-public class DatabaseContentProviderTest extends ProviderTestCase2<DatabaseContentProvider> {
+public class RedditDataContentProviderTest extends ProviderTestCase2<RedditData> {
 
     public static final String DATABASE_NAME = "readdit.db";
     private ContentValues mTagFakeValues;
@@ -24,8 +24,8 @@ public class DatabaseContentProviderTest extends ProviderTestCase2<DatabaseConte
     /**
      * Constructor.
      */
-    public DatabaseContentProviderTest() {
-        super(DatabaseContentProvider.class, ReadditContract.CONTENT_AUTHORITY);
+    public RedditDataContentProviderTest() {
+        super(RedditData.class, ReadditContract.CONTENT_AUTHORITY);
     }
 
     @Override

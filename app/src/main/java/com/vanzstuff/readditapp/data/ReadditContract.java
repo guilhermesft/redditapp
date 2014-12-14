@@ -55,7 +55,6 @@ public class ReadditContract {
         public static final String COLUMN_VOTES = "votes";
         public static final String COLUMN_THREADS = "threads";
         public static final String COLUMN_DATE = "date";
-        public static final String COLUMN_IMAGE = "image";
     }
 
     public static final class TagXPost implements BaseColumns{

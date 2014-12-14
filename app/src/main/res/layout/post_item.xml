@@ -9,12 +9,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-    <com.android.volley.toolbox.NetworkImageView
-        android:id="@+id/post_item_img"
-        android:layout_width="@dimen/post_image_width"
-        android:layout_height="@dimen/post_image_width"
-        android:src="@drawable/abc_btn_check_to_on_mtrl_015"/>
-
     <TextView
         android:id="@+id/post_item_title"
         style="@style/post_item_title"

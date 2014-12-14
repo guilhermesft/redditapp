@@ -6,9 +6,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import com.vanzstuff.redditapp.data.ReadditContract;
 
-/**
- * Created by vanz on 16/11/14.
- */
 public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
 
     private static final int DATABASE_VERSION = 1;
