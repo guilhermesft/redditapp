@@ -1,4 +1,4 @@
-package com.vanzstuff.readditapp.data;
+package com.vanzstuff.readdit.data;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
@@ -7,14 +7,11 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
-import android.webkit.MimeTypeMap;
-
-import com.vanzstuff.redditapp.data.ReadditContract;
 
 /**
  * Created by vanz on 01/12/14.
  */
-public class RedditData extends ContentProvider {
+public class RedditDataProvider extends ContentProvider {
 
     /* Possibles matches for UriMatcher */
     private static final int TAG = 100;
@@ -153,6 +150,7 @@ public class RedditData extends ContentProvider {
             default:
                 throw new UnsupportedOperationException("Unknown URI: " + uri);
         }
+        getContext().getContentResolver().notifyChange(uri, null);
         return returnUri;
     }
 
@@ -181,6 +179,7 @@ public class RedditData extends ContentProvider {
             default:
                 throw new UnsupportedOperationException("Unknown URI: " + uri);
         }
+        getContext().getContentResolver().notifyChange(uri, null);
         return rowsDeleted;
     }
 
@@ -209,6 +208,7 @@ public class RedditData extends ContentProvider {
             default:
                 throw new UnsupportedOperationException("Unknown URI: " + uri);
         }
+        getContext().getContentResolver().notifyChange(uri, null);
         return rowsUpdated;
     }
 }

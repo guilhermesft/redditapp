@@ -1,4 +1,4 @@
-package com.vanzstuff.redditapp.data;
+package com.vanzstuff.readdit.data;
 
 import android.content.ContentUris;
 import android.net.Uri;

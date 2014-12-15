@@ -5,8 +5,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.test.AndroidTestCase;
 import android.test.RenamingDelegatingContext;
 
-import com.vanzstuff.readditapp.data.ReadditSQLOpenHelper;
-import com.vanzstuff.redditapp.data.ReadditContract;
+import com.vanzstuff.readdit.data.ReadditSQLOpenHelper;
+import com.vanzstuff.readdit.data.ReadditContract;
 
 /**
  * Created by vanz on 16/11/14.

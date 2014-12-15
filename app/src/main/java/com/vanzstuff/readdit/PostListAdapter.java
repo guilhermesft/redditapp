@@ -1,4 +1,4 @@
-package com.vanzstuff;
+package com.vanzstuff.readdit;
 
 import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.vanzstuff.redditapp.R;
-import com.vanzstuff.redditapp.data.ReadditContract;
+import com.vanzstuff.readdit.data.ReadditContract;
 
 public class PostListAdapter extends RecyclerView.Adapter<PostListAdapter.ViewHolder> {
 
@@ -40,7 +40,6 @@ public class PostListAdapter extends RecyclerView.Adapter<PostListAdapter.ViewHo
     }
 
     public static final class ViewHolder extends RecyclerView.ViewHolder{
-
         public TextView mTxtTitle;
         public TextView mTxtVotes;
         public TextView mTxtThread;

@@ -12,7 +12,7 @@
         android:theme="@style/AppTheme" >
 
         <provider
-            android:name="com.vanzstuff.readditapp.data.RedditData"
+            android:name="com.vanzstuff.readdit.data.RedditDataProvider"
             android:authorities="com.vanzstuff.readdit" />
 
         <activity

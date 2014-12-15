@@ -7,13 +7,13 @@ import android.net.Uri;
 import android.test.MoreAsserts;
 import android.test.ProviderTestCase2;
 
-import com.vanzstuff.readditapp.data.RedditData;
-import com.vanzstuff.redditapp.data.ReadditContract;
+import com.vanzstuff.readdit.data.RedditDataProvider;
+import com.vanzstuff.readdit.data.ReadditContract;
 
 /**
  * Created by vanz on 02/12/14.
  */
-public class RedditDataContentProviderTest extends ProviderTestCase2<RedditData> {
+public class RedditDataProviderTest extends ProviderTestCase2<RedditDataProvider> {
 
     public static final String DATABASE_NAME = "readdit.db";
     private ContentValues mTagFakeValues;
@@ -24,8 +24,8 @@ public class RedditDataContentProviderTest extends ProviderTestCase2<RedditData>
     /**
      * Constructor.
      */
-    public RedditDataContentProviderTest() {
-        super(RedditData.class, ReadditContract.CONTENT_AUTHORITY);
+    public RedditDataProviderTest() {
+        super(RedditDataProvider.class, ReadditContract.CONTENT_AUTHORITY);
     }
 
     @Override
@@ -84,6 +84,8 @@ public class RedditDataContentProviderTest extends ProviderTestCase2<RedditData>
         insertValues.put(ReadditContract.Post.COLUMN_SUBREDDIT, "redditdev");
         insertValues.put(ReadditContract.Post.COLUMN_USER, "fuser");
         insertValues.put(ReadditContract.Post.COLUMN_VOTES, 2);
+        insertValues.put(ReadditContract.Post.COLUMN_THREADS, 2);
+        insertValues.put(ReadditContract.Post.COLUMN_TITLE, "title");
         retUri = getProvider().insert(ReadditContract.Post.CONTENT_URI, insertValues);
         assertEquals(ReadditContract.CONTENT_AUTHORITY, retUri.getAuthority());
         assertEquals(ReadditContract.PATH_POST, retUri.getPathSegments().get(0));
@@ -95,6 +97,8 @@ public class RedditDataContentProviderTest extends ProviderTestCase2<RedditData>
                         ReadditContract.Post.COLUMN_CONTENT,
                         ReadditContract.Post.COLUMN_SUBREDDIT,
                         ReadditContract.Post.COLUMN_USER,
+                        ReadditContract.Post.COLUMN_TITLE,
+                        ReadditContract.Post.COLUMN_THREADS,
                         ReadditContract.Post.COLUMN_VOTES},
                 ReadditContract.Post._ID + "=?",
                 new String[]{String.valueOf(postID)},
@@ -106,6 +110,8 @@ public class RedditDataContentProviderTest extends ProviderTestCase2<RedditData>
         assertEquals(insertValues.get(ReadditContract.Post.COLUMN_SUBREDDIT), cursor.getString(cursor.getColumnIndex(ReadditContract.Post.COLUMN_SUBREDDIT)));
         assertEquals(insertValues.get(ReadditContract.Post.COLUMN_USER), cursor.getString(cursor.getColumnIndex(ReadditContract.Post.COLUMN_USER)));
         assertEquals(insertValues.get(ReadditContract.Post.COLUMN_VOTES), cursor.getInt(cursor.getColumnIndex(ReadditContract.Post.COLUMN_VOTES)));
+        assertEquals(insertValues.get(ReadditContract.Post.COLUMN_THREADS), cursor.getInt(cursor.getColumnIndex(ReadditContract.Post.COLUMN_THREADS)));
+        assertEquals(insertValues.get(ReadditContract.Post.COLUMN_TITLE), cursor.getString(cursor.getColumnIndex(ReadditContract.Post.COLUMN_TITLE)));
         cursor.close();
         //test insert comment\
         //insert comment without parent
@@ -381,6 +387,8 @@ public class RedditDataContentProviderTest extends ProviderTestCase2<RedditData>
         mPostFakeValues.put(ReadditContract.Post.COLUMN_VOTES, 2);
         mPostFakeValues.put(ReadditContract.Post.COLUMN_USER, "fakeUser");
         mPostFakeValues.put(ReadditContract.Post.COLUMN_CONTENT, "fake content");
+        mPostFakeValues.put(ReadditContract.Post.COLUMN_TITLE, "fake title");
+        mPostFakeValues.put(ReadditContract.Post.COLUMN_THREADS, 5);
         mCommentFakeValues = new ContentValues();
         mCommentFakeValues.put(ReadditContract.Comment.COLUMN_CONTENT, "Great!");
         mCommentFakeValues.put(ReadditContract.Comment.COLUMN_DATE, System.currentTimeMillis());

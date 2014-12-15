@@ -1,4 +1,4 @@
-package com.vanzstuff;
+package com.vanzstuff.readdit.activities;
 
 import android.annotation.TargetApi;
 import android.content.Context;

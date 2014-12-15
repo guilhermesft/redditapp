@@ -1,4 +1,4 @@
-package com.vanzstuff;
+package com.vanzstuff.readdit.fragments;
 
 import android.database.Cursor;
 import android.os.Bundle;
@@ -12,8 +12,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.vanzstuff.readdit.PostListAdapter;
 import com.vanzstuff.redditapp.R;
-import com.vanzstuff.redditapp.data.ReadditContract;
+import com.vanzstuff.readdit.data.ReadditContract;
 
 import android.net.Uri;
 

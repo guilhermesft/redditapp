@@ -1,10 +1,8 @@
-package com.vanzstuff.readditapp.data;
+package com.vanzstuff.readdit.data;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-
-import com.vanzstuff.redditapp.data.ReadditContract;
 
 public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
 
