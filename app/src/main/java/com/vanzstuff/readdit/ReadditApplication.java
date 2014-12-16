@@ -11,5 +11,6 @@ public class ReadditApplication extends Application {
     public void onCreate() {
         super.onCreate();
         VolleyWrapper.getInstance(this);
+        getDatabasePath("readdit.db").delete();
     }
 }

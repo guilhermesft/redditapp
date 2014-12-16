@@ -21,7 +21,7 @@ import android.net.Uri;
 /**
  * Fragment that encapsulate all logic to show a list with all post acquire from a given Uri
  */
-public class PostListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class PostListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>,PostListAdapter.ItemSelectedListener {
 
     private static final int POST_INIT_CURSOR_LOADER = 0;
 
@@ -29,6 +29,8 @@ public class PostListFragment extends Fragment implements LoaderManager.LoaderCa
     private RecyclerView mRecyclerView;
     /** Current Uri used to retrieve the post */
     private Uri mCurrentDataUri;
+    /** Activity listener */
+    private CallBack mCallback;
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -53,11 +55,36 @@ public class PostListFragment extends Fragment implements LoaderManager.LoaderCa
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mRecyclerView.swapAdapter(new PostListAdapter(data), false);
+        mRecyclerView.swapAdapter(new PostListAdapter(data, this), false);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mRecyclerView.swapAdapter(null, false);
+    }
+
+    @Override
+    public void onPostClicked(long postId) {
+        mCallback.onItemSelected(postId);
+    }
+
+    /**
+     * Register the callback listerner. If the activity would like to recive the click events it should
+     * registers itself like a callback
+     * @param callBack
+     */
+    public void registerCallback(CallBack callBack){
+        mCallback = callBack;
+    }
+
+    /**
+     * Interface to enable communication between the fragment and the activity
+     */
+    public interface CallBack {
+        /**
+         * Method called when an item is clicked
+         * @param postID ID of the post selected
+         */
+        public void onItemSelected(long postID);
     }
 }
