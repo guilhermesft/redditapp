@@ -200,22 +200,41 @@ public class RedditDataProvider extends ContentProvider {
                 break;
             }
             case ADD_TAG_TO_POST:{
-                long[] uriValues = ReadditContract.Post.getTagIdAndPostIdFromUri(uri);
-                ContentValues insertValues = new ContentValues();
-                insertValues.put(ReadditContract.TagXPost.COLUMN_POST, uriValues[0]);
-                insertValues.put(ReadditContract.TagXPost.COLUMN_TAG, uriValues[1]);
-                long id = db.insertOrThrow(ReadditContract.TagXPost.TABLE_NAME, null, insertValues);
-                if (id > 0)
-                    returnUri = ReadditContract.Post.buildPostUri(uriValues[0]); //TODO - Maybe is good idea create a custom Uri
-                else
-                    throw new android.database.SQLException("Failed to insert row into " + uri);
+                returnUri = insertTagToPost(db, uri);
                 break;
-
             }
             default:
                 throw new UnsupportedOperationException("Unknown URI: " + uri);
         }
         getContext().getContentResolver().notifyChange(uri, null);
+        return returnUri;
+    }
+
+    /**
+     * Method add a tag to post and notify the change
+     * @param db database to user
+     * @param uri uri with the tag and the post ids
+     * @return the return Uri with the post id altered
+     */
+    private Uri insertTagToPost(SQLiteDatabase db, Uri uri) {
+        long[] uriValues = ReadditContract.Post.getTagIdAndPostIdFromUri(uri);
+        ContentValues insertValues = new ContentValues();
+        insertValues.put(ReadditContract.TagXPost.COLUMN_POST, uriValues[0]);
+        insertValues.put(ReadditContract.TagXPost.COLUMN_TAG, uriValues[1]);
+        long id = db.insertOrThrow(ReadditContract.TagXPost.TABLE_NAME, null, insertValues);
+        Uri returnUri;
+        if (id > 0)
+            returnUri = ReadditContract.Post.buildPostUri(uriValues[0]); //TODO - Maybe is good idea create a custom Uri
+        else
+            throw new android.database.SQLException("Failed to insert row into " + uri);
+        //notify the cursor
+        Cursor tagCursor = getContext().getContentResolver().query(ReadditContract.Tag.CONTENT_URI,
+                new String[]{ReadditContract.Tag.COLUMN_NAME},
+                ReadditContract.Tag._ID + " = ?",
+                new String[]{String.valueOf(uriValues[1])},
+                null);
+        if (tagCursor.moveToFirst())
+            getContext().getContentResolver().notifyChange(ReadditContract.Post.buildPostByTagUri(tagCursor.getString(0)),null);
         return returnUri;
     }
 
