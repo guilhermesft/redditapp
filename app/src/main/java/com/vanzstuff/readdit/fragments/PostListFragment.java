@@ -68,6 +68,11 @@ public class PostListFragment extends Fragment implements LoaderManager.LoaderCa
         mCallback.onItemSelected(postId);
     }
 
+    public void loadDataUri(Uri dataUri){
+        mCurrentDataUri = dataUri;
+        getLoaderManager().restartLoader(POST_INIT_CURSOR_LOADER, null, this);
+    }
+
     /**
      * Register the callback listerner. If the activity would like to recive the click events it should
      * registers itself like a callback
