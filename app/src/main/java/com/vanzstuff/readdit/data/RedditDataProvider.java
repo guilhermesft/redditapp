@@ -6,10 +6,13 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 
+import com.vanzstuff.readdit.Utils;
+
 /**
- * Created by vanz on 01/12/14.
+ * ContentProvider manages the app data
  */
 public class RedditDataProvider extends ContentProvider {
 
@@ -18,16 +21,33 @@ public class RedditDataProvider extends ContentProvider {
     private static final int POST = 101;
     private static final int COMMENT = 102;
     private static final int SUBREDDIT = 104;
-
-    private static final UriMatcher sUriMatcher = buildUriMatcher();
-
+    private static final int POST_BY_TAG = 105;
 
     private SQLiteOpenHelper mOpenHelper;
 
+    private static final UriMatcher sUriMatcher = buildUriMatcher();
+    private static final String sWherePostByTag = ReadditContract.TagXPost.TABLE_NAME + "." + ReadditContract.TagXPost.COLUMN_TAG + " = ?";
+    private static final String sWhereTagId = ReadditContract.Tag.COLUMN_NAME + " = ?";
+    private static final SQLiteQueryBuilder sPostByTagQueryBuilder;
+    private static final SQLiteQueryBuilder sTagId;
+
+    static {
+        sPostByTagQueryBuilder = new SQLiteQueryBuilder();
+        sPostByTagQueryBuilder.setTables(ReadditContract.Post.TABLE_NAME + " LEFT OUTER JOIN " + ReadditContract.TagXPost.TABLE_NAME + " ON (" +
+                ReadditContract.TagXPost.TABLE_NAME + "." + ReadditContract.TagXPost.COLUMN_POST + " = " + ReadditContract.Post.TABLE_NAME + "." + ReadditContract.Post._ID + ")");
+        sTagId = new SQLiteQueryBuilder();
+        sTagId.setTables(ReadditContract.Tag.TABLE_NAME);
+    }
+
+    /**
+     * Build the UriMatcher to match if the expected Uris
+     * @return UriMatcher
+     */
     private static UriMatcher buildUriMatcher() {
         final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_TAG,  TAG);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_POST,  POST);
+        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_POST + "/" + ReadditContract.PATH_POST_BY_TAG + "/*",  POST_BY_TAG);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_COMMENT,  COMMENT);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_SUBREDDIT, SUBREDDIT);
         return matcher;
@@ -85,11 +105,39 @@ public class RedditDataProvider extends ContentProvider {
                         sortOrder);
                 break;
             }
+            case POST_BY_TAG: {
+                cursor = getPostByTag(uri, projection, sortOrder);
+                break;
+            }
             default:
                 throw new UnsupportedOperationException("Unknown URI: " + uri);
         }
         cursor.setNotificationUri(getContext().getContentResolver(), uri);
         return cursor;
+    }
+
+    /**
+     * Method retrieve the post from a given tag
+     * @param uri
+     * @param projection
+     * @param sortOrder
+     * @return
+     */
+    private Cursor getPostByTag(Uri uri, String[] projection, String sortOrder) {
+        String tag = ReadditContract.Post.getTagFromUri(uri);
+        if (Utils.stringNotNullOrEmpty(tag)){
+            Cursor cursor = query(ReadditContract.Tag.CONTENT_URI, new String[]{ReadditContract.Tag._ID}, sWhereTagId, new String[]{tag}, null);
+            if (cursor.moveToFirst()){
+                return sPostByTagQueryBuilder.query(mOpenHelper.getReadableDatabase(),
+                        projection,
+                        sWherePostByTag,
+                        new String[]{cursor.getString(0)},
+                        null,
+                        null,
+                        sortOrder);
+            }
+        }
+        return null;
     }
 
     @Override
@@ -104,6 +152,8 @@ public class RedditDataProvider extends ContentProvider {
                 return ReadditContract.Comment.CONTENT_TYPE;
             case SUBREDDIT:
                 return ReadditContract.Subreddit.CONTENT_TYPE;
+            case POST_BY_TAG:
+                return ReadditContract.Post.CONTENT_TYPE_POST_BY_TAG;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }

@@ -14,9 +14,10 @@ public class ReadditContract {
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
     public static final String PATH_TAG = "tag";
     public static final String PATH_POST = "post";
+    public static final String PATH_POST_BY_TAG = "post_tag" ;
     public static final String PATH_COMMENT = "comment";
     public static final String PATH_SUBREDDIT = "subreddit";
-    private static final String MULTIPLE_ITEM_MIMETYPE = "vnd.android.cursor.dir/";
+    public static final String MULTIPLE_ITEM_MIMETYPE = "vnd.android.cursor.dir/";
 
 
     /**
@@ -40,11 +41,36 @@ public class ReadditContract {
      */
     public static final class Post implements BaseColumns{
 
+        /** Uri used to retrieve all post */
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_POST).build();
         public static final String CONTENT_TYPE = MULTIPLE_ITEM_MIMETYPE +  CONTENT_AUTHORITY + "/" + PATH_POST;
+        public static final String CONTENT_TYPE_POST_BY_TAG = MULTIPLE_ITEM_MIMETYPE +  CONTENT_AUTHORITY + "/" + PATH_POST_BY_TAG;
 
+        /**
+         * Build a Uri with the last segment of the path is the post ID
+         * @param id
+         * @return uri with the post ID
+         */
         public static Uri buildPostUri(long id){
             return ContentUris.withAppendedId(CONTENT_URI, id);
+        }
+
+        /**
+         * Build a uri to retrieve the post from a given tag
+         * @param tag used to retrieve the posts
+         * @return Uri to retrieve the posts
+         */
+        public static Uri buildPostByTagUri(String tag){
+            return CONTENT_URI.buildUpon().appendPath(PATH_POST_BY_TAG).appendPath(tag).build();
+        }
+
+        /**
+         * Get the tag from Uri created by the method buildPostByTagUri
+         * @param uri that holds the tag
+         * @return tag retrieved
+         */
+        static String getTagFromUri(Uri uri){
+            return uri.getPathSegments().get(2);
         }
 
         public static final String TABLE_NAME = "post";
