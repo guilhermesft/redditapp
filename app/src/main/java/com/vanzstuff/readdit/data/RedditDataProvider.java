@@ -22,6 +22,7 @@ public class RedditDataProvider extends ContentProvider {
     private static final int COMMENT = 102;
     private static final int SUBREDDIT = 104;
     private static final int POST_BY_TAG = 105;
+    private static final int ADD_TAG_TO_POST = 106;
 
     private SQLiteOpenHelper mOpenHelper;
 
@@ -47,7 +48,8 @@ public class RedditDataProvider extends ContentProvider {
         final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_TAG,  TAG);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_POST,  POST);
-        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_POST + "/" + ReadditContract.PATH_POST_BY_TAG + "/*",  POST_BY_TAG);
+        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_POST_BY_TAG + "/*",  POST_BY_TAG);
+        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_ADD_TAG_TO_POST + "/*/*",  ADD_TAG_TO_POST);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_COMMENT,  COMMENT);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_SUBREDDIT, SUBREDDIT);
         return matcher;
@@ -196,6 +198,19 @@ public class RedditDataProvider extends ContentProvider {
                 else
                     throw new android.database.SQLException("Failed to insert row into " + uri);
                 break;
+            }
+            case ADD_TAG_TO_POST:{
+                long[] uriValues = ReadditContract.Post.getTagIdAndPostIdFromUri(uri);
+                ContentValues insertValues = new ContentValues();
+                insertValues.put(ReadditContract.TagXPost.COLUMN_POST, uriValues[0]);
+                insertValues.put(ReadditContract.TagXPost.COLUMN_TAG, uriValues[1]);
+                long id = db.insertOrThrow(ReadditContract.TagXPost.TABLE_NAME, null, insertValues);
+                if (id > 0)
+                    returnUri = ReadditContract.Post.buildPostUri(uriValues[0]); //TODO - Maybe is good idea create a custom Uri
+                else
+                    throw new android.database.SQLException("Failed to insert row into " + uri);
+                break;
+
             }
             default:
                 throw new UnsupportedOperationException("Unknown URI: " + uri);
