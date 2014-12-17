@@ -10,9 +10,6 @@ import android.test.ProviderTestCase2;
 import com.vanzstuff.readdit.data.RedditDataProvider;
 import com.vanzstuff.readdit.data.ReadditContract;
 
-/**
- * Created by vanz on 02/12/14.
- */
 public class RedditDataProviderTest extends ProviderTestCase2<RedditDataProvider> {
 
     public static final String DATABASE_NAME = "readdit.db";
@@ -32,6 +29,8 @@ public class RedditDataProviderTest extends ProviderTestCase2<RedditDataProvider
     protected void setUp() throws Exception {
         super.setUp();
         getMockContext().getDatabasePath(DATABASE_NAME).delete();
+        //call the query method for ensure database creation
+        getMockContentResolver().query(ReadditContract.Tag.CONTENT_URI, null, null, null, null);
     }
 
     @Override
@@ -439,6 +438,33 @@ public class RedditDataProviderTest extends ProviderTestCase2<RedditDataProvider
         assertEquals(2, getMockContentResolver().query(ReadditContract.Post.CONTENT_URI, null, null, null, null).getCount());
     }
 
+    /**
+     * Test add a tag to a post
+     */
+    public void testAddTagToPost() {
+        SQLiteDatabase db = SQLiteDatabase.openDatabase(getMockContext().getDatabasePath(DATABASE_NAME).getPath(), null, SQLiteDatabase.OPEN_READWRITE);
+        ContentValues fakeTagValues = new ContentValues();
+        ContentValues fakePostValues = new ContentValues();
+        fakeTagValues.put(ReadditContract.Tag.COLUMN_NAME, "tag1");
+        long tagid = db.insertOrThrow(ReadditContract.Tag.TABLE_NAME, null, fakeTagValues);
+        assertFalse(tagid == -1);
+        fakePostValues.put(ReadditContract.Post.COLUMN_DATE, System.currentTimeMillis());
+        fakePostValues.put(ReadditContract.Post.COLUMN_SUBREDDIT, "fakeSubreddit");
+        fakePostValues.put(ReadditContract.Post.COLUMN_VOTES, 2);
+        fakePostValues.put(ReadditContract.Post.COLUMN_USER, "fakeUser");
+        fakePostValues.put(ReadditContract.Post.COLUMN_CONTENT, "fake content");
+        fakePostValues.put(ReadditContract.Post.COLUMN_TITLE, "fake title");
+        fakePostValues.put(ReadditContract.Post.COLUMN_THREADS, 5);
+        long postid = db.insertOrThrow(ReadditContract.Post.TABLE_NAME, null, fakePostValues);
+        assertFalse(postid == -1);
+        Uri ret = getMockContentResolver().insert(ReadditContract.Post.buildAddTagUri(postid, tagid), null);
+        assertEquals(postid, ReadditContract.Post.getPostId(ret));
+
+    }
+
+    /**
+     * Insert some fake data used in the tests
+     */
     private void insertFakeData() {
         prepareFakeData();
         SQLiteDatabase db = SQLiteDatabase.openDatabase(getMockContext().getDatabasePath(DATABASE_NAME).getPath(), null, SQLiteDatabase.OPEN_READWRITE);
@@ -471,6 +497,5 @@ public class RedditDataProviderTest extends ProviderTestCase2<RedditDataProvider
         mSubredditFakeValues = new ContentValues();
         mSubredditFakeValues.put(ReadditContract.Subreddit.COLUMN_NAME, "mysubreddit");
     }
-
 
 }
