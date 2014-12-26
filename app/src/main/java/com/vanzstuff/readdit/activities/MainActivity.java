@@ -4,30 +4,27 @@ import android.content.ContentValues;
 import android.os.AsyncTask;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.vanzstuff.readdit.Logger;
 import com.vanzstuff.readdit.data.ReadditContract;
-import com.vanzstuff.readdit.fragments.PostListFragment;
+import com.vanzstuff.readdit.fragments.FeedsFragment;
 import com.vanzstuff.redditapp.R;
 
-public class MainActivity extends FragmentActivity implements PostListFragment.CallBack {
+public class MainActivity extends FragmentActivity implements FeedsFragment.CallBack {
 
-    private PostListFragment mPostListFragment;
+    private FeedsFragment mFeedsFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mPostListFragment = (PostListFragment) getSupportFragmentManager().findFragmentById(R.id.list_fragment);
-        mPostListFragment.registerCallback(this);
+        mFeedsFragment = (FeedsFragment) getSupportFragmentManager().findFragmentById(R.id.list_fragment);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mPostListFragment.loadDataUri(ReadditContract.Post.CONTENT_URI);
+        mFeedsFragment.loadDataUri(ReadditContract.Post.CONTENT_URI);
         AsyncTask task = new AsyncTask() {
             @Override
             protected Object doInBackground(Object[] params) {

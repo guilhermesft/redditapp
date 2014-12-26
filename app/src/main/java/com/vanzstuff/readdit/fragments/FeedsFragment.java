@@ -1,5 +1,6 @@
 package com.vanzstuff.readdit.fragments;
 
+import android.app.Activity;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -9,11 +10,9 @@ import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.vanzstuff.readdit.Logger;
 import com.vanzstuff.readdit.PostListAdapter;
 import com.vanzstuff.redditapp.R;
 import com.vanzstuff.readdit.data.ReadditContract;
@@ -23,7 +22,7 @@ import android.net.Uri;
 /**
  * Fragment that encapsulate all logic to show a list with all post acquire from a given Uri
  */
-public class PostListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>,PostListAdapter.ItemSelectedListener {
+public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>,PostListAdapter.ItemSelectedListener {
 
     private static final int POST_INIT_CURSOR_LOADER = 0;
 
@@ -33,6 +32,16 @@ public class PostListFragment extends Fragment implements LoaderManager.LoaderCa
     private Uri mCurrentDataUri;
     /** Activity listener */
     private CallBack mCallback;
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mCallback = (CallBack) activity;
+        }catch (ClassCastException e){
+            throw new ClassCastException("The activity should implements FeedsFragment.Callback interface!");
+        }
+    }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -73,15 +82,6 @@ public class PostListFragment extends Fragment implements LoaderManager.LoaderCa
     public void loadDataUri(Uri dataUri){
         mCurrentDataUri = dataUri;
         getLoaderManager().restartLoader(POST_INIT_CURSOR_LOADER, null, this);
-    }
-
-    /**
-     * Register the callback listerner. If the activity would like to recive the click events it should
-     * registers itself like a callback
-     * @param callBack
-     */
-    public void registerCallback(CallBack callBack){
-        mCallback = callBack;
     }
 
     /**

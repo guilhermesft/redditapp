@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/default_padding"
+    android:gravity="center_horizontal">
+
+    <ImageButton
+        android:layout_width="@dimen/actions_menu_width"
+        android:layout_height="@dimen/actions_menu_height"
+        android:background="@drawable/ic_action_good"/>
+    <ImageButton
+        android:layout_width="@dimen/actions_menu_width"
+        android:layout_height="@dimen/actions_menu_height"
+        android:background="@drawable/ic_action_bad"
+        android:layout_marginLeft="@dimen/default_margin"/>
+    <ImageButton
+        android:layout_width="@dimen/actions_menu_width"
+        android:layout_height="@dimen/actions_menu_height"
+        android:background="@drawable/ic_action_save"
+        android:layout_marginLeft="@dimen/default_margin"/>
+    <ImageButton
+        android:layout_width="@dimen/actions_menu_width"
+        android:layout_height="@dimen/actions_menu_height"
+        android:background="@drawable/ic_action_remove"
+        android:layout_marginLeft="@dimen/default_margin"/>
+    <ImageButton
+        android:layout_width="@dimen/actions_menu_width"
+        android:layout_height="@dimen/actions_menu_height"
+        android:background="@drawable/ic_action_new_label"
+        android:layout_marginLeft="@dimen/default_margin"/>
+
+</LinearLayout>
