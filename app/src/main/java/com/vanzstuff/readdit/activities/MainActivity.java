@@ -1,67 +1,48 @@
 package com.vanzstuff.readdit.activities;
 
-import android.content.ContentValues;
-import android.os.AsyncTask;
+import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 
-import com.vanzstuff.readdit.Logger;
 import com.vanzstuff.readdit.data.ReadditContract;
+import com.vanzstuff.readdit.fragments.DetailFragment;
 import com.vanzstuff.readdit.fragments.FeedsFragment;
 import com.vanzstuff.redditapp.R;
 
-public class MainActivity extends FragmentActivity implements FeedsFragment.CallBack {
+public class MainActivity extends FragmentActivity implements FeedsFragment.CallBack, DetailFragment.Callback {
 
+    private static final String DETAIL_FRAGMENT_TAG = "detail_fragment_tag";
+    /* News feeds fragment. When the user select an item the activity should load the post in
+         * the detail fragment */
     private FeedsFragment mFeedsFragment;
+    /* Indicate if is two panel layout or not */
+    private boolean mIsTwoPanelLayout = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mFeedsFragment = (FeedsFragment) getSupportFragmentManager().findFragmentById(R.id.list_fragment);
+        mFeedsFragment = (FeedsFragment) getSupportFragmentManager().findFragmentById(R.id.feeds_fragment);
+        if (findViewById(R.id.detail_fragment_container) != null )
+            mIsTwoPanelLayout = true;
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         mFeedsFragment.loadDataUri(ReadditContract.Post.CONTENT_URI);
-        AsyncTask task = new AsyncTask() {
-            @Override
-            protected Object doInBackground(Object[] params) {
-                ContentValues tagInsert = new ContentValues();
-                tagInsert.put(ReadditContract.Tag.COLUMN_NAME, "tag-1");
-                long tagID1 = ReadditContract.Tag.getTagId(getContentResolver().insert(ReadditContract.Tag.CONTENT_URI, tagInsert));
-                tagInsert = new ContentValues();
-                tagInsert.put(ReadditContract.Tag.COLUMN_NAME, "tag-2");
-                long tagID2 = ReadditContract.Tag.getTagId(getContentResolver().insert(ReadditContract.Tag.CONTENT_URI, tagInsert));
-                ContentValues insertValues = new ContentValues();
-                for ( int i = 0; i < 50; i++) {
-                    insertValues.put(ReadditContract.Post.COLUMN_DATE, java.util.Calendar.getInstance().getTimeInMillis());
-                    insertValues.put(ReadditContract.Post.COLUMN_CONTENT, "fake content");
-                    insertValues.put(ReadditContract.Post.COLUMN_SUBREDDIT, "redditdev");
-                    insertValues.put(ReadditContract.Post.COLUMN_USER, "fuser");
-                    insertValues.put(ReadditContract.Post.COLUMN_VOTES, 2);
-                    insertValues.put(ReadditContract.Post.COLUMN_THREADS, 2);
-                    insertValues.put(ReadditContract.Post.COLUMN_TITLE, "title");
-                    long postID = ReadditContract.Post.getPostId(getContentResolver().insert(ReadditContract.Post.CONTENT_URI, insertValues));
-                    if (postID % 2 == 0)
-                        getContentResolver().insert(ReadditContract.Post.buildAddTagUri(postID, tagID1), null);
-                    else
-                        getContentResolver().insert(ReadditContract.Post.buildAddTagUri(postID, tagID2), null);
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-                return null;
-            }
-        };
-        task.execute(null);
     }
 
     @Override
     public void onItemSelected(long postID) {
-        Logger.d("ITEM = " + postID);
+        if ( mIsTwoPanelLayout ){
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.detail_fragment_container, DetailFragment.newInstance(postID), DETAIL_FRAGMENT_TAG)
+                    .commit();
+        }else{
+            Intent intent = new Intent(this, DetailActivity.class).putExtra(DetailActivity.EXTRA_POST_ID, postID);
+            startActivity(intent);
+        }
     }
 }

@@ -17,4 +17,12 @@ public final class Logger {
     public static final void d(String msg){
         Log.d(TAG, msg);
     }
+
+    /**
+     * Print warn log message
+     * @param msg mesage to print
+     */
+    public static final void w(String msg) {
+        Log.w(TAG, msg);
+    }
 }

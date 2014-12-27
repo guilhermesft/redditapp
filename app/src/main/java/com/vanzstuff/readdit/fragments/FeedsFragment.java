@@ -39,7 +39,7 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
         try {
             mCallback = (CallBack) activity;
         }catch (ClassCastException e){
-            throw new ClassCastException("The activity should implements FeedsFragment.Callback interface!");
+            throw new ClassCastException("The activity " + activity.getClass().getCanonicalName() + "must implement " + CallBack.class.getCanonicalName());
         }
     }
 
@@ -52,11 +52,30 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        super.onCreateView(inflater, container, savedInstanceState);
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_post_list, container, false);
         mRecyclerView = (RecyclerView) v.findViewById(R.id.fragment_post_list_recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         return v;
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        getLoaderManager().getLoader(POST_INIT_CURSOR_LOADER).stopLoading();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        getLoaderManager().getLoader(POST_INIT_CURSOR_LOADER).startLoading();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        getLoaderManager().destroyLoader(POST_INIT_CURSOR_LOADER);
     }
 
     @Override
@@ -87,7 +106,8 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
     /**
      * Interface to enable communication between the fragment and the activity
      */
-    public interface CallBack {
+    public static interface CallBack {
+
         /**
          * Method called when an item is clicked
          * @param postID ID of the post selected

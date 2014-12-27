@@ -20,6 +20,7 @@ public class ReadditContract {
     public static final String PATH_SUBREDDIT = "subreddit";
     private static final String PATH_TAG_POST = "tag_x_post7";
     public static final String MULTIPLE_ITEM_MIMETYPE = "vnd.android.cursor.dir/";
+    public static final String SINGLE_ITEM_MIMETYPE = "vnd.android.cursor.item/";
 
 
     /**
