@@ -86,6 +86,7 @@ public class RedditDataProviderTest extends ProviderTestCase2<RedditDataProvider
         insertValues.put(ReadditContract.Post.COLUMN_VOTES, 2);
         insertValues.put(ReadditContract.Post.COLUMN_THREADS, 2);
         insertValues.put(ReadditContract.Post.COLUMN_TITLE, "title");
+        insertValues.put(ReadditContract.Post.COLUMN_CONTENT_TYPE, "text/plain");
         retUri = getProvider().insert(ReadditContract.Post.CONTENT_URI, insertValues);
         assertEquals(ReadditContract.CONTENT_AUTHORITY, retUri.getAuthority());
         assertEquals(ReadditContract.PATH_POST, retUri.getPathSegments().get(0));
@@ -387,6 +388,7 @@ public class RedditDataProviderTest extends ProviderTestCase2<RedditDataProvider
         fakePostValues.put(ReadditContract.Post.COLUMN_CONTENT, "fake content");
         fakePostValues.put(ReadditContract.Post.COLUMN_TITLE, "fake title");
         fakePostValues.put(ReadditContract.Post.COLUMN_THREADS, 5);
+        fakePostValues.put(ReadditContract.Post.COLUMN_CONTENT_TYPE, "text/plain");
         long postID = db.insertOrThrow(ReadditContract.Post.TABLE_NAME, null, fakePostValues);
         assertTrue(postID > -1);
         fakeTagXPostValues.put(ReadditContract.TagXPost.COLUMN_TAG, tagID);
@@ -415,6 +417,7 @@ public class RedditDataProviderTest extends ProviderTestCase2<RedditDataProvider
         fakePostValues.put(ReadditContract.Post.COLUMN_VOTES, 2);
         fakePostValues.put(ReadditContract.Post.COLUMN_USER, "fakeUser2");
         fakePostValues.put(ReadditContract.Post.COLUMN_CONTENT, "fake content2");
+        fakePostValues.put(ReadditContract.Post.COLUMN_CONTENT_TYPE, "text/plain");
         fakePostValues.put(ReadditContract.Post.COLUMN_TITLE, "fake title2");
         fakePostValues.put(ReadditContract.Post.COLUMN_THREADS, 5);
         postID = db.insertOrThrow(ReadditContract.Post.TABLE_NAME, null, fakePostValues);
@@ -455,6 +458,7 @@ public class RedditDataProviderTest extends ProviderTestCase2<RedditDataProvider
         fakePostValues.put(ReadditContract.Post.COLUMN_CONTENT, "fake content");
         fakePostValues.put(ReadditContract.Post.COLUMN_TITLE, "fake title");
         fakePostValues.put(ReadditContract.Post.COLUMN_THREADS, 5);
+        fakePostValues.put(ReadditContract.Post.COLUMN_CONTENT_TYPE, "text/plain");
         long postid = db.insertOrThrow(ReadditContract.Post.TABLE_NAME, null, fakePostValues);
         assertFalse(postid == -1);
         Uri ret = getMockContentResolver().insert(ReadditContract.Post.buildAddTagUri(postid, tagid), null);
@@ -488,6 +492,7 @@ public class RedditDataProviderTest extends ProviderTestCase2<RedditDataProvider
         mPostFakeValues.put(ReadditContract.Post.COLUMN_CONTENT, "fake content");
         mPostFakeValues.put(ReadditContract.Post.COLUMN_TITLE, "fake title");
         mPostFakeValues.put(ReadditContract.Post.COLUMN_THREADS, 5);
+        mPostFakeValues.put(ReadditContract.Post.COLUMN_CONTENT_TYPE, "text/plain");
         mCommentFakeValues = new ContentValues();
         mCommentFakeValues.put(ReadditContract.Comment.COLUMN_CONTENT, "Great!");
         mCommentFakeValues.put(ReadditContract.Comment.COLUMN_DATE, System.currentTimeMillis());

@@ -26,6 +26,7 @@ public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
                 ReadditContract.Post.COLUMN_SUBREDDIT + " TEXT NOT NULL, " +
                 ReadditContract.Post.COLUMN_USER +  " TEXT NOT NULL, " +
                 ReadditContract.Post.COLUMN_VOTES + " INTEGER DEFAULT 0, " +
+                ReadditContract.Post.COLUMN_CONTENT_TYPE + " TEXT NOT NULL, " +
                 ReadditContract.Post.COLUMN_THREADS + " INTEGER DEFAULT 0);";
         final String CREATE_TAG_X_POST = "CREATE TABLE " + ReadditContract.TagXPost.TABLE_NAME + " ( " +
                 ReadditContract.TagXPost.COLUMN_TAG + " INTEGER REFERENCES " + ReadditContract.Tag.TABLE_NAME + "( " + ReadditContract.Tag._ID + ") , " +

@@ -2,12 +2,15 @@ package com.vanzstuff.readdit.fragments;
 
 import android.app.Activity;
 import android.database.Cursor;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.vanzstuff.readdit.Logger;
@@ -49,15 +52,30 @@ public class DetailFragment extends Fragment {
         Cursor cursor = null;
         try {
             cursor = getActivity().getContentResolver().query(ReadditContract.Post.CONTENT_URI,
-                    null,
+                    new String[]{ ReadditContract.Post.COLUMN_CONTENT_TYPE,
+                            ReadditContract.Post.COLUMN_CONTENT},
                     ReadditContract.Post._ID + " = ?",
                     new String[]{String.valueOf(mPostID)},
                     null);
             if (cursor.moveToFirst()) {
-                TextView txt = new TextView(getActivity());
-                txt.setText(cursor.getString(cursor.getColumnIndex(ReadditContract.Post.COLUMN_CONTENT)));
+                final String contentType = cursor.getString(0);
+                View contentView = null;
+                if ( contentType.equals("text/plain")) {
+                    //is a text post
+                    TextView txt = new TextView(getActivity());
+                    txt.setText(cursor.getString(1));
+                    contentView = txt;
+                } else if( contentType.startsWith("image/")) {
+                    ImageView iv = new ImageView(getActivity());
+                    iv.setImageBitmap(BitmapFactory.decodeFile(cursor.getString(1)));
+                    contentView = iv;
+                } else if ( contentType.equals("url")){
+                    WebView wv = new WebView(getActivity());
+                    wv.loadUrl(cursor.getString(1));
+                    contentView = wv;
+                }
                 FrameLayout container = (FrameLayout) getView().findViewById(R.id.content_container);
-                container.addView(txt);
+                container.addView(contentView);
             }
         } finally {
             if ( cursor != null )
