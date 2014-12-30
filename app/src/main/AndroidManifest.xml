@@ -25,6 +25,17 @@
         </activity>
         <activity android:name="com.vanzstuff.readdit.activities.DetailActivity"
             android:label="@string/title_activity_detail"/>
+        
+        <!--
+            Services
+         -->
+        <service android:name="com.vanzstuff.readdit.sync.ReaditAuthenticatorService">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator"/>
+            </intent-filter>
+            <meta-data android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator"/>
+        </service>
     </application>
 
 </manifest>
