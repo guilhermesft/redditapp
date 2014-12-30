@@ -10,7 +10,7 @@ import android.provider.BaseColumns;
  */
 public class ReadditContract {
 
-    public static final String CONTENT_AUTHORITY = "com.vanzstuff.readdit";
+    public static final String CONTENT_AUTHORITY = "com.vanzstuff.readdit.provider";
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
     public static final String PATH_TAG = "tag";
     public static final String PATH_POST = "post";
@@ -18,7 +18,7 @@ public class ReadditContract {
     public static final String PATH_ADD_TAG_TO_POST = "post_add_tag";
     public static final String PATH_COMMENT = "comment";
     public static final String PATH_SUBREDDIT = "subreddit";
-    private static final String PATH_TAG_POST = "tag_x_post7";
+    private static final String PATH_TAG_POST = "tag_x_post";
     public static final String MULTIPLE_ITEM_MIMETYPE = "vnd.android.cursor.dir/";
     public static final String SINGLE_ITEM_MIMETYPE = "vnd.android.cursor.item/";
 
