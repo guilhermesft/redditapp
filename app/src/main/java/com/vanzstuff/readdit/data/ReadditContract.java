@@ -15,6 +15,7 @@ public class ReadditContract {
     public static final String PATH_TAG = "tag";
     public static final String PATH_POST = "post";
     public static final String PATH_POST_BY_TAG = "post_tag" ;
+    public static final String PATH_POST_BY_TAGID = "post_tagid" ;
     public static final String PATH_ADD_TAG_TO_POST = "post_add_tag";
     public static final String PATH_COMMENT = "comment";
     public static final String PATH_SUBREDDIT = "subreddit";
@@ -58,6 +59,7 @@ public class ReadditContract {
         /** Uri used to retrieve all post */
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_POST).build();
         public static final Uri CONTENT_URI_POST_BY_TAG = BASE_CONTENT_URI.buildUpon().appendPath(PATH_POST_BY_TAG).build();
+        public static final Uri CONTENT_URI_POST_BY_TAGID = BASE_CONTENT_URI.buildUpon().appendPath(PATH_POST_BY_TAGID).build();
         public static final Uri CONTENT_URI_ADD_TAG_TO_POST = BASE_CONTENT_URI.buildUpon().appendPath(PATH_ADD_TAG_TO_POST).build();
         public static final String CONTENT_TYPE = MULTIPLE_ITEM_MIMETYPE +  CONTENT_AUTHORITY + "/" + PATH_POST;
         public static final String CONTENT_TYPE_POST_BY_TAG = MULTIPLE_ITEM_MIMETYPE +  CONTENT_AUTHORITY + "/" + PATH_POST_BY_TAG;
@@ -124,6 +126,24 @@ public class ReadditContract {
                     Long.parseLong(uri.getPathSegments().get(1)),
                     Long.parseLong(uri.getPathSegments().get(2))
             };
+        }
+
+        /**
+         * Build a uri to retrieve the post from a given tag id
+         * @param tagId id used to retrieve the posts
+         * @return Uri to retrieve the posts
+         */
+        public static Uri buildPostByTagIdUri(long tagId){
+            return CONTENT_URI_POST_BY_TAGID.buildUpon().appendPath(String.valueOf(tagId)).build();
+        }
+
+        /**
+         * Get the tag from Uri created by the method buildPostByTagIdUri
+         * @param uri that holds the tag
+         * @return tag retrieved
+         */
+        static String getTagIdFromUri(Uri uri){
+            return uri.getPathSegments().get(1);
         }
 
         public static final String TABLE_NAME = "post";

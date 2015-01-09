@@ -23,6 +23,7 @@ public class RedditDataProvider extends ContentProvider {
     private static final int SUBREDDIT = 104;
     private static final int POST_BY_TAG = 105;
     private static final int ADD_TAG_TO_POST = 106;
+    private static final int POST_BY_TAGID = 107;
 
     private SQLiteOpenHelper mOpenHelper;
 
@@ -49,6 +50,7 @@ public class RedditDataProvider extends ContentProvider {
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_TAG,  TAG);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_POST,  POST);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_POST_BY_TAG + "/*",  POST_BY_TAG);
+        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_POST_BY_TAGID + "/#",  POST_BY_TAGID);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_ADD_TAG_TO_POST + "/*/*",  ADD_TAG_TO_POST);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_COMMENT,  COMMENT);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_SUBREDDIT, SUBREDDIT);
@@ -111,12 +113,23 @@ public class RedditDataProvider extends ContentProvider {
                 cursor = getPostByTag(uri, projection, sortOrder);
                 break;
             }
+            case POST_BY_TAGID: {
+                cursor = sPostByTagQueryBuilder.query(mOpenHelper.getReadableDatabase(),
+                            projection,
+                            sWherePostByTag,
+                            new String[]{ReadditContract.Post.getTagIdFromUri(uri)},
+                            null,
+                            null,
+                            sortOrder);
+                break;
+            }
             default:
                 throw new UnsupportedOperationException("Unknown URI: " + uri);
         }
         cursor.setNotificationUri(getContext().getContentResolver(), uri);
         return cursor;
     }
+
 
     /**
      * Method retrieve the post from a given tag
@@ -126,7 +139,7 @@ public class RedditDataProvider extends ContentProvider {
      * @return
      */
     private Cursor getPostByTag(Uri uri, String[] projection, String sortOrder) {
-        String tag = ReadditContract.Post.getTagFromUri(uri);
+        String tag = ReadditContract.Post.getTagIdFromUri(uri);
         if (Utils.stringNotNullOrEmpty(tag)){
             Cursor cursor = query(ReadditContract.Tag.CONTENT_URI, new String[]{ReadditContract.Tag._ID}, sWhereTagId, new String[]{tag}, null);
             if (cursor.moveToFirst()){
@@ -229,12 +242,14 @@ public class RedditDataProvider extends ContentProvider {
             throw new android.database.SQLException("Failed to insert row into " + uri);
         //notify the cursor
         Cursor tagCursor = getContext().getContentResolver().query(ReadditContract.Tag.CONTENT_URI,
-                new String[]{ReadditContract.Tag.COLUMN_NAME},
+                new String[]{ReadditContract.Tag._ID,
+                        ReadditContract.Tag.COLUMN_NAME},
                 ReadditContract.Tag._ID + " = ?",
                 new String[]{String.valueOf(uriValues[1])},
                 null);
         if (tagCursor.moveToFirst())
-            getContext().getContentResolver().notifyChange(ReadditContract.Post.buildPostByTagUri(tagCursor.getString(0)),null);
+            getContext().getContentResolver().notifyChange(ReadditContract.Post.buildPostByTagUri(tagCursor.getString(1)),null);
+            getContext().getContentResolver().notifyChange(ReadditContract.Post.buildPostByTagIdUri(tagCursor.getLong(0)),null);
         return returnUri;
     }
 

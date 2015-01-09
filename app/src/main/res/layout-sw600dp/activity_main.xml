@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="horizontal"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <fragment
+    <FrameLayout
+        android:id="@+id/activity_main_content_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <fragment
         android:id="@+id/feeds_fragment"
         android:name="com.vanzstuff.readdit.fragments.FeedsFragment"
         android:layout_width="0dp"
@@ -14,9 +20,20 @@
         tools:context="com.vanzstuff.readdit.fragments.FeedsFragment"
         tools:layout="@layout/fragment_post_list"/>
 
-    <FrameLayout android:id="@+id/detail_fragment_container"
+        <FrameLayout android:id="@+id/detail_fragment_container"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"/>
 
-</LinearLayout>
+    </FrameLayout>
+
+    <ListView android:id="@+id/left_drawer"
+        android:layout_width="240dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:choiceMode="singleChoice"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="0dp"
+        android:background="@color/white"/>
+
+</android.support.v4.widget.DrawerLayout>

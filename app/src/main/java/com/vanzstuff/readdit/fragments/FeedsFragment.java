@@ -101,6 +101,7 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
     public void loadDataUri(Uri dataUri){
         mCurrentDataUri = dataUri;
         getLoaderManager().restartLoader(POST_INIT_CURSOR_LOADER, null, this);
+        mRecyclerView.smoothScrollToPosition(0);
     }
 
     /**
