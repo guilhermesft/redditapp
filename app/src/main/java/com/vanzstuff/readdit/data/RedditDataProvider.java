@@ -24,6 +24,7 @@ public class RedditDataProvider extends ContentProvider {
     private static final int POST_BY_TAG = 105;
     private static final int ADD_TAG_TO_POST = 106;
     private static final int POST_BY_TAGID = 107;
+    private static final int ADD_TAG_NAME_TO_POST = 108;
 
     private SQLiteOpenHelper mOpenHelper;
 
@@ -51,7 +52,8 @@ public class RedditDataProvider extends ContentProvider {
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_POST,  POST);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_POST_BY_TAG + "/*",  POST_BY_TAG);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_POST_BY_TAGID + "/#",  POST_BY_TAGID);
-        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_ADD_TAG_TO_POST + "/*/*",  ADD_TAG_TO_POST);
+        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_ADD_TAG_TO_POST + "/#/#",  ADD_TAG_TO_POST);
+        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_ADD_TAG_NAME_TO_POST + "/#/*",  ADD_TAG_NAME_TO_POST);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_COMMENT,  COMMENT);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_SUBREDDIT, SUBREDDIT);
         return matcher;
@@ -143,10 +145,12 @@ public class RedditDataProvider extends ContentProvider {
         if (Utils.stringNotNullOrEmpty(tag)){
             Cursor cursor = query(ReadditContract.Tag.CONTENT_URI, new String[]{ReadditContract.Tag._ID}, sWhereTagId, new String[]{tag}, null);
             if (cursor.moveToFirst()){
+                tag = cursor.getString(0);
+                cursor.close();
                 return sPostByTagQueryBuilder.query(mOpenHelper.getReadableDatabase(),
                         projection,
                         sWherePostByTag,
-                        new String[]{cursor.getString(0)},
+                        new String[]{tag},
                         null,
                         null,
                         sortOrder);
@@ -216,11 +220,44 @@ public class RedditDataProvider extends ContentProvider {
                 returnUri = insertTagToPost(db, uri);
                 break;
             }
+            case ADD_TAG_NAME_TO_POST: {
+                returnUri = insertTagNameToPost(db, uri);
+                break;
+
+            }
             default:
                 throw new UnsupportedOperationException("Unknown URI: " + uri);
         }
         getContext().getContentResolver().notifyChange(uri, null);
         return returnUri;
+    }
+
+    private Uri insertTagNameToPost(SQLiteDatabase db, Uri uri) {
+        //check if tag already exists
+        Cursor cursor = query(ReadditContract.Tag.CONTENT_URI,
+                new String[]{ReadditContract.Tag._ID},
+                ReadditContract.Tag.COLUMN_NAME + " = ?",
+                new String[]{ReadditContract.Post.getTagFromUri(uri)},
+                null);
+        if ( cursor.moveToFirst() ){
+            //tag already exists.
+            Uri ret = insert(ReadditContract.Post.buildAddTagUri(
+                    Long.parseLong(ReadditContract.Post.getTagNameFromUri(uri)[0]), cursor.getLong(1)), null);
+            cursor.close();
+            return ret;
+        } else {
+            //tag is not exists
+            ContentValues insertValues = new ContentValues();
+            insertValues.put(ReadditContract.Tag.COLUMN_NAME, ReadditContract.Post.getTagFromUri(uri));
+            Uri retUri = insert(ReadditContract.Tag.CONTENT_URI, insertValues);
+            long tagId = ReadditContract.Tag.getTagId(retUri);
+            if ( tagId > 0) {
+                return insert(ReadditContract.Post.buildAddTagUri(
+                        Long.parseLong(ReadditContract.Post.getTagNameFromUri(uri)[0]), tagId), null);
+            }
+        }
+        cursor.close();
+        return null;
     }
 
     /**
@@ -247,9 +284,11 @@ public class RedditDataProvider extends ContentProvider {
                 ReadditContract.Tag._ID + " = ?",
                 new String[]{String.valueOf(uriValues[1])},
                 null);
-        if (tagCursor.moveToFirst())
-            getContext().getContentResolver().notifyChange(ReadditContract.Post.buildPostByTagUri(tagCursor.getString(1)),null);
-            getContext().getContentResolver().notifyChange(ReadditContract.Post.buildPostByTagIdUri(tagCursor.getLong(0)),null);
+        if (tagCursor.moveToFirst()) {
+            getContext().getContentResolver().notifyChange(ReadditContract.Post.buildPostByTagUri(tagCursor.getString(1)), null);
+            getContext().getContentResolver().notifyChange(ReadditContract.Post.buildPostByTagIdUri(tagCursor.getLong(0)), null);
+        }
+        tagCursor.close();
         return returnUri;
     }
 

@@ -463,6 +463,20 @@ public class RedditDataProviderTest extends ProviderTestCase2<RedditDataProvider
         assertFalse(postid == -1);
         Uri ret = getMockContentResolver().insert(ReadditContract.Post.buildAddTagUri(postid, tagid), null);
         assertEquals(postid, ReadditContract.Post.getPostId(ret));
+        //test add a tag is not exists to a post.
+        String tag = "fake";
+        ret = getMockContentResolver().insert(ReadditContract.Post.buildAddTagUri(postid, tag), null);
+        assertEquals(postid, ReadditContract.Post.getPostId(ret));
+        Cursor cursor = db.query(ReadditContract.Tag.TABLE_NAME,
+                new String[]{ReadditContract.Tag._ID,
+                        ReadditContract.Tag.COLUMN_NAME},
+                ReadditContract.Tag.COLUMN_NAME + "=?",
+                new String[]{tag},
+                null, null, null, null);
+        assertEquals(1, cursor.getCount());
+        assertTrue(cursor.moveToFirst());
+        assertEquals(tag, cursor.getString(cursor.getColumnIndex(ReadditContract.Tag.COLUMN_NAME)));
+        cursor.close();
 
     }
 
