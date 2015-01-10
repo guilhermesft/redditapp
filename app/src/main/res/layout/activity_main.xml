@@ -4,14 +4,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/feeds_fragment"
-        android:name="com.vanzstuff.readdit.fragments.FeedsFragment"
-        android:layout_height="match_parent"
+    <FrameLayout
+        android:id="@+id/feeds_fragment_container"
         android:layout_width="match_parent"
-        tools:context="com.vanzstuff.readdit.fragments.FeedsFragment"
-        tools:layout="@layout/fragment_post_list"/>
+        android:layout_height="match_parent"/>
 
     <FrameLayout  android:id="@+id/left_drawer"
         android:layout_width="240dp"
@@ -20,8 +16,7 @@
         android:divider="@android:color/transparent"
         android:dividerHeight="0dp"
         android:background="@color/white">
-        <include layout="@layout/drawer"/>
-
+            <include layout="@layout/drawer"/>
         </FrameLayout>
 
 

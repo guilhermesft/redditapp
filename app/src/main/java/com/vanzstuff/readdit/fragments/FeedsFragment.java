@@ -13,7 +13,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.vanzstuff.readdit.PostListAdapter;
+import com.vanzstuff.readdit.FeedsAdapter;
+import com.vanzstuff.readdit.Logger;
 import com.vanzstuff.redditapp.R;
 import com.vanzstuff.readdit.data.ReadditContract;
 
@@ -22,16 +23,28 @@ import android.net.Uri;
 /**
  * Fragment that encapsulate all logic to show a list with all post acquire from a given Uri
  */
-public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>,PostListAdapter.ItemSelectedListener {
+public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>,FeedsAdapter.ItemSelectedListener {
 
     private static final int POST_INIT_CURSOR_LOADER = 0;
+    private static final String ARG_URI = "arg_uri";
 
     /** RecyclerView responsable to show all post */
     private RecyclerView mRecyclerView;
-    /** Current Uri used to retrieve the post */
-    private Uri mCurrentDataUri;
     /** Activity listener */
     private CallBack mCallback;
+
+    /**
+     * Factory method to build a new FeedFragment
+     * @param postUri uri used to load the posts
+     * @return new FeedsFragment instance
+     */
+    public static final FeedsFragment newInstance(Uri postUri){
+        Bundle args = new Bundle(1);
+        args.putString(ARG_URI, postUri.toString());
+        FeedsFragment fragment = new FeedsFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     @Override
     public void onAttach(Activity activity) {
@@ -41,13 +54,6 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
         }catch (ClassCastException e){
             throw new ClassCastException("The activity " + activity.getClass().getCanonicalName() + "must implement " + CallBack.class.getCanonicalName());
         }
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        mCurrentDataUri = ReadditContract.Post.CONTENT_URI;
-        getLoaderManager().initLoader(POST_INIT_CURSOR_LOADER, null, this);
     }
 
     @Override
@@ -69,7 +75,7 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
     @Override
     public void onStart() {
         super.onStart();
-        getLoaderManager().getLoader(POST_INIT_CURSOR_LOADER).startLoading();
+        getLoaderManager().initLoader(POST_INIT_CURSOR_LOADER, getArguments(), this);
     }
 
     @Override
@@ -80,28 +86,24 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(getActivity(), mCurrentDataUri, null, null, null, ReadditContract.Post.COLUMN_DATE);
+        Logger.d("URI loaded: " + getArguments().getString(ARG_URI));
+        return new CursorLoader(getActivity(), Uri.parse(args.getString(ARG_URI)), null, null, null, ReadditContract.Post.COLUMN_DATE);
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mRecyclerView.swapAdapter(new PostListAdapter(data, this), false);
+        mRecyclerView.swapAdapter(new FeedsAdapter(data, this), false);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
+        loader.stopLoading();
         mRecyclerView.swapAdapter(null, false);
     }
 
     @Override
     public void onPostClicked(long postId) {
         mCallback.onItemSelected(postId);
-    }
-
-    public void loadDataUri(Uri dataUri){
-        mCurrentDataUri = dataUri;
-        getLoaderManager().restartLoader(POST_INIT_CURSOR_LOADER, null, this);
-        mRecyclerView.smoothScrollToPosition(0);
     }
 
     /**

@@ -24,7 +24,7 @@
             android:layout_centerHorizontal="true"
             android:layout_below="@id/drawer_profileimg"
             android:paddingTop="@dimen/default_padding"
-            android:text="User"/>
+            android:text="@string/logout_message"/>
         </RelativeLayout>
     <Button
         android:id="@+id/drawer_friends"
@@ -35,7 +35,7 @@
         android:id="@+id/drawer_messages"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/drawer_messges_button"/>
+        android:text="@string/drawer_messages_button"/>
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -1,8 +1,10 @@
 package com.vanzstuff.readdit.activities;
 
-import android.app.Activity;
+import android.app.LoaderManager;
 import android.content.Intent;
+import android.content.Loader;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
@@ -17,11 +19,12 @@ import android.widget.ListView;
 
 import com.vanzstuff.readdit.Logger;
 import com.vanzstuff.readdit.data.ReadditContract;
+import com.vanzstuff.readdit.data.TagsLoader;
 import com.vanzstuff.readdit.fragments.DetailFragment;
 import com.vanzstuff.readdit.fragments.FeedsFragment;
 import com.vanzstuff.redditapp.R;
 
-public class MainActivity extends FragmentActivity implements FeedsFragment.CallBack, DetailFragment.Callback, ListView.OnItemClickListener, View.OnClickListener {
+public class MainActivity extends FragmentActivity implements FeedsFragment.CallBack, DetailFragment.Callback, ListView.OnItemClickListener, View.OnClickListener, LoaderManager.LoaderCallbacks<Object> {
 
     private static final String DETAIL_FRAGMENT_TAG = "detail_fragment_tag";
     /* News feeds fragment. When the user select an item the activity should load the post in
@@ -31,6 +34,7 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
     private boolean mIsTwoPanelLayout = false;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
+    /* Navigation drawer views */
     private ListView mTagList;
     private Button mSettings;
     private Button mFriends;
@@ -44,6 +48,9 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
         mFeedsFragment = (FeedsFragment) getSupportFragmentManager().findFragmentById(R.id.feeds_fragment);
         if (findViewById(R.id.detail_fragment_container) != null )
             mIsTwoPanelLayout = true;
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.feeds_fragment_container, FeedsFragment.newInstance(ReadditContract.Post.CONTENT_URI))
+                .commit();
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.open_drawer, R.string.close_drawer){
             @Override
@@ -64,11 +71,13 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
         };
         mDrawerLayout.setDrawerListener(mDrawerToggle);
         mTagList = (ListView) findViewById(R.id.drawer_tags);
-        mTagList.setAdapter(new SimpleCursorAdapter(this,
+        SimpleCursorAdapter tagAdapter = new SimpleCursorAdapter(this,
                 android.R.layout.simple_list_item_1,
                 getContentResolver().query(ReadditContract.Tag.CONTENT_URI, null, null, null, null),
                 new String[]{ReadditContract.Tag.COLUMN_NAME},
-                new int[]{android.R.id.text1}, 0));
+                new int[]{android.R.id.text1}, 0);
+        getSupportLoaderManager().initLoader(0, null, new TagsLoader(this, tagAdapter));
+        mTagList.setAdapter(tagAdapter);
         mTagList.setOnItemClickListener(this);
         mSettings = (Button) findViewById(R.id.drawer_settings);
         mSettings.setOnClickListener(this);
@@ -106,12 +115,6 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        mFeedsFragment.loadDataUri(ReadditContract.Post.CONTENT_URI);
-    }
-
-    @Override
     public void onItemSelected(long postID) {
         if ( mIsTwoPanelLayout ){
             getSupportFragmentManager()
@@ -126,7 +129,9 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        mFeedsFragment.loadDataUri(ReadditContract.Post.buildPostByTagIdUri(id));
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.feeds_fragment_container, FeedsFragment.newInstance(ReadditContract.Post.buildPostByTagIdUri(id)))
+                .commit();
     }
 
     @Override
@@ -142,6 +147,21 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
         }else if ( v.getId() == R.id.drawer_about){
             //TODO - Open the about screen ( dialog or activity )
         }
+    }
+
+    @Override
+    public Loader<Object> onCreateLoader(int id, Bundle args) {
+        return null;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Object> loader, Object data) {
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Object> loader) {
+
     }
 }
 
