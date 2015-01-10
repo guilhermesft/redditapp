@@ -13,14 +13,16 @@
         tools:context="com.vanzstuff.readdit.fragments.FeedsFragment"
         tools:layout="@layout/fragment_post_list"/>
 
-    <ListView android:id="@+id/left_drawer"
+    <FrameLayout  android:id="@+id/left_drawer"
         android:layout_width="240dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:choiceMode="singleChoice"
         android:divider="@android:color/transparent"
         android:dividerHeight="0dp"
-        android:background="@color/white"/>
+        android:background="@color/white">
+        <include layout="@layout/drawer"/>
+
+        </FrameLayout>
 
 
 </android.support.v4.widget.DrawerLayout>
