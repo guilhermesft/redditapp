@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.test.MoreAsserts;
 import android.test.ProviderTestCase2;
 
+import com.vanzstuff.readdit.Logger;
 import com.vanzstuff.readdit.data.RedditDataProvider;
 import com.vanzstuff.readdit.data.ReadditContract;
 
@@ -17,6 +18,7 @@ public class RedditDataProviderTest extends ProviderTestCase2<RedditDataProvider
     private ContentValues mPostFakeValues;
     private ContentValues mCommentFakeValues;
     private ContentValues mSubredditFakeValues;
+    private ContentValues mUserFakeValues;
 
     /**
      * Constructor.
@@ -47,6 +49,7 @@ public class RedditDataProviderTest extends ProviderTestCase2<RedditDataProvider
         assertEquals(ReadditContract.Post.CONTENT_TYPE, getProvider().getType(ReadditContract.Post.CONTENT_URI));
         assertEquals(ReadditContract.Comment.CONTENT_TYPE, getProvider().getType(ReadditContract.Comment.CONTENT_URI));
         assertEquals(ReadditContract.Subreddit.CONTENT_TYPE, getProvider().getType(ReadditContract.Subreddit.CONTENT_URI));
+        assertEquals(ReadditContract.User.CONTENT_TYPE, getProvider().getType(ReadditContract.User.CONTENT_URI));
         assertEquals(ReadditContract.Post.CONTENT_TYPE_POST_BY_TAG, getProvider().getType(ReadditContract.Post.buildPostByTagUri("tag")));
         try {
             getProvider().getType(ReadditContract.BASE_CONTENT_URI.buildUpon().appendPath("xpto").build());
@@ -190,6 +193,23 @@ public class RedditDataProviderTest extends ProviderTestCase2<RedditDataProvider
         assertTrue(cursor.moveToFirst());
         assertEquals(insertValues.get(ReadditContract.Subreddit.COLUMN_NAME), cursor.getString(cursor.getColumnIndex(ReadditContract.Subreddit.COLUMN_NAME)));
         cursor.close();
+        //test insert user
+        insertValues.clear();
+        insertValues.put(ReadditContract.User.COLUMN_USERNAME, "fakeuser");
+        retUri = getProvider().insert(ReadditContract.User.CONTENT_URI, insertValues);
+        assertEquals(ReadditContract.CONTENT_AUTHORITY, retUri.getAuthority());
+        assertEquals(ReadditContract.PATH_USER, retUri.getPathSegments().get(0));
+        MoreAsserts.assertMatchesRegex("\\d+", retUri.getPathSegments().get(1));
+        cursor = db.query(ReadditContract.User.TABLE_NAME,
+                new String[]{ReadditContract.User._ID, ReadditContract.User.COLUMN_USERNAME},
+                ReadditContract.User._ID + "=?",
+                new String[]{retUri.getPathSegments().get(1)},
+                null, null, null, null);
+        assertEquals(1, cursor.getCount());
+        assertTrue(cursor.moveToFirst());
+        assertEquals(insertValues.get(ReadditContract.User.COLUMN_USERNAME), cursor.getString(cursor.getColumnIndex(ReadditContract.User.COLUMN_USERNAME)));
+        assertEquals(Long.parseLong(retUri.getPathSegments().get(1)), cursor.getLong(cursor.getColumnIndex(ReadditContract.User._ID)));
+        cursor.close();
         db.close();
     }
 
@@ -244,7 +264,18 @@ public class RedditDataProviderTest extends ProviderTestCase2<RedditDataProvider
                 null, null, null, null);
         assertEquals(0, cursor.getCount());
         cursor.close();
+        long userID = db.insertOrThrow(ReadditContract.User.TABLE_NAME, null, mUserFakeValues);
+        assertEquals(1, db.query(ReadditContract.User.TABLE_NAME, null, null, null, null, null, null, null).getCount());
+        assertEquals(1, getMockContentResolver().delete(ReadditContract.User.CONTENT_URI, "1", null));
+        cursor = db.query(ReadditContract.User.TABLE_NAME,
+                null,
+                ReadditContract.User._ID + "=?",
+                new String[]{String.valueOf(userID)},
+                null, null, null, null);
+        assertEquals(0, cursor.getCount());
+        cursor.close();
         db.close();
+
     }
 
     /**
@@ -364,6 +395,11 @@ public class RedditDataProviderTest extends ProviderTestCase2<RedditDataProvider
         assertEquals(1, cursor.getCount());
         assertEquals(true, cursor.moveToFirst());
         assertEquals(mSubredditFakeValues.get(ReadditContract.Subreddit.COLUMN_NAME), cursor.getString(cursor.getColumnIndex(ReadditContract.Subreddit.COLUMN_NAME)));
+        cursor.close();
+        cursor = getMockContentResolver().query(ReadditContract.User.CONTENT_URI, null, null, null, null);
+        assertEquals(1, cursor.getCount());
+        assertEquals(true, cursor.moveToFirst());
+        assertEquals(mUserFakeValues.get(ReadditContract.User.COLUMN_USERNAME), cursor.getString(cursor.getColumnIndex(ReadditContract.User.COLUMN_USERNAME)));
         cursor.close();
     }
 
@@ -490,6 +526,7 @@ public class RedditDataProviderTest extends ProviderTestCase2<RedditDataProvider
         db.insertOrThrow(ReadditContract.Post.TABLE_NAME, null, mPostFakeValues);
         db.insertOrThrow(ReadditContract.Comment.TABLE_NAME, null, mCommentFakeValues);
         db.insertOrThrow(ReadditContract.Subreddit.TABLE_NAME, null, mSubredditFakeValues);
+        db.insertOrThrow(ReadditContract.User.TABLE_NAME, null, mUserFakeValues);
     }
 
     /**
@@ -515,6 +552,8 @@ public class RedditDataProviderTest extends ProviderTestCase2<RedditDataProvider
         mCommentFakeValues.put(ReadditContract.Comment.COLUMN_USER, "me");
         mSubredditFakeValues = new ContentValues();
         mSubredditFakeValues.put(ReadditContract.Subreddit.COLUMN_NAME, "mysubreddit");
+        mUserFakeValues = new ContentValues();
+        mUserFakeValues.put(ReadditContract.User.COLUMN_USERNAME, "fakeuser");
     }
 
 }
