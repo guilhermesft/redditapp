@@ -25,4 +25,12 @@ public final class Logger {
     public static final void w(String msg) {
         Log.w(TAG, msg);
     }
+
+    /**
+     * Print error log message
+     * @param msg mesage to print
+     */
+    public static void e(String msg) {
+        Log.e(TAG, msg);
+    }
 }

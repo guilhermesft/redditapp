@@ -1,6 +1,7 @@
 package com.vanzstuff.readdit.fragments;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -128,9 +129,18 @@ public class DetailFragment extends Fragment implements View.OnClickListener {
             getActivity().getContentResolver().insert(ReadditContract.Post.buildAddTagUri(mPostID, PredefinedTags.HIDDEN.getName()), null);
         }else if ( v.getId() == R.id.action_menu_label){
             Logger.d("label vote");
+            InputTagFragment.newInstance(mPostID).show(getActivity().getSupportFragmentManager(), "InputTagFragment");
         }else{
             Logger.d("What?");
         }
+    }
+
+    /**
+     * This method open a dialog for the user enter the labels and persistem in the database
+     */
+    private void addLabels() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
     }
 
     /**

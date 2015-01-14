@@ -23,5 +23,9 @@
     <string name="open_drawer">Navigation menu</string>
     <string name="close_drawer">Close drawer</string>
     <string name="logout_message">Who are you?</string>
+    <string name="title_input_label_dialog">What are the labels?</string>
+    <string name="descripton_input_label_dialog">Insert the label what you want separated by space</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">ok</string>
 
 </resources>
