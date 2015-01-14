@@ -1,20 +1,18 @@
 package com.vanzstuff.readdit.activities;
 
-import android.app.LoaderManager;
 import android.content.Intent;
-import android.content.Loader;
 import android.content.res.Configuration;
-import android.database.Cursor;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.view.Menu;
+import android.util.AttributeSet;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ListView;
 
 import com.vanzstuff.readdit.Logger;
@@ -24,12 +22,9 @@ import com.vanzstuff.readdit.fragments.DetailFragment;
 import com.vanzstuff.readdit.fragments.FeedsFragment;
 import com.vanzstuff.redditapp.R;
 
-public class MainActivity extends FragmentActivity implements FeedsFragment.CallBack, DetailFragment.Callback, ListView.OnItemClickListener, View.OnClickListener, LoaderManager.LoaderCallbacks<Object> {
+public class MainActivity extends FragmentActivity implements FeedsFragment.CallBack, DetailFragment.Callback, ListView.OnItemClickListener, View.OnClickListener{
 
     private static final String DETAIL_FRAGMENT_TAG = "detail_fragment_tag";
-    /* News feeds fragment. When the user select an item the activity should load the post in
-         * the detail fragment */
-    private FeedsFragment mFeedsFragment;
     /* Indicate if is two panel layout or not */
     private boolean mIsTwoPanelLayout = false;
     private DrawerLayout mDrawerLayout;
@@ -40,17 +35,18 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
     private Button mFriends;
     private Button mMessages;
     private Button mAbout;
+    private FeedsFragment mFeedsFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mFeedsFragment = (FeedsFragment) getSupportFragmentManager().findFragmentById(R.id.feeds_fragment);
         if (findViewById(R.id.detail_fragment_container) != null )
             mIsTwoPanelLayout = true;
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.feeds_fragment_container, FeedsFragment.newInstance(ReadditContract.Post.CONTENT_URI))
                 .commit();
+
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.open_drawer, R.string.close_drawer){
             @Override
@@ -87,24 +83,14 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
         mMessages.setOnClickListener(this);
         mAbout = (Button) findViewById(R.id.drawer_about);
         mAbout.setOnClickListener(this);
+        findViewById(R.id.drawer_profile_container).setOnClickListener(this);
         getActionBar().setHomeButtonEnabled(true);
 }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (mDrawerToggle.onOptionsItemSelected(item)) {
+        if (mDrawerToggle.onOptionsItemSelected(item))
             return true;
-        }
-        if ( item.getItemId() == R.id.action_login ){
-            Logger.d("Menu login clicked");
-            return true;
-        }
         return false;
     }
 
@@ -138,30 +124,20 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
     public void onClick(View v) {
         //let's verify which button has been clicked
         if ( v.getId() == R.id.drawer_friends){
+            Logger.d("friends");
             //TODO
-        }else if ( v.getId() == R.id.drawer_messages){
+        } else if ( v.getId() == R.id.drawer_messages) {
+            Logger.d("Messages");
             //TODO
-        }else if ( v.getId() == R.id.drawer_settings){
+        } else if ( v.getId() == R.id.drawer_profile_container) {
+            Logger.d("Profile");
+        } else if ( v.getId() == R.id.drawer_settings) {
             //open settgins activity
             startActivity(new Intent(this, SettingsActivity.class));
-        }else if ( v.getId() == R.id.drawer_about){
+        } else if ( v.getId() == R.id.drawer_about){
+            Logger.d("About");
             //TODO - Open the about screen ( dialog or activity )
         }
-    }
-
-    @Override
-    public Loader<Object> onCreateLoader(int id, Bundle args) {
-        return null;
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Object> loader, Object data) {
-
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Object> loader) {
-
     }
 }
 

@@ -13,7 +13,6 @@ import com.android.volley.toolbox.Volley;
 /**
  * Singleton responsable to keep the reference to Volley queue during the
  * app execution
- * Created by vanz on 18/11/14.
  */
 public class VolleyWrapper {
 

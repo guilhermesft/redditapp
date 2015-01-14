@@ -1,4 +1,4 @@
-package com.vanzstuff.readdit;
+package com.vanzstuff.readdit.data;
 
 import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
@@ -7,8 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.vanzstuff.readdit.Logger;
 import com.vanzstuff.redditapp.R;
-import com.vanzstuff.readdit.data.ReadditContract;
 
 public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> {
 

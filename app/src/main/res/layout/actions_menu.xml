@@ -7,25 +7,30 @@
     android:gravity="center_horizontal">
 
     <ImageButton
+        android:id="@+id/action_menu_up_vote"
         android:layout_width="@dimen/actions_menu_width"
         android:layout_height="@dimen/actions_menu_height"
         android:background="@drawable/ic_action_good"/>
     <ImageButton
+        android:id="@+id/action_menu_down_vote"
         android:layout_width="@dimen/actions_menu_width"
         android:layout_height="@dimen/actions_menu_height"
         android:background="@drawable/ic_action_bad"
         android:layout_marginLeft="@dimen/default_margin"/>
     <ImageButton
+        android:id="@+id/action_menu_save"
         android:layout_width="@dimen/actions_menu_width"
         android:layout_height="@dimen/actions_menu_height"
         android:background="@drawable/ic_action_save"
         android:layout_marginLeft="@dimen/default_margin"/>
     <ImageButton
+        android:id="@+id/action_menu_hide"
         android:layout_width="@dimen/actions_menu_width"
         android:layout_height="@dimen/actions_menu_height"
         android:background="@drawable/ic_action_remove"
         android:layout_marginLeft="@dimen/default_margin"/>
     <ImageButton
+        android:id="@+id/action_menu_label"
         android:layout_width="@dimen/actions_menu_width"
         android:layout_height="@dimen/actions_menu_height"
         android:background="@drawable/ic_action_new_label"

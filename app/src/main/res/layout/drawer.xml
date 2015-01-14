@@ -5,6 +5,7 @@
 
     <!-- Container to user profile -->
     <RelativeLayout
+        android:id="@+id/drawer_profile_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -43,6 +44,7 @@
         android:text="@string/drawer_tags_header"/>
     <ListView
         android:id="@+id/drawer_tags"
+        android:choiceMode="singleChoice"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"/>
