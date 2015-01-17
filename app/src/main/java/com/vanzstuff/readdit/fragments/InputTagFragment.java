@@ -25,6 +25,9 @@ public class InputTagFragment extends DialogFragment implements View.OnClickList
     private Button mOkButton;
     private EditText mEditTags;
 
+    public InputTagFragment(){
+        this.setStyle(STYLE_NO_TITLE, 0);
+    }
 
     public static InputTagFragment newInstance(long post){
         Bundle args = new Bundle(1);

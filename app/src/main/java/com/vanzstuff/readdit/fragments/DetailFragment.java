@@ -60,11 +60,8 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
         mLabelButton.setOnClickListener(this);
         mCommentList = (ExpandableListView) v.findViewById(R.id.comment_list);
         if ( !UserSession.getInstance().isLogged() ){
-            mUpVoteButton.setClickable(false);
-            mDownVoteButton.setClickable(false);
-            mSaveButton.setClickable(false);
-            mHideButton.setClickable(false);
-            mLabelButton.setClickable(false);
+            /* TODO - if the user is not logged, we need to change the button style to give a tip
+            to the user */
         }
 
         return v;
@@ -130,11 +127,15 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
     @Override
     public void onClick(View v) {
         if ( v.getId() == R.id.action_menu_up_vote){
-            Logger.d("up vote");
-            vote(VoteRequest.VOTE_UP);
+            if( UserSession.getInstance().isLogged() )
+                vote(VoteRequest.VOTE_UP);
+            else
+                Toast.makeText(getActivity(), getString(R.string.need_login), Toast.LENGTH_LONG).show();
         } else if ( v.getId() == R.id.action_menu_down_vote){
-            Logger.d("down vote");
-            vote(VoteRequest.VOTE_DOWN);
+            if( UserSession.getInstance().isLogged() )
+                vote(VoteRequest.VOTE_DOWN);
+            else
+                Toast.makeText(getActivity(), getString(R.string.need_login), Toast.LENGTH_LONG).show();
         }else if ( v.getId() == R.id.action_menu_save){
             //add the tag saved to the post
             getActivity().getContentResolver().insert(ReadditContract.Post.buildAddTagUri(mPostID, PredefinedTags.SAVED.getName()), null);
@@ -142,7 +143,6 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
             //add the tag hidden to the post
             getActivity().getContentResolver().insert(ReadditContract.Post.buildAddTagUri(mPostID, PredefinedTags.HIDDEN.getName()), null);
         }else if ( v.getId() == R.id.action_menu_label){
-            Logger.d("label vote");
             InputTagFragment.newInstance(mPostID).show(getActivity().getSupportFragmentManager(), "InputTagFragment");
         }
     }
