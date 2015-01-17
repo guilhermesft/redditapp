@@ -27,5 +27,6 @@
     <string name="descripton_input_label_dialog">Insert the label what you want separated by space</string>
     <string name="cancel">Cancel</string>
     <string name="ok">ok</string>
+    <string name="about_content">App developmented to the course android development</string>
 
 </resources>

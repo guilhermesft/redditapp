@@ -16,11 +16,13 @@ import android.widget.ListView;
 import com.vanzstuff.readdit.Logger;
 import com.vanzstuff.readdit.data.ReadditContract;
 import com.vanzstuff.readdit.data.TagsLoader;
+import com.vanzstuff.readdit.fragments.AboutFragment;
 import com.vanzstuff.readdit.fragments.DetailFragment;
 import com.vanzstuff.readdit.fragments.FeedsFragment;
+import com.vanzstuff.readdit.fragments.OAuthFragment;
 import com.vanzstuff.redditapp.R;
 
-public class MainActivity extends FragmentActivity implements FeedsFragment.CallBack, DetailFragment.Callback, ListView.OnItemClickListener, View.OnClickListener{
+public class MainActivity extends FragmentActivity implements FeedsFragment.CallBack, ListView.OnItemClickListener, View.OnClickListener{
 
     private static final String DETAIL_FRAGMENT_TAG = "detail_fragment_tag";
     /* Indicate if is two panel layout or not */
@@ -129,12 +131,13 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
             //TODO
         } else if ( v.getId() == R.id.drawer_profile_container) {
             Logger.d("Profile");
+            OAuthFragment.newInstance().show(getSupportFragmentManager(), "oauth");
         } else if ( v.getId() == R.id.drawer_settings) {
             //open settgins activity
             startActivity(new Intent(this, SettingsActivity.class));
         } else if ( v.getId() == R.id.drawer_about){
             Logger.d("About");
-            //TODO - Open the about screen ( dialog or activity )
+            new AboutFragment().show(getSupportFragmentManager(), "about");
         }
     }
 }
