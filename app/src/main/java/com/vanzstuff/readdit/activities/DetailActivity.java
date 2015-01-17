@@ -6,7 +6,7 @@ import android.support.v4.app.FragmentActivity;
 import com.vanzstuff.readdit.fragments.DetailFragment;
 import com.vanzstuff.redditapp.R;
 
-public class DetailActivity extends FragmentActivity implements DetailFragment.Callback {
+public class DetailActivity extends FragmentActivity {
 
     public static final String EXTRA_POST_ID = "post_id";
 

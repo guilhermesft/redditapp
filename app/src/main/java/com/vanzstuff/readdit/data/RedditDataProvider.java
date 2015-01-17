@@ -25,7 +25,7 @@ public class RedditDataProvider extends ContentProvider {
     private static final int ADD_TAG_TO_POST = 106;
     private static final int POST_BY_TAGID = 107;
     private static final int ADD_TAG_NAME_TO_POST = 108;
-    private static final int USER = 109;
+    private static final int VOTE = 110;
 
     private SQLiteOpenHelper mOpenHelper;
 
@@ -57,7 +57,7 @@ public class RedditDataProvider extends ContentProvider {
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_ADD_TAG_NAME_TO_POST + "/#/*",  ADD_TAG_NAME_TO_POST);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_COMMENT,  COMMENT);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_SUBREDDIT, SUBREDDIT);
-        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_USER, USER);
+        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_VOTE, VOTE);
         return matcher;
     }
 
@@ -127,8 +127,8 @@ public class RedditDataProvider extends ContentProvider {
                             sortOrder);
                 break;
             }
-            case USER: {
-                cursor = db.query(ReadditContract.User.TABLE_NAME,
+            case VOTE: {
+                cursor = db.query(ReadditContract.Vote.TABLE_NAME,
                         projection,
                         selection,
                         selectionArgs,
@@ -143,7 +143,6 @@ public class RedditDataProvider extends ContentProvider {
         cursor.setNotificationUri(getContext().getContentResolver(), uri);
         return cursor;
     }
-
 
     /**
      * Method retrieve the post from a given tag
@@ -185,8 +184,8 @@ public class RedditDataProvider extends ContentProvider {
                 return ReadditContract.Subreddit.CONTENT_TYPE;
             case POST_BY_TAG:
                 return ReadditContract.Post.CONTENT_TYPE_POST_BY_TAG;
-            case USER:
-                return ReadditContract.User.CONTENT_TYPE;
+            case VOTE:
+                return ReadditContract.Vote.CONTENT_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -239,10 +238,10 @@ public class RedditDataProvider extends ContentProvider {
                 break;
 
             }
-            case USER: {
-                long id = db.insertOrThrow(ReadditContract.User.TABLE_NAME, null, values);
+            case VOTE: {
+                long id = db.insertOrThrow(ReadditContract.Vote.TABLE_NAME, null, values);
                 if (id > 0)
-                    returnUri = ReadditContract.User.buildUserUri(id);
+                    returnUri = ReadditContract.Vote.buildVoteUri(id);
                 else
                     throw new android.database.SQLException("Failed to insert row into " + uri);
                 break;
@@ -336,8 +335,8 @@ public class RedditDataProvider extends ContentProvider {
                 rowsDeleted = db.delete(ReadditContract.Subreddit.TABLE_NAME, selection, selectionArgs);
                 break;
             }
-            case USER:{
-                rowsDeleted = db.delete(ReadditContract.User.TABLE_NAME, selection, selectionArgs);
+            case VOTE:{
+                rowsDeleted = db.delete(ReadditContract.Vote.TABLE_NAME, selection, selectionArgs);
                 break;
             }
             default:
@@ -367,6 +366,10 @@ public class RedditDataProvider extends ContentProvider {
             }
             case SUBREDDIT:{
                 rowsUpdated = db.update(ReadditContract.Subreddit.TABLE_NAME, values, selection, selectionArgs );
+                break;
+            }
+            case VOTE:{
+                rowsUpdated = db.update(ReadditContract.Vote.TABLE_NAME, values, selection, selectionArgs );
                 break;
             }
             default:

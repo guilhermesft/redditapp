@@ -36,7 +36,7 @@ public class ReadditSQLOpenHelperTest extends AndroidTestCase{
     public void testOnCreate(){
         SQLiteDatabase db = mDBHelper.getWritableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM main.sqlite_master WHERE type=?;", new String[]{"table"});
-        assertEquals(8, cursor.getCount());
+        assertEquals(7, cursor.getCount());
         while (cursor.moveToNext()){
             if ( cursor.getString(1).equals(ReadditContract.Subreddit.TABLE_NAME)){
                 assertEquals("CREATE TABLE subreddit ( _id INTEGER PRIMARY KEY, subreddit TEXT NOT NULL )", cursor.getString(4));
@@ -50,10 +50,8 @@ public class ReadditSQLOpenHelperTest extends AndroidTestCase{
                 assertEquals("CREATE TABLE tag_x_post ( tag INTEGER REFERENCES tag( _id) , post INTEGER REFERENCES post( _id), PRIMARY KEY ( tag, post ))", cursor.getString(4));
             }else if (cursor.getString(1).equals("android_metadata")) {
                 continue;
-            }else if ( cursor.getString(1).equals(ReadditContract.User.TABLE_NAME)){
-                assertEquals("CREATE TABLE user ( _id INTEGER PRIMARY KEY, username TEXT NOT NULL )", cursor.getString(4));
             }else if ( cursor.getString(1).equals(ReadditContract.Vote.TABLE_NAME)){
-                assertEquals("CREATE TABLE vote ( _id INTEGER PRIMARY KEY, user INTEGER REFERENCES user( _id) , post INTEGER REFERENCES post( _id) , direction INTEGER )", cursor.getString(4));
+                assertEquals("CREATE TABLE vote ( _id INTEGER PRIMARY KEY, user TEXT NOT NULL DEFAULT 0 , post INTEGER REFERENCES post( _id) , direction INTEGER DEFAULT 0 )", cursor.getString(4));
             } else {
                 fail("Unexpected table: " + cursor.getString(0));
             }

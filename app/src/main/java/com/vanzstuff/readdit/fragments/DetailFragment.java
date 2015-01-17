@@ -1,22 +1,26 @@
 package com.vanzstuff.readdit.fragments;
 
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewOutlineProvider;
 import android.webkit.WebView;
+import android.widget.ExpandableListAdapter;
+import android.widget.ExpandableListView;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.vanzstuff.readdit.CommentListAdapter;
 import com.vanzstuff.readdit.Logger;
 import com.vanzstuff.readdit.PredefinedTags;
 import com.vanzstuff.readdit.UserSession;
@@ -27,27 +31,18 @@ import com.vanzstuff.redditapp.R;
 /**
  * Fragment that show the detail info about some reddit post
  */
-public class DetailFragment extends Fragment implements View.OnClickListener {
+public class DetailFragment extends Fragment implements View.OnClickListener, LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String ARG_POST_ID = "post_id";
+    private static final int COMMENT_CURSOR = 1;
     /*Activity that holds the fragment*/
-    private Callback mCallback;
     private ImageButton mUpVoteButton;
     private ImageButton mDownVoteButton;
     private ImageButton mSaveButton;
     private ImageButton mHideButton;
     private ImageButton mLabelButton;
+    private ExpandableListView mCommentList;
     private long mPostID;
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try{
-            mCallback = (Callback) activity;
-        } catch (ClassCastException e){
-            throw new ClassCastException("The activity " + activity.getClass().getCanonicalName() + "must implement " + Callback.class.getCanonicalName());
-        }
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -63,7 +58,22 @@ public class DetailFragment extends Fragment implements View.OnClickListener {
         mHideButton.setOnClickListener(this);
         mLabelButton = (ImageButton) v.findViewById(R.id.action_menu_label);
         mLabelButton.setOnClickListener(this);
+        mCommentList = (ExpandableListView) v.findViewById(R.id.comment_list);
+        if ( !UserSession.getInstance().isLogged() ){
+            mUpVoteButton.setClickable(false);
+            mDownVoteButton.setClickable(false);
+            mSaveButton.setClickable(false);
+            mHideButton.setClickable(false);
+            mLabelButton.setClickable(false);
+        }
+
         return v;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        getLoaderManager().initLoader(COMMENT_CURSOR, getArguments(), this);
     }
 
     @Override
@@ -144,16 +154,16 @@ public class DetailFragment extends Fragment implements View.OnClickListener {
     private void vote(int voteDirection){
         Cursor cursor = getActivity().getContentResolver().query(ReadditContract.Vote.CONTENT_URI, new String[]{ReadditContract.Vote._ID},
                 ReadditContract.Vote.COLUMN_POST + "=? AND " + ReadditContract.Vote.COLUMN_USER + "=?",
-                new String[]{String.valueOf(mPostID), String.valueOf(UserSession.getInstance().getCurrentUserInfo().id)},
+                new String[]{String.valueOf(mPostID), String.valueOf(UserSession.getInstance().getUser())},
                 null);
         ContentValues values = new ContentValues(2);
-        values.put(ReadditContract.Vote.COLUMN_USER, UserSession.getInstance().getCurrentUserInfo().id);
+        values.put(ReadditContract.Vote.COLUMN_USER, UserSession.getInstance().getUser());
         values.put(ReadditContract.Vote.COLUMN_POST, mPostID);
         values.put(ReadditContract.Vote.COLUMN_DIRECTION, voteDirection);
         if ( cursor.moveToFirst()){
             //user already has voted in the post. Update de vote
             getActivity().getContentResolver().update(ReadditContract.Vote.CONTENT_URI, values,ReadditContract.Vote.COLUMN_POST + "=? AND " + ReadditContract.Vote.COLUMN_USER + "=?",
-                    new String[]{String.valueOf(mPostID), String.valueOf(UserSession.getInstance().getCurrentUserInfo().id)});
+                    new String[]{String.valueOf(mPostID), String.valueOf(UserSession.getInstance().getUser())});
         } else {
             //user has not voted in the post. Insert a vote
             getActivity().getContentResolver().insert(ReadditContract.Vote.CONTENT_URI, values);
@@ -161,10 +171,24 @@ public class DetailFragment extends Fragment implements View.OnClickListener {
         cursor.close();
     }
 
-    /**
-     * Callback interface to holder activity
-     */
-    public static interface Callback {
-        //TODO
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return new CursorLoader(getActivity(), ReadditContract.Comment.CONTENT_URI, null,
+                ReadditContract.Comment.COLUMN_POST + "=? AND " + ReadditContract.Comment.COLUMN_PARENT + " is NULL", new String[]{String.valueOf(args.getLong(ARG_POST_ID, 0))}, null);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        mCommentList.setAdapter(new CommentListAdapter(getActivity(), data, R.layout.comment_item,
+                new String[]{ ReadditContract.Comment.COLUMN_USER, ReadditContract.Comment.COLUMN_DATE, ReadditContract.Comment.COLUMN_CONTENT},
+                new int[]{R.id.comment_user_item, R.id.comment_user_time, R.id.comment_item_content},
+                R.layout.comment_item,
+                new String[]{ ReadditContract.Comment.COLUMN_USER, ReadditContract.Comment.COLUMN_DATE, ReadditContract.Comment.COLUMN_CONTENT},
+                new int[]{R.id.comment_user_item, R.id.comment_user_time, R.id.comment_item_content}));
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mCommentList.setAdapter((ExpandableListAdapter)null);
     }
 }
