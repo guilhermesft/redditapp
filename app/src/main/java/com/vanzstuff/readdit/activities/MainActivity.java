@@ -2,6 +2,9 @@ package com.vanzstuff.readdit.activities;
 
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.database.ContentObserver;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
@@ -12,17 +15,20 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.vanzstuff.readdit.Logger;
+import com.vanzstuff.readdit.User;
+import com.vanzstuff.readdit.UserSession;
 import com.vanzstuff.readdit.data.ReadditContract;
 import com.vanzstuff.readdit.data.TagsLoader;
+import com.vanzstuff.readdit.data.UserContentObserver;
 import com.vanzstuff.readdit.fragments.AboutFragment;
 import com.vanzstuff.readdit.fragments.DetailFragment;
 import com.vanzstuff.readdit.fragments.FeedsFragment;
-import com.vanzstuff.readdit.fragments.OAuthFragment;
 import com.vanzstuff.redditapp.R;
 
-public class MainActivity extends FragmentActivity implements FeedsFragment.CallBack, ListView.OnItemClickListener, View.OnClickListener{
+public class MainActivity extends FragmentActivity implements FeedsFragment.CallBack, ListView.OnItemClickListener, View.OnClickListener, Handler.Callback{
 
     private static final String DETAIL_FRAGMENT_TAG = "detail_fragment_tag";
     /* Indicate if is two panel layout or not */
@@ -35,7 +41,7 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
     private Button mFriends;
     private Button mMessages;
     private Button mAbout;
-    private FeedsFragment mFeedsFragment;
+    private ContentObserver mUserContentObserver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,13 +91,29 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
         mAbout.setOnClickListener(this);
         findViewById(R.id.drawer_profile_container).setOnClickListener(this);
         getActionBar().setHomeButtonEnabled(true);
-}
+        mUserContentObserver = new UserContentObserver(new Handler(this));
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        User user = UserSession.getUser(this);
+        if ( user != null )
+            ((TextView)findViewById(R.id.drawer_username)).setText(user.name);
+        getContentResolver().registerContentObserver(ReadditContract.User.CONTENT_URI, false, mUserContentObserver);
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (mDrawerToggle.onOptionsItemSelected(item))
             return true;
         return false;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        getContentResolver().unregisterContentObserver(mUserContentObserver);
     }
 
     @Override
@@ -117,6 +139,7 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.feeds_fragment_container, FeedsFragment.newInstance(ReadditContract.Post.buildPostByTagIdUri(id)))
+                .addToBackStack(null)
                 .commit();
     }
 
@@ -131,7 +154,8 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
             //TODO
         } else if ( v.getId() == R.id.drawer_profile_container) {
             Logger.d("Profile");
-            OAuthFragment.newInstance().show(getSupportFragmentManager(), "oauth");
+            Intent intent = new Intent(this, OAuthActivity.class);
+            startActivity(intent);
         } else if ( v.getId() == R.id.drawer_settings) {
             //open settgins activity
             startActivity(new Intent(this, SettingsActivity.class));
@@ -139,6 +163,13 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
             Logger.d("About");
             new AboutFragment().show(getSupportFragmentManager(), "about");
         }
+    }
+
+
+    @Override
+    public boolean handleMessage(Message msg) {
+        ((TextView)findViewById(R.id.drawer_username)).setText(UserSession.getUser(this).name);
+        return true;
     }
 }
 

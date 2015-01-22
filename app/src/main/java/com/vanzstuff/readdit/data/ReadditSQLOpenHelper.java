@@ -41,13 +41,20 @@ public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
                 ReadditContract.Comment.COLUMN_POST + " INTEGER REFERENCES " + ReadditContract.Post.TABLE_NAME + " ( " + ReadditContract.Post._ID + " ));";
         final String CREATE_SUBSCRIBE = "CREATE TABLE " + ReadditContract.Subreddit.TABLE_NAME + " ( " +
                 ReadditContract.Subreddit._ID + " INTEGER PRIMARY KEY, " +
+                ReadditContract.Subreddit.COLUMN_LAST + " INTEGER NOT NULL DEFAULT 0, " +
                 ReadditContract.Subreddit.COLUMN_NAME + " TEXT NOT NULL );";
         final String CREATE_VOTE = "CREATE TABLE " + ReadditContract.Vote.TABLE_NAME + " ( " +
                 ReadditContract.Vote._ID + " INTEGER PRIMARY KEY, " +
                 ReadditContract.Vote.COLUMN_USER + " TEXT NOT NULL , " +
                 ReadditContract.Vote.COLUMN_POST + " INTEGER REFERENCES " + ReadditContract.Post.TABLE_NAME + "( " + ReadditContract.Post._ID + ") , " +
                 ReadditContract.Vote.COLUMN_DIRECTION + " INTEGER NOT NULL DEFAULT 0 );";
+        final String CREATE_USER = "CREATE TABLE " + ReadditContract.User.TABLE_NAME + " ( " +
+                ReadditContract.User._ID + " INTEGER PRIMARY KEY, " +
+                ReadditContract.User.COLUMN_NAME + " TEXT NOT NULL , " +
+                ReadditContract.User.COLUMN_CURRENT + " INTEGER DEFAULT 0 UNIQUE , " +
+                ReadditContract.User.COLUMN_ACCESSTOKEN + " TEXT );";
 
+        db.execSQL(CREATE_USER);
         db.execSQL(CREATE_TAG);
         db.execSQL(CREATE_POST);
         db.execSQL(CREATE_TAG_X_POST);

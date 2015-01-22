@@ -19,4 +19,5 @@ public class Utils {
     public static boolean isAlphaNumeric(String s) {
         return s.matches("\\w+");
     }
+
 }

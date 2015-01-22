@@ -23,6 +23,7 @@ import android.widget.Toast;
 import com.vanzstuff.readdit.CommentListAdapter;
 import com.vanzstuff.readdit.Logger;
 import com.vanzstuff.readdit.PredefinedTags;
+import com.vanzstuff.readdit.User;
 import com.vanzstuff.readdit.UserSession;
 import com.vanzstuff.readdit.data.ReadditContract;
 import com.vanzstuff.readdit.redditapi.VoteRequest;
@@ -59,11 +60,6 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
         mLabelButton = (ImageButton) v.findViewById(R.id.action_menu_label);
         mLabelButton.setOnClickListener(this);
         mCommentList = (ExpandableListView) v.findViewById(R.id.comment_list);
-        if ( !UserSession.getInstance().isLogged() ){
-            /* TODO - if the user is not logged, we need to change the button style to give a tip
-            to the user */
-        }
-
         return v;
     }
 
@@ -127,12 +123,12 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
     @Override
     public void onClick(View v) {
         if ( v.getId() == R.id.action_menu_up_vote){
-            if( UserSession.getInstance().isLogged() )
+            if( UserSession.isLogged(getActivity()) )
                 vote(VoteRequest.VOTE_UP);
             else
                 Toast.makeText(getActivity(), getString(R.string.need_login), Toast.LENGTH_LONG).show();
         } else if ( v.getId() == R.id.action_menu_down_vote){
-            if( UserSession.getInstance().isLogged() )
+            if( UserSession.isLogged(getActivity()) )
                 vote(VoteRequest.VOTE_DOWN);
             else
                 Toast.makeText(getActivity(), getString(R.string.need_login), Toast.LENGTH_LONG).show();
@@ -152,18 +148,19 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
      * @param voteDirection vote direction from VoteRequest.VOTE_UP or VoteRequest.VOTE_DOWN
      */
     private void vote(int voteDirection){
+        User user = UserSession.getUser(getActivity());
         Cursor cursor = getActivity().getContentResolver().query(ReadditContract.Vote.CONTENT_URI, new String[]{ReadditContract.Vote._ID},
                 ReadditContract.Vote.COLUMN_POST + "=? AND " + ReadditContract.Vote.COLUMN_USER + "=?",
-                new String[]{String.valueOf(mPostID), String.valueOf(UserSession.getInstance().getUser())},
+                new String[]{String.valueOf(mPostID), String.valueOf(user.name)},
                 null);
         ContentValues values = new ContentValues(2);
-        values.put(ReadditContract.Vote.COLUMN_USER, UserSession.getInstance().getUser());
+        values.put(ReadditContract.Vote.COLUMN_USER, user.name);
         values.put(ReadditContract.Vote.COLUMN_POST, mPostID);
         values.put(ReadditContract.Vote.COLUMN_DIRECTION, voteDirection);
         if ( cursor.moveToFirst()){
             //user already has voted in the post. Update de vote
             getActivity().getContentResolver().update(ReadditContract.Vote.CONTENT_URI, values,ReadditContract.Vote.COLUMN_POST + "=? AND " + ReadditContract.Vote.COLUMN_USER + "=?",
-                    new String[]{String.valueOf(mPostID), String.valueOf(UserSession.getInstance().getUser())});
+                    new String[]{String.valueOf(mPostID), String.valueOf(user.name)});
         } else {
             //user has not voted in the post. Insert a vote
             getActivity().getContentResolver().insert(ReadditContract.Vote.CONTENT_URI, values);

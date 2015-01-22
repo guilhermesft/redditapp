@@ -26,8 +26,9 @@
     <string name="title_input_label_dialog">What are the labels?</string>
     <string name="descripton_input_label_dialog">Insert the label what you want separated by space</string>
     <string name="cancel">Cancel</string>
-    <string name="ok">ok</string>
+    <string name="ok">Ok</string>
     <string name="about_content">App developmented to the course android development</string>
     <string name="need_login">Hey! Who are you? You need to login</string>
+    <string name="sync_account_type">com.vanzstuff.readdit.account</string>
 
 </resources>

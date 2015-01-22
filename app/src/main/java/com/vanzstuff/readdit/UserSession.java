@@ -1,46 +1,36 @@
 package com.vanzstuff.readdit;
 
+import android.content.Context;
+import android.database.Cursor;
+
+import com.vanzstuff.readdit.data.ReadditContract;
+
+
 public class UserSession {
 
-    private static UserSession mInstance;
-    private String mUser;
-    private String mAccessToken;
-
-    public static UserSession getInstance(){
-        if( mInstance == null )
-            mInstance = new UserSession();
-        return mInstance;
+    public static User getUser(Context context){
+        Cursor cursor = context.getContentResolver().query(ReadditContract.User.CONTENT_URI, new String[]{ReadditContract.User.COLUMN_NAME,
+                ReadditContract.User.COLUMN_ACCESSTOKEN, ReadditContract.User.COLUMN_CURRENT}, ReadditContract.User.COLUMN_CURRENT + "=?", new String[]{"1"}, null);
+        try {
+            if (cursor.moveToFirst()) {
+                User user = new User();
+                user.name = cursor.getString(0);
+                user.accessToken = cursor.getString(1);
+                user.currentUser = cursor.getInt(2) == 1 ? true : false;
+                return user;
+            }
+        } finally {
+            cursor.close();
+        }
+        return null;
     }
 
-    private UserSession(){}
-
-    public void setUser(String user) {
-        if (Utils.stringNotNullOrEmpty(user))
-            mUser = user;
-    }
-
-    public void setAccessToken(String accessToken){
-        if ( Utils.stringNotNullOrEmpty(accessToken))
-            mAccessToken = accessToken;
-    }
-
-    public String getAccessToken() {
-        return mAccessToken;
-    }
-
-    /**
-     * Method used to check if a used is logged in the app
-     * @return true if a user is logged. Otherwise, return false
-     */
-    public boolean isLogged(){
-        return true || Utils.stringNotNullOrEmpty(mAccessToken);
-    }
-
-    /**
-     * Get the current user logged
-     * @return username of current user logged.
-     */
-    public String getUser(){
-        return "jvanz"; //mUser;
+    public static boolean isLogged(Context context) {
+        Cursor cursor = context.getContentResolver().query(ReadditContract.User.CONTENT_URI, new String[]{ ReadditContract.User.COLUMN_CURRENT}, ReadditContract.User.COLUMN_CURRENT + "=?", new String[]{"1"}, null);
+        try {
+            return cursor.moveToFirst();
+        } finally {
+            cursor.close();
+        }
     }
 }

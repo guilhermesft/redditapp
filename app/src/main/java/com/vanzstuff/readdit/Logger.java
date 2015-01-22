@@ -29,8 +29,17 @@ public final class Logger {
     /**
      * Print error log message
      * @param msg mesage to print
+     * @param error error threw
+     */
+    public static void e(String msg, Throwable error) {
+        Log.e(TAG, msg, error);
+    }
+
+    /**
+     * Print error log message
+     * @param msg mesage to print
      */
     public static void e(String msg) {
-        Log.e(TAG, msg);
+        Logger.e(msg, null);
     }
 }
