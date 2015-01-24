@@ -19,7 +19,7 @@ public class CommentReplyRequest extends BaseRedditApiJsonRequest {
     public static final String PARAM_UH = "uh";
     public static final String DEFAULT_API_TYPE = "json";
 
-    public CommentReplyRequest(Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, Map<String, Object> params) {
-        super(Method.POST, "api/comment", null, listener, errorListener, params);
+    public CommentReplyRequest(Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, Map<String, Object> params, String accessToken) {
+        super(Method.POST, "api/comment", null, listener, errorListener, params, accessToken);
     }
 }

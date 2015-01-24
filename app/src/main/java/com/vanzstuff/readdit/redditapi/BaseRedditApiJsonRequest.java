@@ -5,7 +5,6 @@ import android.net.Uri;
 import com.android.volley.AuthFailureError;
 import com.android.volley.Response;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.vanzstuff.readdit.Utils;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -14,33 +13,34 @@ import org.json.JSONObject;
 
 /**
  * Base class for Reddit API requests
- * Created by vanz on 18/11/14.
  */
 public class BaseRedditApiJsonRequest extends JsonObjectRequest {
 
     protected static final String DEFAULT_BASE_URL = "https://oauth.reddit.com";
     protected static final String HEADER_AUTHORIZATION = "Authorization";
     private Map<String, String> mParams;
+    private String mAccessToken;
 
-    public BaseRedditApiJsonRequest(int method, String path, JSONObject jsonRequest, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
-        this(method, DEFAULT_BASE_URL,  path, jsonRequest, listener, errorListener, null);
+    public BaseRedditApiJsonRequest(int method, String path, JSONObject jsonRequest, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, String accessToken) {
+        this(method, DEFAULT_BASE_URL,  path, jsonRequest, listener, errorListener, null, accessToken);
     }
 
-    public BaseRedditApiJsonRequest(int method, String baseUrl,  String path, JSONObject jsonRequest, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, Map<String, Object> params) {
+    public BaseRedditApiJsonRequest(int method, String baseUrl,  String path, JSONObject jsonRequest, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, Map<String, Object> params, String accessToken) {
         super(method, Uri.parse(baseUrl).buildUpon().appendPath(path).build().toString(), jsonRequest, listener, errorListener);
-        mParams = Utils.parserParamsToString(params);
+        mParams = RedditApiUtils.parserParamsToString(params);
+        mAccessToken = accessToken;
     }
 
-    public BaseRedditApiJsonRequest(String path, JSONObject jsonRequest, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
-        this(path, jsonRequest, listener, errorListener, null);
+    public BaseRedditApiJsonRequest(String path, JSONObject jsonRequest, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, String accessToken) {
+        this(path, jsonRequest, listener, errorListener, null, accessToken);
     }
 
-    public BaseRedditApiJsonRequest(String path, JSONObject jsonRequest, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, Map<String, Object> params) {
-        this(jsonRequest == null ? Method.GET : Method.POST, DEFAULT_BASE_URL, path, jsonRequest, listener, errorListener, params);
+    public BaseRedditApiJsonRequest(String path, JSONObject jsonRequest, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, Map<String, Object> params, String accessToken) {
+        this(jsonRequest == null ? Method.GET : Method.POST, DEFAULT_BASE_URL, path, jsonRequest, listener, errorListener, params, accessToken);
     }
 
-    public BaseRedditApiJsonRequest(int method, String path, JSONObject jsonRequest, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, Map<String, Object> params) {
-        this(method, DEFAULT_BASE_URL, path, jsonRequest, listener, errorListener, params);
+    public BaseRedditApiJsonRequest(int method, String path, JSONObject jsonRequest, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, Map<String, Object> params, String accessToken) {
+        this(method, DEFAULT_BASE_URL, path, jsonRequest, listener, errorListener, params, accessToken);
     }
 
     @Override
@@ -77,9 +77,8 @@ public class BaseRedditApiJsonRequest extends JsonObjectRequest {
 
     @Override
     public Map<String, String> getHeaders() throws AuthFailureError {
-        HashMap<String, String> params = new HashMap<String, String>();
-        //TODO - Where should retrieve the access token?
-        params.put(HEADER_AUTHORIZATION, "bearer " +  Utils.getAccessToken());
-        return params;
+        Map<String, String> headers = new HashMap(1);
+        headers.put(HEADER_AUTHORIZATION, "bearer " + mAccessToken);
+        return headers;
     }
 }

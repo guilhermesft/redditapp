@@ -32,7 +32,7 @@ public class SubmitRequest extends BaseRedditApiJsonRequest {
     public static final String THEN_TB = "tb";
     public static final String THEN_COMMENTS = "comments";
 
-    public SubmitRequest(Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, Map<String, Object> params) {
-        super(Method.POST, "api/submit", null, listener, errorListener, params);
+    public SubmitRequest(Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, Map<String, Object> params, String accessToken) {
+        super(Method.POST, "api/submit", null, listener, errorListener, params, accessToken);
     }
 }

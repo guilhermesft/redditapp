@@ -13,10 +13,12 @@
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme">
         <provider
             android:name="com.vanzstuff.readdit.data.RedditDataProvider"
-            android:authorities="com.vanzstuff.readdit.provider" />
+            android:authorities="@string/content_authority"
+            android:syncable="true"
+            android:exported="false"/>
 
         <activity
             android:name="com.vanzstuff.readdit.activities.MainActivity"
@@ -39,33 +41,27 @@
         <activity android:name="com.vanzstuff.readdit.activities.OAuthActivity"
             android:parentActivityName="com.vanzstuff.readdit.activities.MainActivity"/>
 
-<!--             Services -->
-        <service android:name="com.vanzstuff.readdit.sync.ReaditAuthenticatorService" >
+        <service
+            android:name="com.vanzstuff.readdit.sync.AutheticatorService">
             <intent-filter>
-                <action android:name="android.accounts.AccountAuthenticator" />
+                <action android:name="android.accounts.AccountAuthenticator"/>
             </intent-filter>
-
             <meta-data
                 android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/authenticator" />
         </service>
-        <service
-            android:name="com.vanzstuff.readdit.sync.RedditSyncService"
-            android:exported="false"
-            android:process=":sync" >
-            <intent-filter>
-                <action android:name="android.content.SyncAdapter" />
-            </intent-filter>
 
-            <meta-data
-                android:name="android.content.SyncAdapter"
+        <service
+            android:name="com.vanzstuff.readdit.sync.SyncService"
+            android:exported="true"
+            android:process=":sync">
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter"/>
+            </intent-filter>
+            <meta-data android:name="android.content.SyncAdapter"
                 android:resource="@xml/syncadapter" />
         </service>
 
-        <activity
-            android:name="com.vanzstuff.readdit.activities.RegistrationActivity"
-            android:label="@string/title_activity_registration" >
-        </activity>
     </application>
 
 </manifest>

@@ -25,10 +25,18 @@ public class VolleyWrapper {
      * @param ctx
      * @return
      */
-    public static VolleyWrapper getInstance(Context ctx){
+    static VolleyWrapper getInstance(Context ctx){
         if( mInstance == null ){
             mInstance = new VolleyWrapper(ctx);
         }
+        return mInstance;
+    }
+
+    /**
+     * Get the VolleyWrapper instance
+     * @return
+     */
+    public static VolleyWrapper getInstance(){
         return mInstance;
     }
 
@@ -60,6 +68,10 @@ public class VolleyWrapper {
      * @see com.android.volley.toolbox.ImageLoader
      */
     public ImageLoader getImageLoader(){ return mImageLoader; }
+
+    public void cancel(Object tag) {
+        mVolleyRequestQueue.cancelAll(tag);
+    }
 
     /**
      *  com.android.volley.toolbox.ImageLoader.ImageCache implementation to use with com.android.volley.toolbox.ImageLoader

@@ -9,7 +9,6 @@ import java.util.Map;
 /**
  * Request to vote on a thing
  * http://www.reddit.com/dev/api#POST_api_vote
- * Created by vanz on 21/11/14.
  */
 public class VoteRequest extends BaseRedditApiJsonRequest {
 
@@ -20,8 +19,8 @@ public class VoteRequest extends BaseRedditApiJsonRequest {
     public static final int VOTE_NONE = 0;
     public static final int VOTE_DOWN = -1;
 
-    public VoteRequest(Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, Map<String, Object> params) {
-        super(Method.POST, "api/vote" , null, listener, errorListener, params);
+    public VoteRequest(Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, Map<String, Object> params, String accessToken) {
+        super(Method.POST, "api/vote" , null, listener, errorListener, params, accessToken);
     }
 }
 

@@ -45,4 +45,8 @@ public class VolleyError extends Exception {
         super(cause);
         networkResponse = null;
     }
+
+    public NetworkResponse getNetworkResponse() {
+        return networkResponse;
+    }
 }

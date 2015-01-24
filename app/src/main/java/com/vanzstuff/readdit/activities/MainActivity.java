@@ -1,8 +1,14 @@
 package com.vanzstuff.readdit.activities;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.FragmentActivity;
@@ -18,11 +24,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.vanzstuff.readdit.Logger;
+import com.vanzstuff.readdit.PredefinedTags;
 import com.vanzstuff.readdit.User;
 import com.vanzstuff.readdit.UserSession;
+import com.vanzstuff.readdit.data.DatabaseContentObserver;
 import com.vanzstuff.readdit.data.ReadditContract;
 import com.vanzstuff.readdit.data.TagsLoader;
-import com.vanzstuff.readdit.data.UserContentObserver;
 import com.vanzstuff.readdit.fragments.AboutFragment;
 import com.vanzstuff.readdit.fragments.DetailFragment;
 import com.vanzstuff.readdit.fragments.FeedsFragment;
@@ -41,7 +48,7 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
     private Button mFriends;
     private Button mMessages;
     private Button mAbout;
-    private ContentObserver mUserContentObserver;
+    private ContentObserver mDatabaseObserver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,8 +98,56 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
         mAbout.setOnClickListener(this);
         findViewById(R.id.drawer_profile_container).setOnClickListener(this);
         getActionBar().setHomeButtonEnabled(true);
-        mUserContentObserver = new UserContentObserver(new Handler(this));
+        mDatabaseObserver = new DatabaseContentObserver(getApplicationContext(), new Handler(this));
+        getContentResolver().registerContentObserver(ReadditContract.User.CONTENT_URI, false, mDatabaseObserver);
+        // Pass the settings flags by inserting them in a bundle
+        Bundle settingsBundle = new Bundle();
+        settingsBundle.putBoolean(
+                ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        settingsBundle.putBoolean(
+                ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+        /*
+         * Request the sync for the default account, authority, and
+         * manual sync settings
+         */
+        ContentResolver.requestSync(createSyncAccount(this), getString(R.string.content_authority), settingsBundle);
     }
+
+    /**
+     * Create a new dummy account for the sync adapter
+     *
+     * @param context The application context
+     */
+    public Account createSyncAccount(Context context) {
+        // Create the account type and default account
+        Account newAccount = new Account(
+                "vanz", context.getString(R.string.sync_account_type));
+        // Get an instance of the Android account manager
+        AccountManager accountManager =
+                (AccountManager) context.getSystemService(
+                        ACCOUNT_SERVICE);
+        /*
+         * Add the account and account type, no password or user data
+         * If successful, return the Account object, otherwise report an error.
+         */
+        if (accountManager.addAccountExplicitly(newAccount, "", null)) {
+            /*
+             * If you don't set android:syncable="true" in
+             * in your <provider> element in the manifest,
+             * then call context.setIsSyncable(account, AUTHORITY, 1)
+             * here.
+             */
+           context.getContentResolver().setIsSyncable(newAccount, getString(R.string.content_authority), 1);
+            return newAccount;
+        } else {
+            /*
+             * The account exists or some other error occurred. Log this, report it,
+             * or handle it internally.
+             */
+            return null;
+        }
+    }
+
 
     @Override
     protected void onResume() {
@@ -100,7 +155,6 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
         User user = UserSession.getUser(this);
         if ( user != null )
             ((TextView)findViewById(R.id.drawer_username)).setText(user.name);
-        getContentResolver().registerContentObserver(ReadditContract.User.CONTENT_URI, false, mUserContentObserver);
     }
 
     @Override
@@ -108,12 +162,6 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
         if (mDrawerToggle.onOptionsItemSelected(item))
             return true;
         return false;
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        getContentResolver().unregisterContentObserver(mUserContentObserver);
     }
 
     @Override

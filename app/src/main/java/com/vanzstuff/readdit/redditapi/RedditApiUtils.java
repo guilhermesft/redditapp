@@ -1,10 +1,14 @@
 package com.vanzstuff.readdit.redditapi;
 
+import android.content.ContentValues;
 import android.net.Uri;
+
+import org.json.JSONObject;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 public class RedditApiUtils {
 
@@ -33,6 +37,13 @@ public class RedditApiUtils {
     public static final String AUTHORIZATION_RESPONSE_EXPIRES_in = "expires_in";
     public static final String AUTHORIZATION_RESPONSE_STATE = "state";
     public static final String AUTHORIZATION_RESPONSE_ERROR = "error";
+    public static final String FULLNAME_PREFIX_COMMENT = "t1_";
+    public static final String FULLNAME_PREFIX_ACCOUNT = "t2_";
+    public static final String FULLNAME_PREFIX_LINK = "t3_";
+    public static final String FULLNAME_PREFIX_MESSAGE = "t4_";
+    public static final String FULLNAME_PREFIX_SUBREDDIT = "t5_";
+    public static final String FULLNAME_PREFIX_AWARD = "t6_";
+    public static final String FULLNAME_PREFIX_PROMOCAMPAIGN = "t7_";
 
     private static final String sClientId = "7KxduDMf4c8Sig";
 
@@ -77,7 +88,8 @@ public class RedditApiUtils {
     }
 
     public static Uri generateAuthorizationUri( String state, String ... scopes ){
-        return Uri.parse("https://www.reddit.com/api/v1/authorize").buildUpon().appendQueryParameter("client_id", sClientId)
+        return Uri.parse("https://www.reddit.com/api/v1/authorize").buildUpon()
+                .appendQueryParameter("client_id", sClientId)
                 .appendQueryParameter("response_type", "token")
                 .appendQueryParameter("state", state)
                 .appendQueryParameter("redirect_uri", REDIRECT_URI)

@@ -19,8 +19,8 @@ public class SubscribeRequest extends BaseRedditApiJsonRequest {
     public static final String ACTION_SUBSCRIBE = "sub";
     public static final String ACTION_UNSUBSCRIBE = "usub";
 
-    public SubscribeRequest(Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, Map<String, Object> params) {
-        super(Method.POST, "api/subscribe", null, listener, errorListener, params);
+    public SubscribeRequest(Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, Map<String, Object> params, String accessToken) {
+        super(Method.POST, "api/subscribe", null, listener, errorListener, params, accessToken);
     }
 
 }

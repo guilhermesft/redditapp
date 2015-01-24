@@ -9,7 +9,6 @@ import java.util.Map;
 /**
  * Request to save a link or comment
  * http://www.reddit.com/dev/api#POST_api_save
- * Created by vanz on 21/11/14.
  */
 public class SaveRequest extends BaseRedditApiJsonRequest {
 
@@ -17,8 +16,8 @@ public class SaveRequest extends BaseRedditApiJsonRequest {
     public static final String PARAM_ID = "id";
     public static final String PARAM_UH = "uh";
 
-    public SaveRequest(Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, Map<String, Object> params) {
-        super(Method.POST, "api/save" , null, listener, errorListener, params);
+    public SaveRequest(Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, Map<String, Object> params, String accessToken) {
+        super(Method.POST, "api/save" , null, listener, errorListener, params, accessToken);
     }
 
 }

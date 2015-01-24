@@ -51,7 +51,22 @@ public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
         final String CREATE_USER = "CREATE TABLE " + ReadditContract.User.TABLE_NAME + " ( " +
                 ReadditContract.User._ID + " INTEGER PRIMARY KEY, " +
                 ReadditContract.User.COLUMN_NAME + " TEXT NOT NULL , " +
-                ReadditContract.User.COLUMN_CURRENT + " INTEGER DEFAULT 0 UNIQUE , " +
+                ReadditContract.User.COLUMN_CURRENT + " INTEGER DEFAULT 0 , " +
+                ReadditContract.User.COLUMN_IS_FRIEND + " INTEGER DEFAULT 0 , " +
+                ReadditContract.User.COLUMN_GOLD_CREDDITS + " INTEGER DEFAULT 0 , " +
+                ReadditContract.User.COLUMN_MODHASH + " TEXT DEFAULT 0 , " +
+                ReadditContract.User.COLUMN_HAS_VERIFIED_EMAIL + " INTEGER DEFAULT 0 , " +
+                ReadditContract.User.COLUMN_CREATED_UTC + " INTEGER DEFAULT 0 , " +
+                ReadditContract.User.COLUMN_HIDE_FROM_ROBOTS + " INTEGER DEFAULT 0 , " +
+                ReadditContract.User.COLUMN_COMMENT_KARMA + " INTEGER DEFAULT 0 , " +
+                ReadditContract.User.COLUMN_OVER_18 + " INTEGER DEFAULT 0 , " +
+                ReadditContract.User.COLUMN_GOLD_EXPIRATION + " INTEGER DEFAULT 0 , " +
+                ReadditContract.User.COLUMN_CREATED + " INTEGER DEFAULT 0 , " +
+                ReadditContract.User.COLUMN_IS_GOLD + " INTEGER DEFAULT 0 , " +
+                ReadditContract.User.COLUMN_IS_MOD + " INTEGER DEFAULT 0 , " +
+                ReadditContract.User.COLUMN_LINK_KARMA + " INTEGER DEFAULT 0 , " +
+                ReadditContract.User.COLUMN_ID + " TEXT UNIQUE , " +
+                ReadditContract.User.COLUMN_SYNC_STATUS + " INTEGER DEFAULT 0 , " +
                 ReadditContract.User.COLUMN_ACCESSTOKEN + " TEXT );";
 
         db.execSQL(CREATE_USER);

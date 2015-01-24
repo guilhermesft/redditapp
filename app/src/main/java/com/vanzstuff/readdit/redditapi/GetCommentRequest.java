@@ -1,18 +1,16 @@
 package com.vanzstuff.readdit.redditapi;
 
-import android.util.ArrayMap;
-
 import com.android.volley.Response;
 import com.vanzstuff.readdit.Utils;
 
 import org.json.JSONObject;
 
 import java.util.Map;
+import java.util.HashMap;
 
 /**
  * Request to retrieve the comment tree for a given article
  * http://www.reddit.com/dev/api#GET_comments_{article}
- * Created by vanz on 24/11/14.
  */
 public class GetCommentRequest extends BaseRedditApiJsonRequest {
 
@@ -30,8 +28,8 @@ public class GetCommentRequest extends BaseRedditApiJsonRequest {
     public static final String PARAM_SORT_OLD = "old";
     public static final String PARAM_SORT_RANDOM = "random";
 
-    public static GetCommentRequest newInstance(String subreddit, String article, String ID36Article, String ID36comment, int context, int depth, int limit, String sortOrder,  Response.Listener<JSONObject> listener, Response.ErrorListener errorListener){
-        Map<String,Object> params = new ArrayMap<String, Object>();
+    public static GetCommentRequest newInstance(String subreddit, String article, String ID36Article, String ID36comment, int context, int depth, int limit, String sortOrder, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, String accessToken){
+        Map<String,Object> params = new HashMap<String, Object>();
         if(Utils.stringNotNullOrEmpty(ID36Article))
             params.put(PARAM_ARTICLE, ID36Article);
         if(Utils.stringNotNullOrEmpty(ID36comment))
@@ -55,10 +53,10 @@ public class GetCommentRequest extends BaseRedditApiJsonRequest {
             if(validSort)
                 params.put(PARAM_SORT, sortOrder);
         }
-        return new GetCommentRequest("r/" + subreddit + "/comments/" + article, listener, errorListener, params );
+        return new GetCommentRequest("r/" + subreddit + "/comments/" + article, listener, errorListener, params, accessToken);
     }
 
-    protected GetCommentRequest(String path, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, Map<String, Object> params) {
-        super(Method.GET, path, null, listener, errorListener, params);
+    protected GetCommentRequest(String path, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, Map<String, Object> params, String accessToken) {
+        super(Method.GET, path, null, listener, errorListener, params, accessToken);
     }
 }

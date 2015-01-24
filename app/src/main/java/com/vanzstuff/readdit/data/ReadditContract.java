@@ -288,12 +288,73 @@ public class ReadditContract {
          * The curent user's access token
          * Type: string
          */
-        public static final String COLUMN_ACCESSTOKEN = "user";
+        public static final String COLUMN_ACCESSTOKEN = "access_token";
         /**
          * Flag idicate if the user is the current user
          * Type: boolean
          */
         public static final String COLUMN_CURRENT = "current";
+        /**
+         * Type: boolean
+         */
+        public static final String COLUMN_IS_FRIEND = "is_friend";
+        /**
+         * Type:
+         */
+        public static final String COLUMN_GOLD_EXPIRATION = "gold_expiration";
+        /**
+         * Type: text
+         */
+        public static final String COLUMN_MODHASH = "modhash";
+        /**
+         * Type: boolean
+         */
+        public static final String COLUMN_HAS_VERIFIED_EMAIL = "has_verified_email";
+        /**
+         * Type: integer
+         */
+        public static final String COLUMN_CREATED_UTC = "created_utc";
+        /**
+         * Type: boolean
+         */
+        public static final String COLUMN_HIDE_FROM_ROBOTS = "hide_from_robots";
+        /**
+         * Type: integer
+         */
+        public static final String COLUMN_COMMENT_KARMA = "comment_karma";
+        /**
+         * Type: boolean
+         */
+        public static final String COLUMN_OVER_18 = "over_18";
+        /**
+         * Type: integer
+         */
+        public static final String COLUMN_GOLD_CREDDITS = "gold_creddits";
+        /**
+         * Type: integer
+         */
+        public static final String COLUMN_CREATED = "created";
+        /**
+         * Type: boolean
+         */
+        public static final String COLUMN_IS_GOLD = "is_gold";
+        /**
+         * Type: boolean
+         */
+        public static final String COLUMN_IS_MOD = "is_mod";
+        /**
+         * Type: integer
+         */
+        public static final String COLUMN_LINK_KARMA = "link_karma";
+        /**
+         * Type: text
+         */
+        public static final String COLUMN_ID = "id";
+        /**
+         * Type: integer
+         */
+        public static final String COLUMN_SYNC_STATUS = "sync_status";
+
 
 
         public static Uri buildUserUri(long id){
@@ -306,9 +367,7 @@ public class ReadditContract {
          * @return -1 if could not retrieve the the id. Otherwise, return the id
          */
         public static long getUserId(Uri uri){
-            if ( uri.getPathSegments().size() == 2)
-                return Long.parseLong(uri.getPathSegments().get(1));
-            return -1l;
+            return ContentUris.parseId(uri);
         }
     }
 }

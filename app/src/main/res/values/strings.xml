@@ -30,5 +30,6 @@
     <string name="about_content">App developmented to the course android development</string>
     <string name="need_login">Hey! Who are you? You need to login</string>
     <string name="sync_account_type">com.vanzstuff.readdit.account</string>
+    <string name="content_authority">com.vanzstuff.readdit.provider</string>
 
 </resources>

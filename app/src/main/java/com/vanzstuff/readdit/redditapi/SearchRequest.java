@@ -15,8 +15,8 @@ public class SearchRequest extends BaseRedditApiJsonRequest implements Listing {
 
     public static final String PARAM_QUERY = "q";
 
-    public SearchRequest(Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, Map<String, Object> params) {
-        super(Method.GET, "subreddits/search", null, listener, errorListener, params);
+    public SearchRequest(Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, Map<String, Object> params, String accessToken) {
+        super(Method.GET, "subreddits/search", null, listener, errorListener, params, accessToken);
     }
 
 }
