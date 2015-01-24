@@ -1,8 +1,10 @@
 package com.vanzstuff.readdit.sync;
 
 import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SyncResult;
@@ -15,10 +17,9 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
 import com.android.volley.toolbox.Volley;
 import com.vanzstuff.readdit.Logger;
-import com.vanzstuff.readdit.User;
 import com.vanzstuff.readdit.data.ReadditContract;
 import com.vanzstuff.readdit.redditapi.AboutRequest;
-import com.vanzstuff.readdit.redditapi.MySubredditRequest;
+import com.vanzstuff.redditapp.R;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -55,7 +56,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         syncUser(provider);
     }
 
+    /**
+     * Sync info about users
+     * @param provider provider to access database
+     */
     private void syncUser(ContentProviderClient provider){
+        Logger.w("### syncUser ###");
         Cursor cursor = null;
         try {
             cursor = provider.query(ReadditContract.User.CONTENT_URI, new String[] {
@@ -111,5 +117,41 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             if ( cursor != null)
                 cursor.close();
         }
+    }
+
+    public static void syncNow(Context context){
+        Bundle bundle = new Bundle(1);
+        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        context.getContentResolver().requestSync(SyncAdapter.getSyncAccount(context), context.getString(R.string.content_authority), bundle);
+    }
+
+    /**
+     * Create a new dummy account for the sync adapter
+     *
+     * @param context The application context
+     */
+    private static Account getSyncAccount(Context context) {
+        // Get an instance of the Android account manager
+        AccountManager accountManager = (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
+        // Create the account type and default account
+        Account newAccount = new Account(context.getString(R.string.app_name), context.getString(R.string.sync_account_type));
+        // If the password doesn't exist, the account doesn't exist
+        if ( null == accountManager.getPassword(newAccount) ) {
+        /*
+         * Add the account and account type, no password or user data
+         * If successful, return the Account object, otherwise report an error.
+         */
+            if (!accountManager.addAccountExplicitly(newAccount, "", null)) {
+                return null;
+            }
+            /*
+             * If you don't set android:syncable="true" in
+             * in your <provider> element in the manifest,
+             * then call ContentResolver.setIsSyncable(account, AUTHORITY, 1)
+             * here.
+             */
+        }
+        return newAccount;
     }
 }

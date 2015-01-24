@@ -109,6 +109,8 @@ public class OAuthActivity extends FragmentActivity implements Response.ErrorLis
             Logger.d(response.toString());
             if ( response.has( "name") ) {
                 ContentValues content = new ContentValues();
+                content.put(ReadditContract.User.COLUMN_CURRENT, 0);
+                getContentResolver().update(ReadditContract.User.CONTENT_URI, content, null, null);
                 if ( isUserAlreadyRegister(response.getString("name")) ){
                     //if the user is already register make he/she the current user
                     content.put(ReadditContract.User.COLUMN_CURRENT, 1);

@@ -98,56 +98,9 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
         mAbout.setOnClickListener(this);
         findViewById(R.id.drawer_profile_container).setOnClickListener(this);
         getActionBar().setHomeButtonEnabled(true);
-        mDatabaseObserver = new DatabaseContentObserver(getApplicationContext(), new Handler(this));
+        mDatabaseObserver = new DatabaseContentObserver(this, new Handler(this));
         getContentResolver().registerContentObserver(ReadditContract.User.CONTENT_URI, false, mDatabaseObserver);
-        // Pass the settings flags by inserting them in a bundle
-        Bundle settingsBundle = new Bundle();
-        settingsBundle.putBoolean(
-                ContentResolver.SYNC_EXTRAS_MANUAL, true);
-        settingsBundle.putBoolean(
-                ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
-        /*
-         * Request the sync for the default account, authority, and
-         * manual sync settings
-         */
-        ContentResolver.requestSync(createSyncAccount(this), getString(R.string.content_authority), settingsBundle);
     }
-
-    /**
-     * Create a new dummy account for the sync adapter
-     *
-     * @param context The application context
-     */
-    public Account createSyncAccount(Context context) {
-        // Create the account type and default account
-        Account newAccount = new Account(
-                "vanz", context.getString(R.string.sync_account_type));
-        // Get an instance of the Android account manager
-        AccountManager accountManager =
-                (AccountManager) context.getSystemService(
-                        ACCOUNT_SERVICE);
-        /*
-         * Add the account and account type, no password or user data
-         * If successful, return the Account object, otherwise report an error.
-         */
-        if (accountManager.addAccountExplicitly(newAccount, "", null)) {
-            /*
-             * If you don't set android:syncable="true" in
-             * in your <provider> element in the manifest,
-             * then call context.setIsSyncable(account, AUTHORITY, 1)
-             * here.
-             */
-           context.getContentResolver().setIsSyncable(newAccount, getString(R.string.content_authority), 1);
-            return newAccount;
-        } else {
-            /*
-             * The account exists or some other error occurred. Log this, report it,
-             * or handle it internally.
-             */
-            return null;
-        }
-    }
-
 
     @Override
     protected void onResume() {
