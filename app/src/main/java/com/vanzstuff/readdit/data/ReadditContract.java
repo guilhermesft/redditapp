@@ -228,8 +228,164 @@ public class ReadditContract {
         }
 
         public static final String TABLE_NAME = "subreddit";
-        public static final String COLUMN_NAME = "subreddit";
-        public static final String COLUMN_LAST = "last";
+        /**
+         * number of users active in last 15 minutes
+         * Type: integer
+         */
+        public static final String COLUMN_ACCOUNTS_ACTIVE = "accounts_active";
+        /**
+         * number of minutes the subreddit initially hides comment scores
+         * Type: integer
+         */
+        public static final String COLUMN_COMMENT_SCORE_HIDE_MINS= "comment_score_hide_mins";
+        /**
+         * sidebar text
+         * Type: text
+         */
+        public static final String COLUMN_DESCRIPTION = "description";
+        /**
+         * sidebar text, escaped HTML format
+         * Type: text
+         */
+        public static final String COLUMN_DESCRIPTION_HTML = "description_html";
+        /**
+         * human name of the subreddit
+         * Type: text
+         */
+        public static final String COLUMN_DISPLAY_NAME = "display_name";
+        /**
+         * full URL to the header image
+         * Type: text
+         */
+        public static final String COLUMN_HEADER_IMG = "header_img";
+        /**
+         * width of the header image
+         * Type: integer
+         */
+        public static final String COLUMN_HEADER_WIDTH = "header_width";
+        /**
+         * height of the header image
+         * Type: integer
+         */
+        public static final String COLUMN_HEADER_HEIGHT = "header_height";
+        /**
+         * description of header image shown on hover
+         * Type: text
+         */
+        public static final String COLUMN_HEADER_TITLE = "header_title";
+        /**
+         * is_nsfw?
+         * Type: integer
+         */
+        public static final String COLUMN_OVER18 = "over18";
+        /**
+         * Description shown in subreddit search results?
+         * Type: text
+         */
+        public static final String COLUMN_PUBLIC_DESCRIPTION = "public_description";
+        /**
+         * whether the subreddit's traffic page is publicly-accessible
+         * Type: integer
+         */
+        public static final String COLUMN_PUBLIC_TRAFFIC = "public_traffic";
+        /**
+         * the number of redditors subscribed to this subreddit
+         * Type: integer
+         */
+        public static final String COLUMN_SUBSCRIBERS = "subscribers";
+        /**
+         * the type of submissions the subreddit allows - one of "any", "link" or "self"
+         * Type: text
+         */
+        public static final String COLUMN_SUBMISSION_TYPE = "submission_type";
+        /**
+         * the subreddit's custom label for the submit link button, if any
+         * Type: text
+         */
+        public static final String COLUMN_SUBMIT_LINK_LABEL = "submit_link_label";
+        /**
+         * the subreddit's custom label for the submit text button, if any
+         * Type: text
+         */
+        public static final String COLUMN_SUBMIT_TEXT_LABEL = "submit_text_label";
+        /**
+         * the subreddit's type - one of "public", "private", "restricted", or in very special cases "gold_restricted" or "archived"
+         * Type: text
+         */
+        public static final String COLUMN_SUBREDDIT_TYPE = "subreddit_type";
+        /**
+         * title of the main page
+         * Type: text
+         */
+        public static final String COLUMN_TITLE = "title";
+        /**
+         * The relative URL of the subreddit. Ex: "/r/pics/"
+         * Type: text
+         */
+        public static final String COLUMN_URL = "url";
+        /**
+         * whether the logged-in user is banned from the subreddit
+         * Type: integer
+         */
+        public static final String COLUMN_USER_IS_BANNED= "user_is_banned";
+        /**
+         * whether the logged-in user is an approved submitter in the subreddit
+         * Type: integer
+         */
+        public static final String COLUMN_USER_IS_CONTRIBUTOR = "user_is_contributor";
+        /**
+         * whether the logged-in user is a moderator of the subreddit
+         * Type: interger
+         */
+        public static final String COLUMN_USER_IS_MODERATOR = "user_is_moderator";
+        /**
+         * whether the logged-in user is subscribed to the subreddit
+         * Type: integer
+         */
+        public static final String COLUMN_USER_IS_SUBSCRIBER = "user_is_subscriber";
+        /**
+         * Type: text
+         */
+        public static final String COLUMN_SUBMIT_TEXT_HTML = "submit_text_html";
+        /**
+         * Type: text
+         */
+        public static final String COLUMN_ID = "id";
+        /**
+         * Type: text
+         */
+        public static final String COLUMN_SUBMIT_TEXT = "submit_text";
+        /**
+         * Type: integer
+         */
+        public static final String COLUMN_COLLAPSE_DELETED_COMMENTS = "collapse_deleted_comments";
+        /**
+         * Type: text
+         */
+        public static final String COLUMN_PUBLIC_DESCRIPTION_HTML = "public_description_html";
+        /**
+         * Type: text
+         */
+        public static final String COLUMN_NAME = "name";
+        /**
+         * Type: integer
+         */
+        public static final String COLUMN_CREATED = "created";
+        /**
+         * Type: integer
+         */
+        public static final String COLUMN_CREATED_UTC = "created_utc";
+        /**
+         * user subscribed in the subreddit
+         * Type: integer
+         */
+        public static final String COLUMN_USER = "user";
+        /**
+         * synchronization status
+         * Type: integer
+         */
+        public static final String COLUMN_SYNC_STATUS = "sync_status";
+
     }
 
     /**
@@ -280,7 +436,10 @@ public class ReadditContract {
         public static final String CONTENT_TYPE = MULTIPLE_ITEM_MIMETYPE + CONTENT_AUTHORITY + "/" + PATH_USER;
         public static final String TABLE_NAME = "user";
         /**
-         * User name
+         * The username of the account in question.
+         * This attribute overrides the superclass's name attribute. Do not confuse an account's name which is
+         * the account's username with a thing's name which is the thing's FULLNAME.
+         * See API: Glossary for details on what FULLNAMEs are
          * Type: string
          */
         public static final String COLUMN_NAME = "name";
@@ -295,7 +454,8 @@ public class ReadditContract {
          */
         public static final String COLUMN_CURRENT = "current";
         /**
-         * Type: boolean
+         * whether the logged-in user has this user set as a friend
+         * Type: integer
          */
         public static final String COLUMN_IS_FRIEND = "is_friend";
         /**
@@ -303,11 +463,13 @@ public class ReadditContract {
          */
         public static final String COLUMN_GOLD_EXPIRATION = "gold_expiration";
         /**
+         * current modhash. not present if not your account
          * Type: text
          */
         public static final String COLUMN_MODHASH = "modhash";
         /**
-         * Type: boolean
+         * user has provided an email address and got it verified?
+         * Type: integer
          */
         public static final String COLUMN_HAS_VERIFIED_EMAIL = "has_verified_email";
         /**
@@ -319,11 +481,13 @@ public class ReadditContract {
          */
         public static final String COLUMN_HIDE_FROM_ROBOTS = "hide_from_robots";
         /**
+         * user's comment karma
          * Type: integer
          */
         public static final String COLUMN_COMMENT_KARMA = "comment_karma";
         /**
-         * Type: boolean
+         * whether this account is set to be over 18
+         * Type: integer
          */
         public static final String COLUMN_OVER_18 = "over_18";
         /**
@@ -335,21 +499,35 @@ public class ReadditContract {
          */
         public static final String COLUMN_CREATED = "created";
         /**
-         * Type: boolean
+         * reddit gold status
+         * Type: integer
          */
         public static final String COLUMN_IS_GOLD = "is_gold";
         /**
-         * Type: boolean
+         * whether this account moderates any subreddits
+         * Type: integer
          */
         public static final String COLUMN_IS_MOD = "is_mod";
         /**
+         * user's link karma
          * Type: integer
          */
         public static final String COLUMN_LINK_KARMA = "link_karma";
         /**
+         * ID of the account; prepend t2_ to get fullname
          * Type: text
          */
         public static final String COLUMN_ID = "id";
+        /**
+         * user has unread mail? null if not your account
+         * Type: integer
+         */
+        public static final String COLUMN_HAS_MAIL = "has_mail";
+        /**
+         * user has unread mod mail? null if not your account
+         * Type: integer
+         */
+        public static final String COLUMN_HAS_MOD_MAIL = "has_mod_mail";
         /**
          * Type: integer
          */

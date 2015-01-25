@@ -64,7 +64,7 @@ public class RedditApiUtils {
                     StringBuilder listParam = new StringBuilder();
                     for( Object obj : (Object[]) objParams.get(key)){
                         if ( obj instanceof String)
-                            listParam.append((String)obj);
+                            listParam.append(((String) obj).isEmpty()? "\"\"": obj);
                         else
                             listParam.append(String.valueOf(obj));
                         listParam.append(",");

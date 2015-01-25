@@ -42,4 +42,8 @@ public final class Logger {
     public static void e(String msg) {
         Logger.e(msg, null);
     }
+
+    public static void i(String msg) {
+        Log.i(TAG, msg);
+    }
 }

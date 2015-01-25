@@ -41,8 +41,39 @@ public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
                 ReadditContract.Comment.COLUMN_POST + " INTEGER REFERENCES " + ReadditContract.Post.TABLE_NAME + " ( " + ReadditContract.Post._ID + " ));";
         final String CREATE_SUBSCRIBE = "CREATE TABLE " + ReadditContract.Subreddit.TABLE_NAME + " ( " +
                 ReadditContract.Subreddit._ID + " INTEGER PRIMARY KEY, " +
-                ReadditContract.Subreddit.COLUMN_LAST + " INTEGER NOT NULL DEFAULT 0, " +
-                ReadditContract.Subreddit.COLUMN_NAME + " TEXT NOT NULL );";
+                ReadditContract.Subreddit.COLUMN_SYNC_STATUS + " INTEGER DEFAULT 0, " +
+                ReadditContract.Subreddit.COLUMN_ACCOUNTS_ACTIVE + " INTEGER DEFAULT 0, " +
+                ReadditContract.Subreddit.COLUMN_COMMENT_SCORE_HIDE_MINS + " INTEGER DEFAULT 0, " +
+                ReadditContract.Subreddit.COLUMN_DESCRIPTION + " TEXT, " +
+                ReadditContract.Subreddit.COLUMN_DESCRIPTION_HTML + " TEXT, " +
+                ReadditContract.Subreddit.COLUMN_DISPLAY_NAME + " TEXT, " +
+                ReadditContract.Subreddit.COLUMN_HEADER_IMG + " TEXT, " +
+                ReadditContract.Subreddit.COLUMN_HEADER_WIDTH + " INTEGER, " +
+                ReadditContract.Subreddit.COLUMN_HEADER_HEIGHT + " INTEGER, " +
+                ReadditContract.Subreddit.COLUMN_HEADER_TITLE + " TEXT, " +
+                ReadditContract.Subreddit.COLUMN_OVER18 + " INTEGER DEFAULT 0, " +
+                ReadditContract.Subreddit.COLUMN_PUBLIC_DESCRIPTION + " TEXT, " +
+                ReadditContract.Subreddit.COLUMN_PUBLIC_TRAFFIC + " INTEGER, " +
+                ReadditContract.Subreddit.COLUMN_SUBSCRIBERS + " INTEGER, " +
+                ReadditContract.Subreddit.COLUMN_SUBMISSION_TYPE + " TEXT, " +
+                ReadditContract.Subreddit.COLUMN_SUBMIT_LINK_LABEL + " TEXT, " +
+                ReadditContract.Subreddit.COLUMN_SUBMIT_TEXT_LABEL + " TEXT, " +
+                ReadditContract.Subreddit.COLUMN_SUBREDDIT_TYPE + " TEXT, " +
+                ReadditContract.Subreddit.COLUMN_TITLE + " TEXT, " +
+                ReadditContract.Subreddit.COLUMN_URL + " TEXT, " +
+                ReadditContract.Subreddit.COLUMN_USER_IS_BANNED + " INTEGER DEFAULT 0, " +
+                ReadditContract.Subreddit.COLUMN_USER_IS_CONTRIBUTOR + " INTEGER DEFAULT 0, " +
+                ReadditContract.Subreddit.COLUMN_USER_IS_MODERATOR + " INTEGER DEFAULT 0, " +
+                ReadditContract.Subreddit.COLUMN_USER_IS_SUBSCRIBER + " INTEGER DEFAULT 0," +
+                ReadditContract.Subreddit.COLUMN_SUBMIT_TEXT_HTML + " TEXT," +
+                ReadditContract.Subreddit.COLUMN_ID + " TEXT," +
+                ReadditContract.Subreddit.COLUMN_SUBMIT_TEXT + " TEXT," +
+                ReadditContract.Subreddit.COLUMN_COLLAPSE_DELETED_COMMENTS + " INTEGER DEFAULT 0," +
+                ReadditContract.Subreddit.COLUMN_PUBLIC_DESCRIPTION_HTML + " TEXT," +
+                ReadditContract.Subreddit.COLUMN_NAME + " TEXT," +
+                ReadditContract.Subreddit.COLUMN_CREATED + " INTEGER," +
+                ReadditContract.Subreddit.COLUMN_CREATED_UTC + " INTEGER," +
+                ReadditContract.Subreddit.COLUMN_USER + " INTEGER REFERENCES " + ReadditContract.User.TABLE_NAME + "(" + ReadditContract.User._ID + "));";
         final String CREATE_VOTE = "CREATE TABLE " + ReadditContract.Vote.TABLE_NAME + " ( " +
                 ReadditContract.Vote._ID + " INTEGER PRIMARY KEY, " +
                 ReadditContract.Vote.COLUMN_USER + " TEXT NOT NULL , " +
@@ -66,6 +97,8 @@ public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
                 ReadditContract.User.COLUMN_IS_MOD + " INTEGER DEFAULT 0 , " +
                 ReadditContract.User.COLUMN_LINK_KARMA + " INTEGER DEFAULT 0 , " +
                 ReadditContract.User.COLUMN_ID + " TEXT UNIQUE , " +
+                ReadditContract.User.COLUMN_HAS_MAIL + " INTEGER , " +
+                ReadditContract.User.COLUMN_HAS_MOD_MAIL + " INTEGER , " +
                 ReadditContract.User.COLUMN_SYNC_STATUS + " INTEGER DEFAULT 0 , " +
                 ReadditContract.User.COLUMN_ACCESSTOKEN + " TEXT );";
 
