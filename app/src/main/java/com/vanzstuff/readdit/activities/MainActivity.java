@@ -1,14 +1,8 @@
 package com.vanzstuff.readdit.activities;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
-import android.content.ContentResolver;
-import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.FragmentActivity;
@@ -24,7 +18,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.vanzstuff.readdit.Logger;
-import com.vanzstuff.readdit.PredefinedTags;
 import com.vanzstuff.readdit.User;
 import com.vanzstuff.readdit.UserSession;
 import com.vanzstuff.readdit.data.DatabaseContentObserver;
@@ -57,7 +50,7 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
         if (findViewById(R.id.detail_fragment_container) != null )
             mIsTwoPanelLayout = true;
         getSupportFragmentManager().beginTransaction()
-                .add(R.id.feeds_fragment_container, FeedsFragment.newInstance(ReadditContract.Post.CONTENT_URI))
+                .add(R.id.feeds_fragment_container, FeedsFragment.newInstance(ReadditContract.Link.CONTENT_URI))
                 .commit();
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -139,7 +132,7 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.feeds_fragment_container, FeedsFragment.newInstance(ReadditContract.Post.buildPostByTagIdUri(id)))
+                .replace(R.id.feeds_fragment_container, FeedsFragment.newInstance(ReadditContract.Link.buildLinkByTagIdUri(id)))
                 .addToBackStack(null)
                 .commit();
     }

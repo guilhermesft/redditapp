@@ -18,19 +18,48 @@ public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
         final String CREATE_TAG = "CREATE TABLE " + ReadditContract.Tag.TABLE_NAME + " ( " +
                 ReadditContract.Tag._ID + " INTEGER PRIMARY KEY, " +
                 ReadditContract.Tag.COLUMN_NAME + " TEXT UNIQUE NOT NULL );";
-        final String CREATE_POST = "CREATE TABLE " + ReadditContract.Post.TABLE_NAME + " ( " +
-                ReadditContract.Post._ID + " INTEGER PRIMARY KEY, " +
-                ReadditContract.Post.COLUMN_TITLE + " TEXT NOT NULL, " +
-                ReadditContract.Post.COLUMN_CONTENT + " TEXT NOT NULL, " +
-                ReadditContract.Post.COLUMN_DATE + " INTEGER NOT NULL, " +
-                ReadditContract.Post.COLUMN_SUBREDDIT + " TEXT NOT NULL, " +
-                ReadditContract.Post.COLUMN_USER +  " TEXT NOT NULL, " +
-                ReadditContract.Post.COLUMN_VOTES + " INTEGER DEFAULT 0, " +
-                ReadditContract.Post.COLUMN_CONTENT_TYPE + " TEXT NOT NULL, " +
-                ReadditContract.Post.COLUMN_THREADS + " INTEGER DEFAULT 0);";
+        final String CREATE_LINK = "CREATE TABLE " + ReadditContract.Link.TABLE_NAME + " ( " +
+                ReadditContract.Link._ID + " INTEGER PRIMARY KEY, " +
+                ReadditContract.Link.COLUMN_AUTHOR + " TEXT, " +
+                ReadditContract.Link.COLUMN_AUTHOR_FLAIR_CSS_CLASS + " TEXT, " +
+                ReadditContract.Link.COLUMN_AUTHOR_FLAIR_TEXT + " TEXT, " +
+                ReadditContract.Link.COLUMN_CLICKED + " INTEGER, " +
+                ReadditContract.Link.COLUMN_DOMAIN + " TEXT, " +
+                ReadditContract.Link.COLUMN_HIDDEN + " INTEGER, " +
+                ReadditContract.Link.COLUMN_IS_SELF + " INTEGER, " +
+                ReadditContract.Link.COLUMN_LINK_FLAIR_CSS_CLASS + " TEXT, " +
+                ReadditContract.Link.COLUMN_LINK_FLAIR_TEXT + " TEXT, " +
+                ReadditContract.Link.COLUMN_MEDIA + " TEXT, " + //TODO
+                ReadditContract.Link.COLUMN_MEDIA_EMBED + " TEXT, " + //TODO
+                ReadditContract.Link.COLUMN_NUM_COMMENTS + " INTEGER, " +
+                ReadditContract.Link.COLUMN_OVER_18 + " INTEGER, " +
+                ReadditContract.Link.COLUMN_PERMALINK + " TEXT, " +
+                ReadditContract.Link.COLUMN_SAVED + " INTEGER, " +
+                ReadditContract.Link.COLUMN_SCORE + " INTEGER, " +
+                ReadditContract.Link.COLUMN_SELFTEXT + " TEXT, " +
+                ReadditContract.Link.COLUMN_SELFTEXT_HTML + " TEXT, " +
+                ReadditContract.Link.COLUMN_SUBREDDIT + " TEXT, " +
+                ReadditContract.Link.COLUMN_SUBREDDIT_ID + " TEXT, " +
+                ReadditContract.Link.COLUMN_THUMBNAIL + " TEXT, " +
+                ReadditContract.Link.COLUMN_TITLE + " TEXT, " +
+                ReadditContract.Link.COLUMN_URL + " TEXT, " +
+                ReadditContract.Link.COLUMN_EDITED + " INTEGER, " +
+                ReadditContract.Link.COLUMN_DISTINGUISHED + " TEXT, " +
+                ReadditContract.Link.COLUMN_STICKIED + " INTEGER, " +
+                ReadditContract.Link.COLUMN_CREATED + " INTEGER, " +
+                ReadditContract.Link.COLUMN_CREATED_UTC + " INTEGER, " +
+                ReadditContract.Link.COLUMN_UPS + " INTEGER, " +
+                ReadditContract.Link.COLUMN_DOWNS + " INTEGER, " +
+                ReadditContract.Link.COLUMN_BANNED_BY + " TEXT, " +
+                ReadditContract.Link.COLUMN_ID + " TEXT, " +
+                ReadditContract.Link.COLUMN_APPROVED_BY + " TEXT, " +
+                ReadditContract.Link.COLUMN_NAME + " TEXT, " +
+                ReadditContract.Link.COLUMN_VISITED + " INTEGER, " +
+                ReadditContract.Link.COLUMN_GILDED + " INTEGER, " +
+                ReadditContract.Link.COLUMN_LIKES + " INTEGER);";
         final String CREATE_TAG_X_POST = "CREATE TABLE " + ReadditContract.TagXPost.TABLE_NAME + " ( " +
                 ReadditContract.TagXPost.COLUMN_TAG + " INTEGER REFERENCES " + ReadditContract.Tag.TABLE_NAME + "( " + ReadditContract.Tag._ID + ") , " +
-                ReadditContract.TagXPost.COLUMN_POST + " INTEGER REFERENCES " + ReadditContract.Post.TABLE_NAME + "( " + ReadditContract.Post._ID + "), " +
+                ReadditContract.TagXPost.COLUMN_POST + " INTEGER REFERENCES " + ReadditContract.Link.TABLE_NAME + "( " + ReadditContract.Link._ID + "), " +
                 "PRIMARY KEY ( " + ReadditContract.TagXPost.COLUMN_TAG + ", " + ReadditContract.TagXPost.COLUMN_POST + " ));";
         final String CREATE_COMMENT = "CREATE TABLE " + ReadditContract.Comment.TABLE_NAME + " ( " +
                 ReadditContract.Comment._ID + " INTEGER PRIMARY KEY," +
@@ -38,7 +67,7 @@ public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
                 ReadditContract.Comment.COLUMN_CONTENT + " TEXT NOT NULL," +
                 ReadditContract.Comment.COLUMN_DATE + " INTEGER NOT NULL, " +
                 ReadditContract.Comment.COLUMN_USER + " TEXT NOT NULL, " +
-                ReadditContract.Comment.COLUMN_POST + " INTEGER REFERENCES " + ReadditContract.Post.TABLE_NAME + " ( " + ReadditContract.Post._ID + " ));";
+                ReadditContract.Comment.COLUMN_POST + " INTEGER REFERENCES " + ReadditContract.Link.TABLE_NAME + " ( " + ReadditContract.Link._ID + " ));";
         final String CREATE_SUBSCRIBE = "CREATE TABLE " + ReadditContract.Subreddit.TABLE_NAME + " ( " +
                 ReadditContract.Subreddit._ID + " INTEGER PRIMARY KEY, " +
                 ReadditContract.Subreddit.COLUMN_SYNC_STATUS + " INTEGER DEFAULT 0, " +
@@ -77,7 +106,7 @@ public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
         final String CREATE_VOTE = "CREATE TABLE " + ReadditContract.Vote.TABLE_NAME + " ( " +
                 ReadditContract.Vote._ID + " INTEGER PRIMARY KEY, " +
                 ReadditContract.Vote.COLUMN_USER + " TEXT NOT NULL , " +
-                ReadditContract.Vote.COLUMN_POST + " INTEGER REFERENCES " + ReadditContract.Post.TABLE_NAME + "( " + ReadditContract.Post._ID + ") , " +
+                ReadditContract.Vote.COLUMN_POST + " INTEGER REFERENCES " + ReadditContract.Link.TABLE_NAME + "( " + ReadditContract.Link._ID + ") , " +
                 ReadditContract.Vote.COLUMN_DIRECTION + " INTEGER NOT NULL DEFAULT 0 );";
         final String CREATE_USER = "CREATE TABLE " + ReadditContract.User.TABLE_NAME + " ( " +
                 ReadditContract.User._ID + " INTEGER PRIMARY KEY, " +
@@ -104,7 +133,7 @@ public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
 
         db.execSQL(CREATE_USER);
         db.execSQL(CREATE_TAG);
-        db.execSQL(CREATE_POST);
+        db.execSQL(CREATE_LINK);
         db.execSQL(CREATE_TAG_X_POST);
         db.execSQL(CREATE_COMMENT);
         db.execSQL(CREATE_SUBSCRIBE);

@@ -21,7 +21,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.vanzstuff.readdit.CommentListAdapter;
-import com.vanzstuff.readdit.Logger;
 import com.vanzstuff.readdit.PredefinedTags;
 import com.vanzstuff.readdit.User;
 import com.vanzstuff.readdit.UserSession;
@@ -75,10 +74,9 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
         mPostID = getArguments().getLong(ARG_POST_ID, -1);
         Cursor cursor = null;
         try {
-            cursor = getActivity().getContentResolver().query(ReadditContract.Post.CONTENT_URI,
-                    new String[]{ ReadditContract.Post.COLUMN_CONTENT_TYPE,
-                            ReadditContract.Post.COLUMN_CONTENT},
-                    ReadditContract.Post._ID + " = ?",
+            //TODO - review
+            cursor = getActivity().getContentResolver().query(ReadditContract.Link.CONTENT_URI, null,
+                    ReadditContract.Link._ID + " = ?",
                     new String[]{String.valueOf(String.valueOf(mPostID))},
                     null);
             if (cursor.moveToFirst()) {
@@ -134,10 +132,10 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
                 Toast.makeText(getActivity(), getString(R.string.need_login), Toast.LENGTH_LONG).show();
         }else if ( v.getId() == R.id.action_menu_save){
             //add the tag saved to the post
-            getActivity().getContentResolver().insert(ReadditContract.Post.buildAddTagUri(mPostID, PredefinedTags.SAVED.getName()), null);
+            getActivity().getContentResolver().insert(ReadditContract.Link.buildAddTagUri(mPostID, PredefinedTags.SAVED.getName()), null);
         }else if ( v.getId() == R.id.action_menu_hide){
             //add the tag hidden to the post
-            getActivity().getContentResolver().insert(ReadditContract.Post.buildAddTagUri(mPostID, PredefinedTags.HIDDEN.getName()), null);
+            getActivity().getContentResolver().insert(ReadditContract.Link.buildAddTagUri(mPostID, PredefinedTags.HIDDEN.getName()), null);
         }else if ( v.getId() == R.id.action_menu_label){
             InputTagFragment.newInstance(mPostID).show(getActivity().getSupportFragmentManager(), "InputTagFragment");
         }

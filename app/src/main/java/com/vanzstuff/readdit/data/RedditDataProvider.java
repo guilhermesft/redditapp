@@ -1,21 +1,15 @@
 package com.vanzstuff.readdit.data;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.content.ContentProvider;
-import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
-import android.os.Bundle;
 
 import com.vanzstuff.readdit.Utils;
-import com.vanzstuff.redditapp.R;
 
 /**
  * ContentProvider manages the app data
@@ -45,8 +39,8 @@ public class RedditDataProvider extends ContentProvider {
 
     static {
         sPostByTagQueryBuilder = new SQLiteQueryBuilder();
-        sPostByTagQueryBuilder.setTables(ReadditContract.Post.TABLE_NAME + " LEFT OUTER JOIN " + ReadditContract.TagXPost.TABLE_NAME + " ON (" +
-                ReadditContract.TagXPost.TABLE_NAME + "." + ReadditContract.TagXPost.COLUMN_POST + " = " + ReadditContract.Post.TABLE_NAME + "." + ReadditContract.Post._ID + ")");
+        sPostByTagQueryBuilder.setTables(ReadditContract.Link.TABLE_NAME + " LEFT OUTER JOIN " + ReadditContract.TagXPost.TABLE_NAME + " ON (" +
+                ReadditContract.TagXPost.TABLE_NAME + "." + ReadditContract.TagXPost.COLUMN_POST + " = " + ReadditContract.Link.TABLE_NAME + "." + ReadditContract.Link._ID + ")");
         sTagId = new SQLiteQueryBuilder();
         sTagId.setTables(ReadditContract.Tag.TABLE_NAME);
     }
@@ -58,11 +52,11 @@ public class RedditDataProvider extends ContentProvider {
     private static UriMatcher buildUriMatcher() {
         final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_TAG,  TAG);
-        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_POST,  POST);
-        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_POST_BY_TAG + "/*",  POST_BY_TAG);
-        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_POST_BY_TAGID + "/#",  POST_BY_TAGID);
-        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_ADD_TAG_TO_POST + "/#/#",  ADD_TAG_TO_POST);
-        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_ADD_TAG_NAME_TO_POST + "/#/*",  ADD_TAG_NAME_TO_POST);
+        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_LINK,  POST);
+        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_LINK_BY_TAG + "/*",  POST_BY_TAG);
+        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_LINK_BY_TAGID + "/#",  POST_BY_TAGID);
+        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_ADD_TAG_TO_LINK + "/#/#",  ADD_TAG_TO_POST);
+        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_ADD_TAG_NAME_TO_LINK + "/#/*",  ADD_TAG_NAME_TO_POST);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_COMMENT,  COMMENT);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_USER,  USER);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_SUBREDDIT, SUBREDDIT);
@@ -103,7 +97,7 @@ public class RedditDataProvider extends ContentProvider {
                 break;
             }
             case POST:{
-                cursor = db.query(ReadditContract.Post.TABLE_NAME,
+                cursor = db.query(ReadditContract.Link.TABLE_NAME,
                         projection,
                         selection,
                         selectionArgs,
@@ -140,7 +134,7 @@ public class RedditDataProvider extends ContentProvider {
                 cursor = sPostByTagQueryBuilder.query(mOpenHelper.getReadableDatabase(),
                             projection,
                             sWherePostByTag,
-                            new String[]{ReadditContract.Post.getTagIdFromUri(uri)},
+                            new String[]{ReadditContract.Link.getTagIdFromUri(uri)},
                             null,
                             null,
                             sortOrder);
@@ -171,7 +165,7 @@ public class RedditDataProvider extends ContentProvider {
      * @return
      */
     private Cursor getPostByTag(Uri uri, String[] projection, String sortOrder) {
-        String tag = ReadditContract.Post.getTagIdFromUri(uri);
+        String tag = ReadditContract.Link.getTagIdFromUri(uri);
         if (Utils.stringNotNullOrEmpty(tag)){
             Cursor cursor = query(ReadditContract.Tag.CONTENT_URI, new String[]{ReadditContract.Tag._ID}, sWhereTagId, new String[]{tag}, null);
             if (cursor.moveToFirst()){
@@ -198,13 +192,13 @@ public class RedditDataProvider extends ContentProvider {
             case USER:
                 return ReadditContract.User.CONTENT_TYPE;
             case POST:
-                return ReadditContract.Post.CONTENT_TYPE;
+                return ReadditContract.Link.CONTENT_TYPE;
             case COMMENT:
                 return ReadditContract.Comment.CONTENT_TYPE;
             case SUBREDDIT:
                 return ReadditContract.Subreddit.CONTENT_TYPE;
             case POST_BY_TAG:
-                return ReadditContract.Post.CONTENT_TYPE_POST_BY_TAG;
+                return ReadditContract.Link.CONTENT_TYPE_POST_BY_TAG;
             case VOTE:
                 return ReadditContract.Vote.CONTENT_TYPE;
             default:
@@ -236,9 +230,9 @@ public class RedditDataProvider extends ContentProvider {
                     break;
                 }
             case POST:{
-                long id = db.insertOrThrow(ReadditContract.Post.TABLE_NAME, null, values);
+                long id = db.insertOrThrow(ReadditContract.Link.TABLE_NAME, null, values);
                 if (id > 0)
-                    returnUri = ReadditContract.Post.buildPostUri(id);
+                    returnUri = ReadditContract.Link.buildPostUri(id);
                 else
                     throw new android.database.SQLException("Failed to insert row into " + uri);
                 break;
@@ -288,23 +282,23 @@ public class RedditDataProvider extends ContentProvider {
         Cursor cursor = query(ReadditContract.Tag.CONTENT_URI,
                 new String[]{ReadditContract.Tag._ID},
                 ReadditContract.Tag.COLUMN_NAME + " = ?",
-                new String[]{ReadditContract.Post.getTagFromUri(uri)},
+                new String[]{ReadditContract.Link.getTagFromUri(uri)},
                 null);
         if ( cursor.moveToFirst() ){
             //tag already exists.
-            Uri ret = insert(ReadditContract.Post.buildAddTagUri(
-                    Long.parseLong(ReadditContract.Post.getTagNameFromUri(uri)[0]), cursor.getLong(0)), null);
+            Uri ret = insert(ReadditContract.Link.buildAddTagUri(
+                    Long.parseLong(ReadditContract.Link.getTagNameFromUri(uri)[0]), cursor.getLong(0)), null);
             cursor.close();
             return ret;
         } else {
             //tag is not exists
             ContentValues insertValues = new ContentValues();
-            insertValues.put(ReadditContract.Tag.COLUMN_NAME, ReadditContract.Post.getTagFromUri(uri));
+            insertValues.put(ReadditContract.Tag.COLUMN_NAME, ReadditContract.Link.getTagFromUri(uri));
             Uri retUri = insert(ReadditContract.Tag.CONTENT_URI, insertValues);
             long tagId = ReadditContract.Tag.getTagId(retUri);
             if ( tagId > 0) {
-                return insert(ReadditContract.Post.buildAddTagUri(
-                        Long.parseLong(ReadditContract.Post.getTagNameFromUri(uri)[0]), tagId), null);
+                return insert(ReadditContract.Link.buildAddTagUri(
+                        Long.parseLong(ReadditContract.Link.getTagNameFromUri(uri)[0]), tagId), null);
             }
         }
         cursor.close();
@@ -318,14 +312,14 @@ public class RedditDataProvider extends ContentProvider {
      * @return the return Uri with the post id altered
      */
     private Uri insertTagToPost(SQLiteDatabase db, Uri uri) {
-        long[] uriValues = ReadditContract.Post.getTagIdAndPostIdFromUri(uri);
+        long[] uriValues = ReadditContract.Link.getTagIdAndLinkIdFromUri(uri);
         ContentValues insertValues = new ContentValues();
         insertValues.put(ReadditContract.TagXPost.COLUMN_POST, uriValues[0]);
         insertValues.put(ReadditContract.TagXPost.COLUMN_TAG, uriValues[1]);
         long id = db.insertOrThrow(ReadditContract.TagXPost.TABLE_NAME, null, insertValues);
         Uri returnUri;
         if (id > 0)
-            returnUri = ReadditContract.Post.buildPostUri(uriValues[0]); //TODO - Maybe is good idea create a custom Uri
+            returnUri = ReadditContract.Link.buildPostUri(uriValues[0]); //TODO - Maybe is good idea create a custom Uri
         else
             throw new android.database.SQLException("Failed to insert row into " + uri);
         //notify the cursor
@@ -336,8 +330,8 @@ public class RedditDataProvider extends ContentProvider {
                 new String[]{String.valueOf(uriValues[1])},
                 null);
         if (tagCursor.moveToFirst()) {
-            getContext().getContentResolver().notifyChange(ReadditContract.Post.buildPostByTagUri(tagCursor.getString(1)), null);
-            getContext().getContentResolver().notifyChange(ReadditContract.Post.buildPostByTagIdUri(tagCursor.getLong(0)), null);
+            getContext().getContentResolver().notifyChange(ReadditContract.Link.buildLinkByTagUri(tagCursor.getString(1)), null);
+            getContext().getContentResolver().notifyChange(ReadditContract.Link.buildLinkByTagIdUri(tagCursor.getLong(0)), null);
         }
         tagCursor.close();
         return returnUri;
@@ -354,7 +348,7 @@ public class RedditDataProvider extends ContentProvider {
                 break;
             }
             case POST:{
-                rowsDeleted = db.delete(ReadditContract.Post.TABLE_NAME, selection, selectionArgs);
+                rowsDeleted = db.delete(ReadditContract.Link.TABLE_NAME, selection, selectionArgs);
                 break;
             }
             case COMMENT:{
@@ -391,7 +385,7 @@ public class RedditDataProvider extends ContentProvider {
                 break;
             }
             case POST:{
-                rowsUpdated = db.update(ReadditContract.Post.TABLE_NAME, values, selection, selectionArgs );
+                rowsUpdated = db.update(ReadditContract.Link.TABLE_NAME, values, selection, selectionArgs );
                 break;
             }
             case COMMENT:{
@@ -424,7 +418,7 @@ public class RedditDataProvider extends ContentProvider {
                 db.beginTransaction();
                 try{
                     for( ContentValues value : values ){
-                        long id = db.insertOrThrow(ReadditContract.Post.TABLE_NAME, null, value);
+                        long id = db.insertOrThrow(ReadditContract.Link.TABLE_NAME, null, value);
                         if ( id != -1 )
                             returnCount++;
                     }

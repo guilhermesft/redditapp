@@ -5,6 +5,7 @@ import android.net.Uri;
 import com.android.volley.AuthFailureError;
 import com.android.volley.Response;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.vanzstuff.readdit.Logger;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -58,6 +59,7 @@ public class BaseRedditApiJsonRequest extends JsonObjectRequest {
             }
             url = uriBuilder.build().toString();
         }
+        Logger.d(url);
         return url;
     }
 

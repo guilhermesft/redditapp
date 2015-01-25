@@ -68,7 +68,7 @@ public class InputTagFragment extends DialogFragment implements View.OnClickList
             for ( String tag : tags){
                 if ( Utils.isAlphaNumeric(tag)) {
                     //everything ok. Let's store in the database
-                    getActivity().getContentResolver().insert(ReadditContract.Post.buildAddTagUri(post, tag), null);
+                    getActivity().getContentResolver().insert(ReadditContract.Link.buildAddTagUri(post, tag), null);
                 } else {
                     //notify the user about the invalid tag and ignore it
                     Toast.makeText(getActivity(), "Tag " + tag + " invalid. The tag allows only letters and numbers", Toast.LENGTH_LONG ).show();

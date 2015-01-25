@@ -11,7 +11,6 @@ import android.content.SyncResult;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.util.Log;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.VolleyError;
@@ -20,6 +19,7 @@ import com.android.volley.toolbox.Volley;
 import com.vanzstuff.readdit.Logger;
 import com.vanzstuff.readdit.data.ReadditContract;
 import com.vanzstuff.readdit.redditapi.AboutRequest;
+import com.vanzstuff.readdit.redditapi.GetLinkSorted;
 import com.vanzstuff.readdit.redditapi.MySubredditRequest;
 import com.vanzstuff.redditapp.R;
 
@@ -58,17 +58,102 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         Logger.w("### SYNC ADAPTER ###");
         syncUser(provider);
         syncSubreddit(provider);
+        syncLinks(provider);
+    }
+
+    private void syncLinks(ContentProviderClient provider) {
+        Logger.i("### syncLinks ###");
+        Cursor cursor = null;
+        try {
+            cursor = provider.query(ReadditContract.User.CONTENT_URI, new String[]{ReadditContract.User.COLUMN_ACCESSTOKEN}, null, null, null);
+            while (cursor.move(1)) {
+                Cursor subredditCursor = null;
+                try {
+                    subredditCursor = provider.query(ReadditContract.Subreddit.CONTENT_URI, null, null, null, null);
+                    while (subredditCursor.move(1)) {
+                        String subreddit = subredditCursor.getString(subredditCursor.getColumnIndex(ReadditContract.Subreddit.COLUMN_DISPLAY_NAME));
+                        RequestFuture<JSONObject> future = RequestFuture.newFuture();
+                        mVolleyQueue.add(GetLinkSorted.newInstance(GetLinkSorted.PATH_TOP, subreddit, GetLinkSorted.T_ALL, null, null, -1, 50, cursor.getString(0), future, future));
+                        JSONObject result = future.get();
+                        Logger.d(result.toString());
+                        ContentValues[] linksValues = loadLinks(result);
+                        provider.bulkInsert(ReadditContract.Link.CONTENT_URI, linksValues);
+                        //TODO - update link that is already in the database
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } finally {
+                    if (subredditCursor != null)
+                        subredditCursor.close();
+                }
+            }
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } finally {
+            if ( cursor != null){
+                cursor.close();
+            }
+        }
+    }
+
+    private ContentValues[] loadLinks(JSONObject result) throws JSONException {
+        JSONArray links = result.getJSONObject("data").getJSONArray("children");
+        ContentValues[] values = new ContentValues[links.length()];
+        for (int i = 0; i < links.length(); i++) {
+            //TODO - check the fields user_reports, report_reasons, mod_reports, num_reports, media_embed, media,  secure_media_embed and secure_media
+            values[i] = new ContentValues();
+            JSONObject link = links.getJSONObject(i).getJSONObject("data");
+            values[i].put(ReadditContract.Link.COLUMN_DOMAIN, link.getString("domain"));
+            values[i].put(ReadditContract.Link.COLUMN_BANNED_BY, link.getString("banned_by"));
+            values[i].put(ReadditContract.Link.COLUMN_SUBREDDIT, link.getString("subreddit"));
+            values[i].put(ReadditContract.Link.COLUMN_SELFTEXT_HTML, link.getString("selftext_html"));
+            values[i].put(ReadditContract.Link.COLUMN_SELFTEXT, link.getString("selftext"));
+            values[i].put(ReadditContract.Link.COLUMN_LIKES, link.optBoolean("likes"));
+            values[i].put(ReadditContract.Link.COLUMN_LINK_FLAIR_TEXT, link.optString("link_flair_text"));
+            values[i].put(ReadditContract.Link.COLUMN_ID, link.getString("id"));
+            values[i].put(ReadditContract.Link.COLUMN_GILDED, link.getInt("gilded"));
+            values[i].put(ReadditContract.Link.COLUMN_CLICKED, link.getBoolean("clicked"));
+            values[i].put(ReadditContract.Link.COLUMN_AUTHOR, link.optString("author"));
+            values[i].put(ReadditContract.Link.COLUMN_SCORE, link.getInt("score"));
+            values[i].put(ReadditContract.Link.COLUMN_APPROVED_BY, link.optString("approved_by"));
+            values[i].put(ReadditContract.Link.COLUMN_OVER_18, link.getBoolean("over_18"));
+            values[i].put(ReadditContract.Link.COLUMN_HIDDEN, link.getBoolean("hidden"));
+            values[i].put(ReadditContract.Link.COLUMN_NUM_COMMENTS, link.getInt("num_comments"));
+            values[i].put(ReadditContract.Link.COLUMN_THUMBNAIL, link.getString("thumbnail"));
+            values[i].put(ReadditContract.Link.COLUMN_SUBREDDIT_ID, link.getString("subreddit_id"));
+            values[i].put(ReadditContract.Link.COLUMN_EDITED, link.optInt("edited"));
+            values[i].put(ReadditContract.Link.COLUMN_LINK_FLAIR_CSS_CLASS, link.optString("link_flair_css_class"));
+            values[i].put(ReadditContract.Link.COLUMN_AUTHOR_FLAIR_CSS_CLASS, link.optString("author_flair_css_class"));
+            values[i].put(ReadditContract.Link.COLUMN_DOWNS, link.getInt("downs"));
+            values[i].put(ReadditContract.Link.COLUMN_SAVED, link.getBoolean("saved"));
+            values[i].put(ReadditContract.Link.COLUMN_STICKIED, link.getBoolean("stickied"));
+            values[i].put(ReadditContract.Link.COLUMN_IS_SELF, link.getBoolean("is_self"));
+            values[i].put(ReadditContract.Link.COLUMN_PERMALINK, link.getString("permalink"));
+            values[i].put(ReadditContract.Link.COLUMN_NAME, link.getString("name"));
+            values[i].put(ReadditContract.Link.COLUMN_CREATED, link.getInt("created"));
+            values[i].put(ReadditContract.Link.COLUMN_URL, link.getString("url"));
+            values[i].put(ReadditContract.Link.COLUMN_AUTHOR_FLAIR_TEXT, link.optString("author_flair_text"));
+            values[i].put(ReadditContract.Link.COLUMN_TITLE, link.getString("title"));
+            values[i].put(ReadditContract.Link.COLUMN_CREATED_UTC, link.getInt("created_utc"));
+            values[i].put(ReadditContract.Link.COLUMN_DISTINGUISHED, link.getString("distinguished"));
+            values[i].put(ReadditContract.Link.COLUMN_VISITED, link.getBoolean("visited"));
+            values[i].put(ReadditContract.Link.COLUMN_UPS, link.getInt("ups"));
+        }
+        return values;
     }
 
     private void syncSubreddit(ContentProviderClient provider) {
-        Logger.w("### syncSubreddit ###");
+        Logger.i("### syncSubreddit ###");
         Cursor cursor = null;
         try {
             cursor = provider.query(ReadditContract.User.CONTENT_URI, new String[]{ ReadditContract.User.COLUMN_ACCESSTOKEN}, null, null, null);
             while (cursor.move(1)) {
                 RequestFuture<JSONObject> future = RequestFuture.newFuture();
-                MySubredditRequest request = MySubredditRequest.newInstance(MySubredditRequest.PATH_SUBSCRIBER, null, null, -1, 50, future, future, cursor.getString(0));
-                mVolleyQueue.add(request);
+                mVolleyQueue.add(MySubredditRequest.newInstance(MySubredditRequest.PATH_SUBSCRIBER, null, null, -1, 50, future, future, cursor.getString(0)));
                 JSONObject result = future.get();
                 ContentValues[] subredditsValues = loadSubreddits(result);
                 int rowsCount = provider.bulkInsert(ReadditContract.Subreddit.CONTENT_URI, subredditsValues);
@@ -141,7 +226,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
      * @param provider provider to access database
      */
     private void syncUser(ContentProviderClient provider){
-        Logger.w("### syncUser ###");
+        Logger.i("### syncUser ###");
         Cursor cursor = null;
         try {
             cursor = provider.query(ReadditContract.User.CONTENT_URI, new String[] {
@@ -155,8 +240,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 content.put(ReadditContract.User.COLUMN_SYNC_STATUS, SYNC_STATUS_RUNNING);
                 provider.update(ReadditContract.User.CONTENT_URI, content, ReadditContract.User._ID + "=?", new String[]{String.valueOf(id)});
                 RequestFuture<JSONObject> future = RequestFuture.newFuture();
-                AboutRequest request = AboutRequest.newInstance(name, future, future, accessToken);
-                mVolleyQueue.add(request);
+                mVolleyQueue.add(AboutRequest.newInstance(name, future, future, accessToken));
                 JSONObject response = future.get();
                 content = new ContentValues(15);
                 Logger.d(response.toString());

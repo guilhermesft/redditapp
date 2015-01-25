@@ -23,8 +23,7 @@ public class SubredditRequest extends BaseRedditApiJsonRequest implements Listin
         params.put(PARAM_COUNT, count <= 0 ? 0 : count);
         params.put(PARAM_LIMIT, limit);
         params.put(PARAM_SHOW, "all");
-        SubredditRequest instance = new SubredditRequest(path, listener, errorListener, params, accessToken);
-        return instance;
+        return new SubredditRequest(path, listener, errorListener, params, accessToken);
     }
 
     public SubredditRequest(String path, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, Map<String, Object> params, String accessToken) {

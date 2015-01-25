@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.vanzstuff.readdit.Logger;
 import com.vanzstuff.redditapp.R;
 
 public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> {
@@ -30,11 +29,11 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         mCursor.moveToPosition(position);
-        holder.mTxtTitle.setText(mCursor.getString(mCursor.getColumnIndex(ReadditContract.Post.COLUMN_TITLE)));
-        holder.mTxtUser.setText(mCursor.getString(mCursor.getColumnIndex(ReadditContract.Post.COLUMN_USER)));
-        holder.mTxtTime.setText(mCursor.getString(mCursor.getColumnIndex(ReadditContract.Post.COLUMN_DATE)));
-        holder.mTxtVotes.setText(mCursor.getString(mCursor.getColumnIndex(ReadditContract.Post.COLUMN_VOTES)));
-        holder.mTxtThread.setText(mCursor.getString(mCursor.getColumnIndex(ReadditContract.Post.COLUMN_THREADS)));
+        holder.mTxtTitle.setText(mCursor.getString(mCursor.getColumnIndex(ReadditContract.Link.COLUMN_TITLE)));
+        holder.mTxtUser.setText(mCursor.getString(mCursor.getColumnIndex(ReadditContract.Link.COLUMN_AUTHOR)));
+        holder.mTxtTime.setText(mCursor.getString(mCursor.getColumnIndex(ReadditContract.Link.COLUMN_CREATED)));
+        holder.mTxtVotes.setText(mCursor.getString(mCursor.getColumnIndex(ReadditContract.Link.COLUMN_UPS)));
+        holder.mTxtThread.setText(mCursor.getString(mCursor.getColumnIndex(ReadditContract.Link.COLUMN_NUM_COMMENTS)));
     }
 
     @Override
@@ -45,7 +44,7 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> 
     @Override
     public long getItemId(int position) {
         if(mCursor.moveToPosition(position))
-            return mCursor.getLong(mCursor.getColumnIndex(ReadditContract.Post._ID));
+            return mCursor.getLong(mCursor.getColumnIndex(ReadditContract.Link._ID));
         return super.getItemId(position);
     }
 

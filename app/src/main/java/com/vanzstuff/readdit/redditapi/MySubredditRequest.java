@@ -26,8 +26,7 @@ public class MySubredditRequest extends BaseRedditApiJsonRequest implements List
             params.put(PARAM_COUNT, count);
         if ( limit >= 0 )
             params.put(PARAM_LIMIT, limit);
-        MySubredditRequest instance = new MySubredditRequest(path, listener, errorListener, params, accessToken);
-        return instance;
+        return new MySubredditRequest(path, listener, errorListener, params, accessToken);
     }
 
 
