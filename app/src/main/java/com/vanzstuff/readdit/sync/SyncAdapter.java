@@ -1,4 +1,4 @@
-package com.vanzstuff.readdit.sync;
+ package com.vanzstuff.readdit.sync;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
@@ -20,6 +20,7 @@ import com.vanzstuff.readdit.Logger;
 import com.vanzstuff.readdit.data.ReadditContract;
 import com.vanzstuff.readdit.redditapi.AboutRequest;
 import com.vanzstuff.readdit.redditapi.GetLinkSorted;
+import com.vanzstuff.readdit.redditapi.GetLinks;
 import com.vanzstuff.readdit.redditapi.MySubredditRequest;
 import com.vanzstuff.redditapp.R;
 
@@ -73,7 +74,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     while (subredditCursor.move(1)) {
                         String subreddit = subredditCursor.getString(subredditCursor.getColumnIndex(ReadditContract.Subreddit.COLUMN_DISPLAY_NAME));
                         RequestFuture<JSONObject> future = RequestFuture.newFuture();
-                        mVolleyQueue.add(GetLinkSorted.newInstance(GetLinkSorted.PATH_TOP, subreddit, GetLinkSorted.T_ALL, null, null, -1, 50, cursor.getString(0), future, future));
+                        mVolleyQueue.add(GetLinks.newInstance(subreddit, null, null, -1, 50, cursor.getString(0), future, future));
                         JSONObject result = future.get();
                         Logger.d(result.toString());
                         ContentValues[] linksValues = loadLinks(result);
@@ -110,8 +111,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             values[i].put(ReadditContract.Link.COLUMN_DOMAIN, link.getString("domain"));
             values[i].put(ReadditContract.Link.COLUMN_BANNED_BY, link.getString("banned_by"));
             values[i].put(ReadditContract.Link.COLUMN_SUBREDDIT, link.getString("subreddit"));
-            values[i].put(ReadditContract.Link.COLUMN_SELFTEXT_HTML, link.getString("selftext_html"));
-            values[i].put(ReadditContract.Link.COLUMN_SELFTEXT, link.getString("selftext"));
+            values[i].put(ReadditContract.Link.COLUMN_SELFTEXT_HTML, link.optString("selftext_html"));
+            values[i].put(ReadditContract.Link.COLUMN_SELFTEXT, link.optString("selftext"));
             values[i].put(ReadditContract.Link.COLUMN_LIKES, link.optBoolean("likes"));
             values[i].put(ReadditContract.Link.COLUMN_LINK_FLAIR_TEXT, link.optString("link_flair_text"));
             values[i].put(ReadditContract.Link.COLUMN_ID, link.getString("id"));

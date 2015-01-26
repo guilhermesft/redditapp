@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.FrameLayout;
@@ -20,13 +21,20 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.toolbox.NetworkImageView;
+import com.android.volley.toolbox.Volley;
 import com.vanzstuff.readdit.CommentListAdapter;
 import com.vanzstuff.readdit.PredefinedTags;
 import com.vanzstuff.readdit.User;
 import com.vanzstuff.readdit.UserSession;
+import com.vanzstuff.readdit.Utils;
+import com.vanzstuff.readdit.VolleyWrapper;
 import com.vanzstuff.readdit.data.ReadditContract;
+import com.vanzstuff.readdit.redditapi.RedditApiUtils;
 import com.vanzstuff.readdit.redditapi.VoteRequest;
 import com.vanzstuff.redditapp.R;
+
+import java.util.UUID;
 
 /**
  * Fragment that show the detail info about some reddit post
@@ -80,21 +88,29 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
                     new String[]{String.valueOf(String.valueOf(mPostID))},
                     null);
             if (cursor.moveToFirst()) {
-                final String contentType = cursor.getString(0);
+                String selfText = cursor.getString(cursor.getColumnIndex(ReadditContract.Link.COLUMN_SELFTEXT));
+                final String url = cursor.getString(cursor.getColumnIndex(ReadditContract.Link.COLUMN_URL));
                 View contentView = null;
-                if ( contentType.equals("text/")) {
+                if (Utils.stringNotNullOrEmpty(selfText)) {
                     //is a text post
                     TextView txt = new TextView(getActivity());
-                    txt.setText(cursor.getString(1));
+                    txt.setText(selfText);
                     contentView = txt;
-                } else if( contentType.startsWith("image/")) {
-                    ImageView iv = new ImageView(getActivity());
-                    iv.setImageBitmap(BitmapFactory.decodeFile(cursor.getString(1)));
-                    contentView = iv;
-                } else if ( contentType.equals("url")){
-                    WebView wv = new WebView(getActivity());
-                    wv.loadUrl(cursor.getString(1));
-                    contentView = wv;
+                } else if ( Utils.isImageUrl(url) ){
+                    NetworkImageView networkImageView = new NetworkImageView(getActivity());
+                    networkImageView.setImageUrl(url, VolleyWrapper.getInstance().getImageLoader());
+                    contentView = networkImageView;
+                }else{
+                    WebView webView = new WebView(getActivity());
+                    webView.getSettings().setJavaScriptEnabled(true);
+                    webView.setWebViewClient(new WebViewClient(){
+                        @Override
+                        public boolean shouldOverrideUrlLoading(WebView view, String urlLoading) {
+                            return url.equals(urlLoading);
+                        }
+                    });
+                    webView.loadUrl( url );
+                    contentView = webView;
                 }
                 FrameLayout container = (FrameLayout) getView().findViewById(R.id.content_container);
                 container.addView(contentView);
