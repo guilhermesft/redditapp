@@ -1,24 +1,32 @@
 package com.vanzstuff.readdit.redditapi;
 
+import android.net.Uri;
+
+import com.android.volley.AuthFailureError;
 import com.android.volley.Response;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.vanzstuff.readdit.Logger;
 import com.vanzstuff.readdit.Utils;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.Map;
 import java.util.HashMap;
 
 /**
- * Request to retrieve the comment tree for a given article
+ * Get the comment tree for a given Link article.
  * http://www.reddit.com/dev/api#GET_comments_{article}
  */
-public class GetCommentRequest extends BaseRedditApiJsonRequest {
+public class GetCommentRequest extends JsonArrayRequest {
 
     protected static final String PARAM_ARTICLE = "article";
     protected static final String PARAM_COMMENT = "comment";
     protected static final String PARAM_CONTEXT = "context";
     protected static final String PARAM_DEPTH = "depth";
     protected static final String PARAM_LIMIT = "limit";
+    protected static final String PARAM_SHOW_EDIT = "showedits";
+    protected static final String PARAM_SHOW_MORE = "showmore";
     protected static final String PARAM_SORT = "sort";
     public static final String PARAM_SORT_CONFIDENCE = "sort";
     public static final String PARAM_SORT_TOP = "top";
@@ -28,7 +36,10 @@ public class GetCommentRequest extends BaseRedditApiJsonRequest {
     public static final String PARAM_SORT_OLD = "old";
     public static final String PARAM_SORT_RANDOM = "random";
 
-    public static GetCommentRequest newInstance(String subreddit, String article, String ID36Article, String ID36comment, int context, int depth, int limit, String sortOrder, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, String accessToken){
+    private Map<String, String> mParams;
+    private String mAccessToken;
+
+    public static GetCommentRequest newInstance(String subreddit, String article, String ID36Article, String ID36comment, int context, int depth, int limit, boolean showedit, boolean showmore, String sortOrder, Response.Listener<JSONArray> listener, Response.ErrorListener errorListener, String accessToken){
         Map<String,Object> params = new HashMap<String, Object>();
         if(Utils.stringNotNullOrEmpty(ID36Article))
             params.put(PARAM_ARTICLE, ID36Article);
@@ -40,6 +51,8 @@ public class GetCommentRequest extends BaseRedditApiJsonRequest {
             params.put(PARAM_DEPTH, depth);
         if( limit > 0)
             params.put(PARAM_LIMIT, limit);
+        params.put(PARAM_SHOW_EDIT, showedit);
+        params.put(PARAM_SHOW_MORE, showmore);
         if(Utils.stringNotNullOrEmpty(sortOrder)){
             boolean validSort = false;
             if (PARAM_SORT_CONFIDENCE.equals(sortOrder) ||
@@ -53,10 +66,32 @@ public class GetCommentRequest extends BaseRedditApiJsonRequest {
             if(validSort)
                 params.put(PARAM_SORT, sortOrder);
         }
-        return new GetCommentRequest("r/" + subreddit + "/comments/" + article, listener, errorListener, params, accessToken);
+        return new GetCommentRequest(String.format("r/%s/comments/%s", subreddit, article), listener, errorListener, params, accessToken);
     }
 
-    protected GetCommentRequest(String path, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, Map<String, Object> params, String accessToken) {
-        super(Method.GET, path, null, listener, errorListener, params, accessToken);
+    protected GetCommentRequest(String path, Response.Listener<JSONArray> listener, Response.ErrorListener errorListener, Map<String, Object> params, String accessToken) {
+        super( Uri.parse(BaseRedditApiJsonRequest.DEFAULT_BASE_URL).buildUpon().appendPath(path).build().toString(),listener, errorListener);
+        mParams = RedditApiUtils.parserParamsToString(params);
+        mAccessToken = accessToken;
+    }
+    @Override
+    public String getUrl() {
+        String url = super.getUrl();
+        if (getMethod() == Method.GET){
+            Uri.Builder uriBuilder = Uri.parse(url).buildUpon();
+            for(String key : mParams.keySet()){
+                uriBuilder.appendQueryParameter(key, mParams.get(key));
+            }
+            url = uriBuilder.build().toString();
+        }
+        Logger.d(url);
+        return url;
+    }
+
+    @Override
+    public Map<String, String> getHeaders() throws AuthFailureError {
+        Map<String, String> headers = new HashMap(1);
+        headers.put(BaseRedditApiJsonRequest.HEADER_AUTHORIZATION, "bearer " + mAccessToken);
+        return headers;
     }
 }

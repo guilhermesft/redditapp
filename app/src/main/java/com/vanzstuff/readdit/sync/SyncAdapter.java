@@ -19,9 +19,10 @@ import com.android.volley.toolbox.Volley;
 import com.vanzstuff.readdit.Logger;
 import com.vanzstuff.readdit.data.ReadditContract;
 import com.vanzstuff.readdit.redditapi.AboutRequest;
-import com.vanzstuff.readdit.redditapi.GetLinkSorted;
+import com.vanzstuff.readdit.redditapi.GetCommentRequest;
 import com.vanzstuff.readdit.redditapi.GetLinks;
 import com.vanzstuff.readdit.redditapi.MySubredditRequest;
+import com.vanzstuff.readdit.redditapi.RedditApiUtils;
 import com.vanzstuff.redditapp.R;
 
 import org.json.JSONArray;
@@ -29,10 +30,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.concurrent.ExecutionException;
+import java.util.Set;
+import java.util.HashSet;
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     private RequestQueue mVolleyQueue;
+    private String mAccessToken;
 
     /*Synchronization status for control by syncadapters*/
     public static final int SYNC_STATUS_NONE = 0x0;
@@ -42,16 +46,26 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     public SyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
-        init();
+        init(context);
     }
 
-    private void init() {
+    private void init(Context context) {
         mVolleyQueue = Volley.newRequestQueue(getContext());
+        Cursor cursor = null;
+        try{
+            cursor = context.getContentResolver().query(ReadditContract.User.CONTENT_URI, new String[]{ReadditContract.User.COLUMN_ACCESSTOKEN},
+                    ReadditContract.User.COLUMN_CURRENT + "=?", new String[]{"1"}, null);
+            if (cursor.moveToFirst())
+                mAccessToken = cursor.getString(0);
+        } finally {
+            if ( cursor != null )
+                cursor.close();
+        }
     }
 
     public SyncAdapter(Context context, boolean autoInitialize, boolean allowParallelSyncs) {
         super(context, autoInitialize, allowParallelSyncs);
-        init();
+        init(context);
     }
 
     @Override
@@ -60,39 +74,125 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         syncUser(provider);
         syncSubreddit(provider);
         syncLinks(provider);
+        syncComment(provider);
     }
 
-    private void syncLinks(ContentProviderClient provider) {
-        Logger.i("### syncLinks ###");
+    private void syncComment(ContentProviderClient provider) {
+        Logger.i("### syncComment ###");
         Cursor cursor = null;
         try {
-            cursor = provider.query(ReadditContract.User.CONTENT_URI, new String[]{ReadditContract.User.COLUMN_ACCESSTOKEN}, null, null, null);
+            cursor = provider.query(ReadditContract.Link.CONTENT_URI, new String[]{
+                ReadditContract.Link.COLUMN_NAME,
+                ReadditContract.Link.COLUMN_ID,
+                ReadditContract.Link.COLUMN_SUBREDDIT,
+                }, null, null, null);
             while (cursor.move(1)) {
-                Cursor subredditCursor = null;
-                try {
-                    subredditCursor = provider.query(ReadditContract.Subreddit.CONTENT_URI, null, null, null, null);
-                    while (subredditCursor.move(1)) {
-                        String subreddit = subredditCursor.getString(subredditCursor.getColumnIndex(ReadditContract.Subreddit.COLUMN_DISPLAY_NAME));
-                        RequestFuture<JSONObject> future = RequestFuture.newFuture();
-                        mVolleyQueue.add(GetLinks.newInstance(subreddit, null, null, -1, 50, cursor.getString(0), future, future));
-                        JSONObject result = future.get();
-                        Logger.d(result.toString());
-                        ContentValues[] linksValues = loadLinks(result);
-                        provider.bulkInsert(ReadditContract.Link.CONTENT_URI, linksValues);
-                        //TODO - update link that is already in the database
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                } finally {
-                    if (subredditCursor != null)
-                        subredditCursor.close();
-                }
+                String subreddit = cursor.getString(2);
+                String article = cursor.getString(0);
+                String ID36article = cursor.getString(1);
+                RequestFuture<JSONArray> future = RequestFuture.newFuture();
+                mVolleyQueue.add(GetCommentRequest.newInstance(subreddit, article, ID36article, null, 0, -1, -1, true, true, GetCommentRequest.PARAM_SORT_NEW, future, future, mAccessToken));
+                JSONArray result = future.get();
+                loadComments(result);
+                Logger.d(result.toString());
             }
         } catch (RemoteException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
+            e.printStackTrace();
+        } finally {
+            if ( cursor != null)
+                cursor.close();
+        }
+    }
+
+    private ContentValues[] loadComments(JSONArray result) {
+        Set<ContentValues> valuesSet = new HashSet<ContentValues>();
+        try {
+            for (int i = 0; i < result.length(); i++) {
+                valuesSet.addAll(parseComments(result.getJSONObject(i)));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return valuesSet.toArray(new ContentValues[]{});
+    }
+
+    private Set<ContentValues> parseComments(JSONObject obj) throws JSONException {
+        Set<ContentValues> comments = new HashSet<ContentValues>();
+        //TODO - handler replies
+        //user_reports, report_reasons, mod_reports is being ignore
+        if (!RedditApiUtils.KIND_LISTING.equals(obj.getString("kind")) || obj.isNull("data"))
+            return comments;
+        JSONArray children = obj.getJSONObject("data").getJSONArray("children");
+        for(int ci = 0; ci < children.length(); ci++) {
+            JSONObject child = children.getJSONObject(ci);
+            if (!RedditApiUtils.KIND_COMMENT.equals(child.getString("kind")))
+                continue;
+            //ok, it's a comment. Let's load it
+            child = child.getJSONObject("data");
+            ContentValues comment = new ContentValues();
+            if( !obj.isNull("replies"))
+                comments.addAll(parseComments(obj.getJSONObject("replies")));
+            comment.put(ReadditContract.Comment.COLUMN_SUBREDDIT_ID, child.getString("subreddit_id"));
+            comment.put(ReadditContract.Comment.COLUMN_BANNED_BY, child.optString("banned_by"));
+            comment.put(ReadditContract.Comment.COLUMN_LINK_ID, child.getString("link_id"));
+            if ( child.isNull("likes"))
+                comment.put(ReadditContract.Comment.COLUMN_LIKES, 0);
+            else
+                comment.put(ReadditContract.Comment.COLUMN_LIKES, child.getBoolean("likes")?1:-1);
+            comment.put(ReadditContract.Comment.COLUMN_SAVED, child.getBoolean("saved"));
+            comment.put(ReadditContract.Comment.COLUMN_ID, child.getString("id"));
+            comment.put(ReadditContract.Comment.COLUMN_GILDED, child.getString("gilded"));
+            comment.put(ReadditContract.Comment.COLUMN_AUTHOR, child.getString("author"));
+            comment.put(ReadditContract.Comment.COLUMN_PARENT_ID, child.getString("parent_id"));
+            comment.put(ReadditContract.Comment.COLUMN_SCORE, child.getInt("score"));
+            comment.put(ReadditContract.Comment.COLUMN_APPROVED_BY, child.optString("approved_by"));
+            comment.put(ReadditContract.Comment.COLUMN_CONTROVERSIALITY, child.getInt("controversiality"));
+            comment.put(ReadditContract.Comment.COLUMN_BODY, child.getString("body"));
+            comment.put(ReadditContract.Comment.COLUMN_EDITED, child.optInt("edited"));
+            comment.put(ReadditContract.Comment.COLUMN_AUTHOR_CSS_CLASS, child.getString("author_flair_css_class"));
+            comment.put(ReadditContract.Comment.COLUMN_DOWNS, child.getInt("downs"));
+            comment.put(ReadditContract.Comment.COLUMN_BODY_HTML, child.getString("body_html"));
+            comment.put(ReadditContract.Comment.COLUMN_SUBREDDIT, child.getString("subreddit"));
+            comment.put(ReadditContract.Comment.COLUMN_SCORE_HIDDEN, child.getBoolean("score_hidden"));
+            comment.put(ReadditContract.Comment.COLUMN_NAME, child.getString("name"));
+            comment.put(ReadditContract.Comment.COLUMN_CREATED, child.getInt("created"));
+            comment.put(ReadditContract.Comment.COLUMN_AUTHOR_FLAIR_TEXT, child.getString("author_flair_text"));
+            comment.put(ReadditContract.Comment.COLUMN_CREATED_UTC, child.getInt("created_utc"));
+            comment.put(ReadditContract.Comment.COLUMN_UPS, child.getInt("ups"));
+            comment.put(ReadditContract.Comment.COLUMN_NUM_REPORTS, child.optInt("num_reports"));
+            comment.put(ReadditContract.Comment.COLUMN_DISTINGUISHED, child.optString("distinguished"));
+            comments.add(comment);
+        }
+        return comments;
+    }
+
+    private void syncLinks(ContentProviderClient provider) {
+        Logger.i("### syncLinks ###");
+        Cursor cursor = null;
+        try {
+            Cursor subredditCursor = null;
+            subredditCursor = provider.query(ReadditContract.Subreddit.CONTENT_URI, null, null, null, null);
+            while (subredditCursor.move(1)) {
+                String subreddit = subredditCursor.getString(subredditCursor.getColumnIndex(ReadditContract.Subreddit.COLUMN_DISPLAY_NAME));
+                RequestFuture<JSONObject> future = RequestFuture.newFuture();
+                mVolleyQueue.add(GetLinks.newInstance(subreddit, null, null, -1, 50, mAccessToken, future, future));
+                JSONObject result = future.get();
+                Logger.d(result.toString());
+                ContentValues[] linksValues = loadLinks(result);
+                provider.bulkInsert(ReadditContract.Link.CONTENT_URI, linksValues);
+                //TODO - update link that is already in the database
+            }
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
             e.printStackTrace();
         } finally {
             if ( cursor != null){
@@ -151,18 +251,15 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         Logger.i("### syncSubreddit ###");
         Cursor cursor = null;
         try {
-            cursor = provider.query(ReadditContract.User.CONTENT_URI, new String[]{ ReadditContract.User.COLUMN_ACCESSTOKEN}, null, null, null);
-            while (cursor.move(1)) {
-                RequestFuture<JSONObject> future = RequestFuture.newFuture();
-                mVolleyQueue.add(MySubredditRequest.newInstance(MySubredditRequest.PATH_SUBSCRIBER, null, null, -1, 50, future, future, cursor.getString(0)));
-                JSONObject result = future.get();
-                ContentValues[] subredditsValues = loadSubreddits(result);
-                int rowsCount = provider.bulkInsert(ReadditContract.Subreddit.CONTENT_URI, subredditsValues);
-                if ( rowsCount != subredditsValues.length )
-                    Logger.e(String.format("subreddits sync failed. Total subreddits retrieved %d, only %d were stored", subredditsValues.length, rowsCount));
-                else
-                    Logger.i(String.format("%d subreddit updated", rowsCount));
-            }
+            RequestFuture<JSONObject> future = RequestFuture.newFuture();
+            mVolleyQueue.add(MySubredditRequest.newInstance(MySubredditRequest.PATH_SUBSCRIBER, null, null, -1, 50, future, future, mAccessToken));
+            JSONObject result = future.get();
+            ContentValues[] subredditsValues = loadSubreddits(result);
+            int rowsCount = provider.bulkInsert(ReadditContract.Subreddit.CONTENT_URI, subredditsValues);
+            if ( rowsCount != subredditsValues.length )
+                Logger.e(String.format("subreddits sync failed. Total subreddits retrieved %d, only %d were stored", subredditsValues.length, rowsCount));
+            else
+                Logger.i(String.format("%d subreddit updated", rowsCount));
         } catch (RemoteException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {

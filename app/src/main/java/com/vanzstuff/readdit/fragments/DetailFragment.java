@@ -184,18 +184,12 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(getActivity(), ReadditContract.Comment.CONTENT_URI, null,
-                ReadditContract.Comment.COLUMN_POST + "=? AND " + ReadditContract.Comment.COLUMN_PARENT + " is NULL", new String[]{String.valueOf(args.getLong(ARG_POST_ID, 0))}, null);
+        return null;
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mCommentList.setAdapter(new CommentListAdapter(getActivity(), data, R.layout.comment_item,
-                new String[]{ ReadditContract.Comment.COLUMN_USER, ReadditContract.Comment.COLUMN_DATE, ReadditContract.Comment.COLUMN_CONTENT},
-                new int[]{R.id.comment_user_item, R.id.comment_user_time, R.id.comment_item_content},
-                R.layout.comment_item,
-                new String[]{ ReadditContract.Comment.COLUMN_USER, ReadditContract.Comment.COLUMN_DATE, ReadditContract.Comment.COLUMN_CONTENT},
-                new int[]{R.id.comment_user_item, R.id.comment_user_time, R.id.comment_item_content}));
+
     }
 
     @Override

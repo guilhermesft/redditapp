@@ -62,12 +62,32 @@ public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
                 ReadditContract.TagXPost.COLUMN_POST + " INTEGER REFERENCES " + ReadditContract.Link.TABLE_NAME + "( " + ReadditContract.Link._ID + "), " +
                 "PRIMARY KEY ( " + ReadditContract.TagXPost.COLUMN_TAG + ", " + ReadditContract.TagXPost.COLUMN_POST + " ));";
         final String CREATE_COMMENT = "CREATE TABLE " + ReadditContract.Comment.TABLE_NAME + " ( " +
-                ReadditContract.Comment._ID + " INTEGER PRIMARY KEY," +
-                ReadditContract.Comment.COLUMN_PARENT + " INTEGER REFERENCES " + ReadditContract.Comment.TABLE_NAME + " ( " + ReadditContract.Comment._ID + " )," +
-                ReadditContract.Comment.COLUMN_CONTENT + " TEXT NOT NULL," +
-                ReadditContract.Comment.COLUMN_DATE + " INTEGER NOT NULL, " +
-                ReadditContract.Comment.COLUMN_USER + " TEXT NOT NULL, " +
-                ReadditContract.Comment.COLUMN_POST + " INTEGER REFERENCES " + ReadditContract.Link.TABLE_NAME + " ( " + ReadditContract.Link._ID + " ));";
+                ReadditContract.Comment._ID + " INTEGER PRIMARY KEY, " +
+                ReadditContract.Comment.COLUMN_APPROVED_BY + " TEXT, " +
+                ReadditContract.Comment.COLUMN_AUTHOR + " TEXT, " +
+                ReadditContract.Comment.COLUMN_AUTHOR_CSS_CLASS + " TEXT, " +
+                ReadditContract.Comment.COLUMN_AUTHOR_FLAIR_TEXT + " TEXT, " +
+                ReadditContract.Comment.COLUMN_BANNED_BY + " TEXT, " +
+                ReadditContract.Comment.COLUMN_BODY + " TEXT, " +
+                ReadditContract.Comment.COLUMN_BODY_HTML + " TEXT, " +
+                ReadditContract.Comment.COLUMN_EDITED + " INTEGER, " +
+                ReadditContract.Comment.COLUMN_GILDED + " INTEGER, " +
+                ReadditContract.Comment.COLUMN_LIKES + " INTEGER, " +
+                ReadditContract.Comment.COLUMN_LINK_AUTHOR + " TEXT, " +
+                ReadditContract.Comment.COLUMN_LINK_ID + " TEXT, " +
+                ReadditContract.Comment.COLUMN_LINK_TITLE + " TEXT, " +
+                ReadditContract.Comment.COLUMN_LINK_URL + " TEXT, " +
+                ReadditContract.Comment.COLUMN_NUM_REPORTS + " INTEGER, " +
+                ReadditContract.Comment.COLUMN_PARENT_ID + " TEXT, " +
+                ReadditContract.Comment.COLUMN_SAVED + " INTEGER, " +
+                ReadditContract.Comment.COLUMN_SCORE_HIDDEN + " INTEGER, " +
+                ReadditContract.Comment.COLUMN_SUBREDDIT + " TEXT, " +
+                ReadditContract.Comment.COLUMN_SUBREDDIT_ID + " TEXT, " +
+                ReadditContract.Comment.COLUMN_ID + " TEXT, " +
+                ReadditContract.Comment.COLUMN_SCORE + " INTEGER, " +
+                ReadditContract.Comment.COLUMN_CONTROVERSIALITY + " INTEGER, " +
+                ReadditContract.Comment.COLUMN_NAME + " TEXT, " +
+                ReadditContract.Comment.COLUMN_DISTINGUISHED + " TEXT);";
         final String CREATE_SUBSCRIBE = "CREATE TABLE " + ReadditContract.Subreddit.TABLE_NAME + " ( " +
                 ReadditContract.Subreddit._ID + " INTEGER PRIMARY KEY, " +
                 ReadditContract.Subreddit.COLUMN_SYNC_STATUS + " INTEGER DEFAULT 0, " +

@@ -18,12 +18,8 @@ public class CommentListAdapter extends SimpleCursorTreeAdapter {
 
     @Override
     protected Cursor getChildrenCursor(Cursor groupCursor) {
-        return mContext.getContentResolver().query(ReadditContract.Comment.CONTENT_URI, new String[]{
-                ReadditContract.Comment._ID,
-                ReadditContract.Comment.COLUMN_USER,
-                ReadditContract.Comment.COLUMN_DATE,
-                ReadditContract.Comment.COLUMN_CONTENT},
-                ReadditContract.Comment.COLUMN_PARENT + "=?",
+        return mContext.getContentResolver().query(ReadditContract.Comment.CONTENT_URI, null,
+                ReadditContract.Comment.COLUMN_PARENT_ID + "=?",
                 new String[]{groupCursor.getString(groupCursor.getColumnIndex(ReadditContract.Comment._ID))},
                 null);
     }

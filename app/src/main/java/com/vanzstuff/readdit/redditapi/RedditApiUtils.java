@@ -37,13 +37,14 @@ public class RedditApiUtils {
     public static final String AUTHORIZATION_RESPONSE_EXPIRES_in = "expires_in";
     public static final String AUTHORIZATION_RESPONSE_STATE = "state";
     public static final String AUTHORIZATION_RESPONSE_ERROR = "error";
-    public static final String FULLNAME_PREFIX_COMMENT = "t1_";
-    public static final String FULLNAME_PREFIX_ACCOUNT = "t2_";
-    public static final String FULLNAME_PREFIX_LINK = "t3_";
-    public static final String FULLNAME_PREFIX_MESSAGE = "t4_";
-    public static final String FULLNAME_PREFIX_SUBREDDIT = "t5_";
-    public static final String FULLNAME_PREFIX_AWARD = "t6_";
-    public static final String FULLNAME_PREFIX_PROMOCAMPAIGN = "t7_";
+    public static final String KIND_COMMENT = "t1";
+    public static final String KIND_ACCOUNT = "t2";
+    public static final String KIND_LINK = "t3";
+    public static final String KIND_MESSAGE = "t4";
+    public static final String KIND_SUBREDDIT = "t5";
+    public static final String KIND_AWARD = "t6";
+    public static final String KIND_PROMOCAMPAIGN = "t7";
+    public static final String KIND_LISTING = "listing";
 
     private static final String sClientId = "7KxduDMf4c8Sig";
 
