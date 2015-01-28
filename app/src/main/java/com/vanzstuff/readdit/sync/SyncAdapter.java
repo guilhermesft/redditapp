@@ -11,6 +11,7 @@ import android.content.SyncResult;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.util.Log;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.VolleyError;
@@ -82,19 +83,29 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         Cursor cursor = null;
         try {
             cursor = provider.query(ReadditContract.Link.CONTENT_URI, new String[]{
-                ReadditContract.Link.COLUMN_NAME,
-                ReadditContract.Link.COLUMN_ID,
-                ReadditContract.Link.COLUMN_SUBREDDIT,
-                }, null, null, null);
+                    ReadditContract.Link.COLUMN_ID,
+                    ReadditContract.Link.COLUMN_SUBREDDIT,
+            }, null, null, null);
             while (cursor.move(1)) {
-                String subreddit = cursor.getString(2);
+                String subreddit = cursor.getString(1);
                 String article = cursor.getString(0);
-                String ID36article = cursor.getString(1);
                 RequestFuture<JSONArray> future = RequestFuture.newFuture();
-                mVolleyQueue.add(GetCommentRequest.newInstance(subreddit, article, ID36article, null, 0, -1, -1, true, true, GetCommentRequest.PARAM_SORT_NEW, future, future, mAccessToken));
+                mVolleyQueue.add(GetCommentRequest.newInstance(subreddit, article, 0, -1, -1, true, true, GetCommentRequest.PARAM_SORT_NEW, future, future, mAccessToken));
                 JSONArray result = future.get();
-                loadComments(result);
-                Logger.d(result.toString());
+                ContentValues[] comments = loadComments(result);
+                Set<ContentValues> newComments = new HashSet<ContentValues>();
+                for (ContentValues value : comments) {
+                    String commentID = value.getAsString(ReadditContract.Comment.COLUMN_ID);
+                    if (isCommentInDatabase(provider, commentID)) {
+                        if (provider.update(ReadditContract.Comment.CONTENT_URI, value, ReadditContract.Comment.COLUMN_ID + "=?", new String[]{commentID}) > 0) {
+                            Logger.i(commentID + " updated");
+                        }
+                    } else {
+                        newComments.add(value);
+                    }
+                }
+                    int ret = provider.bulkInsert(ReadditContract.Comment.CONTENT_URI, newComments.toArray(new ContentValues[newComments.size()]));
+                    Logger.i(ret + " comments inserted");
             }
         } catch (RemoteException e) {
             e.printStackTrace();
@@ -103,9 +114,24 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         } catch (ExecutionException e) {
             e.printStackTrace();
         } finally {
-            if ( cursor != null)
+            if (cursor != null)
                 cursor.close();
         }
+    }
+
+    private boolean isCommentInDatabase(ContentProviderClient provider, String commentID) {
+        Cursor cursor = null;
+        try {
+            cursor = provider.query(ReadditContract.Comment.CONTENT_URI, new String[]{ReadditContract.Comment.COLUMN_ID},
+                    ReadditContract.Comment.COLUMN_ID + "=?", new String[]{commentID}, null);
+            return cursor.moveToFirst();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        } finally {
+            if(cursor!=null)
+                cursor.close();
+        }
+        return false;
     }
 
     private ContentValues[] loadComments(JSONArray result) {
@@ -124,8 +150,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         Set<ContentValues> comments = new HashSet<ContentValues>();
         //TODO - handler replies
         //user_reports, report_reasons, mod_reports is being ignore
-        if (!RedditApiUtils.KIND_LISTING.equals(obj.getString("kind")) || obj.isNull("data"))
+        if ((!RedditApiUtils.KIND_LISTING.equals(obj.getString("kind"))) || obj.isNull("data")) {
             return comments;
+        }
         JSONArray children = obj.getJSONObject("data").getJSONArray("children");
         for(int ci = 0; ci < children.length(); ci++) {
             JSONObject child = children.getJSONObject(ci);
@@ -137,7 +164,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             if( !obj.isNull("replies"))
                 comments.addAll(parseComments(obj.getJSONObject("replies")));
             comment.put(ReadditContract.Comment.COLUMN_SUBREDDIT_ID, child.getString("subreddit_id"));
-            comment.put(ReadditContract.Comment.COLUMN_BANNED_BY, child.optString("banned_by"));
+            if ( child.has("banned_by"))
+                comment.put(ReadditContract.Comment.COLUMN_BANNED_BY, child.getString("banned_by"));
             comment.put(ReadditContract.Comment.COLUMN_LINK_ID, child.getString("link_id"));
             if ( child.isNull("likes"))
                 comment.put(ReadditContract.Comment.COLUMN_LIKES, 0);
@@ -149,22 +177,26 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             comment.put(ReadditContract.Comment.COLUMN_AUTHOR, child.getString("author"));
             comment.put(ReadditContract.Comment.COLUMN_PARENT_ID, child.getString("parent_id"));
             comment.put(ReadditContract.Comment.COLUMN_SCORE, child.getInt("score"));
-            comment.put(ReadditContract.Comment.COLUMN_APPROVED_BY, child.optString("approved_by"));
+            if(child.has("approved_by"))
+                comment.put(ReadditContract.Comment.COLUMN_APPROVED_BY, child.getString("approved_by"));
             comment.put(ReadditContract.Comment.COLUMN_CONTROVERSIALITY, child.getInt("controversiality"));
             comment.put(ReadditContract.Comment.COLUMN_BODY, child.getString("body"));
             comment.put(ReadditContract.Comment.COLUMN_EDITED, child.optInt("edited"));
-            comment.put(ReadditContract.Comment.COLUMN_AUTHOR_CSS_CLASS, child.getString("author_flair_css_class"));
+            if(child.has("author_flair_css_class"))
+                comment.put(ReadditContract.Comment.COLUMN_AUTHOR_CSS_CLASS, child.getString("author_flair_css_class"));
             comment.put(ReadditContract.Comment.COLUMN_DOWNS, child.getInt("downs"));
             comment.put(ReadditContract.Comment.COLUMN_BODY_HTML, child.getString("body_html"));
             comment.put(ReadditContract.Comment.COLUMN_SUBREDDIT, child.getString("subreddit"));
             comment.put(ReadditContract.Comment.COLUMN_SCORE_HIDDEN, child.getBoolean("score_hidden"));
             comment.put(ReadditContract.Comment.COLUMN_NAME, child.getString("name"));
             comment.put(ReadditContract.Comment.COLUMN_CREATED, child.getInt("created"));
-            comment.put(ReadditContract.Comment.COLUMN_AUTHOR_FLAIR_TEXT, child.getString("author_flair_text"));
+            if(child.has("author_flair_text"))
+                comment.put(ReadditContract.Comment.COLUMN_AUTHOR_FLAIR_TEXT, child.getString("author_flair_text"));
             comment.put(ReadditContract.Comment.COLUMN_CREATED_UTC, child.getInt("created_utc"));
             comment.put(ReadditContract.Comment.COLUMN_UPS, child.getInt("ups"));
             comment.put(ReadditContract.Comment.COLUMN_NUM_REPORTS, child.optInt("num_reports"));
-            comment.put(ReadditContract.Comment.COLUMN_DISTINGUISHED, child.optString("distinguished"));
+            if(child.has("distinguished"))
+                comment.put(ReadditContract.Comment.COLUMN_DISTINGUISHED, child.optString("distinguished"));
             comments.add(comment);
         }
         return comments;
@@ -183,8 +215,18 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 JSONObject result = future.get();
                 Logger.d(result.toString());
                 ContentValues[] linksValues = loadLinks(result);
-                provider.bulkInsert(ReadditContract.Link.CONTENT_URI, linksValues);
-                //TODO - update link that is already in the database
+                Set<ContentValues> newLinks = new HashSet<ContentValues>();
+                for(ContentValues value : linksValues ){
+                    String linkID = value.getAsString(ReadditContract.Link.COLUMN_ID);
+                    if(isLinkInDatabase(provider, linkID)){
+                        if (provider.update(ReadditContract.Link.CONTENT_URI, value, ReadditContract.Link.COLUMN_ID + "=?", new String[]{linkID}) > 0)
+                            Logger.i(linkID + " updated");
+
+                    } else
+                        newLinks.add(value);
+                }
+                int ret = provider.bulkInsert(ReadditContract.Link.CONTENT_URI, newLinks.toArray(new ContentValues[newLinks.size()]));
+                Logger.i(ret + " link inserted");
             }
         } catch (RemoteException e) {
             e.printStackTrace();
@@ -199,6 +241,21 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 cursor.close();
             }
         }
+    }
+
+    private boolean isLinkInDatabase(ContentProviderClient provider, String linkID) {
+        Cursor cursor = null;
+        try{
+            cursor = provider.query(ReadditContract.Link.CONTENT_URI, new String[]{ReadditContract.Link.COLUMN_ID},
+                    ReadditContract.Link.COLUMN_ID + "=?", new String[]{linkID}, null);
+            return cursor.moveToFirst();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        } finally {
+            if(cursor!=null)
+                cursor.close();
+        }
+        return false;
     }
 
     private ContentValues[] loadLinks(JSONObject result) throws JSONException {
@@ -255,11 +312,19 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             mVolleyQueue.add(MySubredditRequest.newInstance(MySubredditRequest.PATH_SUBSCRIBER, null, null, -1, 50, future, future, mAccessToken));
             JSONObject result = future.get();
             ContentValues[] subredditsValues = loadSubreddits(result);
-            int rowsCount = provider.bulkInsert(ReadditContract.Subreddit.CONTENT_URI, subredditsValues);
-            if ( rowsCount != subredditsValues.length )
-                Logger.e(String.format("subreddits sync failed. Total subreddits retrieved %d, only %d were stored", subredditsValues.length, rowsCount));
-            else
-                Logger.i(String.format("%d subreddit updated", rowsCount));
+            Set<ContentValues> newSubreddits = new HashSet<ContentValues>();
+            //we need to update subreddit that already in the database and insert new ones
+            for( ContentValues value : subredditsValues){
+                String subredditId = value.getAsString(ReadditContract.Subreddit.COLUMN_ID);
+                if(isSubredditInDatabase(provider, subredditId)) {
+                    provider.update(ReadditContract.Subreddit.CONTENT_URI, value, ReadditContract.Subreddit.COLUMN_ID + "=?", new String[]{subredditId});
+                    Logger.i(subredditId + " updated");
+                } else
+                    newSubreddits.add(value);
+
+            }
+            int rowsCount = provider.bulkInsert(ReadditContract.Subreddit.CONTENT_URI, newSubreddits.toArray(new ContentValues[newSubreddits.size()]));
+            Logger.i(rowsCount + " subreddits inserted");
         } catch (RemoteException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -273,6 +338,21 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             if ( cursor != null )
                 cursor.close();
         }
+    }
+
+    private boolean isSubredditInDatabase(ContentProviderClient provider, String subreddit) {
+        Cursor cursor = null;
+        try{
+            cursor = provider.query(ReadditContract.Subreddit.CONTENT_URI, new String[]{ReadditContract.Subreddit.COLUMN_ID},
+                    ReadditContract.Subreddit.COLUMN_ID + "=?", new String[]{subreddit}, null);
+            return cursor.moveToFirst();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        } finally {
+            if( cursor != null)
+                cursor.close();
+        }
+        return false;
     }
 
     private ContentValues[] loadSubreddits(JSONObject result) throws JSONException {
@@ -370,8 +450,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             Logger.e(e.getLocalizedMessage(), e);
         } catch (ExecutionException e) {
             e.printStackTrace();
-            VolleyError volleyError = (VolleyError) e.getCause();
-            Logger.e(new String(volleyError.getNetworkResponse().data), e.getCause());
         } catch (RemoteException e) {
             e.printStackTrace();
             Logger.e(e.getLocalizedMessage(), e);

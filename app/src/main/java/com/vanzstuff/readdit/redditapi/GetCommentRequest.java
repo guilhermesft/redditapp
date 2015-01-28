@@ -39,12 +39,8 @@ public class GetCommentRequest extends JsonArrayRequest {
     private Map<String, String> mParams;
     private String mAccessToken;
 
-    public static GetCommentRequest newInstance(String subreddit, String article, String ID36Article, String ID36comment, int context, int depth, int limit, boolean showedit, boolean showmore, String sortOrder, Response.Listener<JSONArray> listener, Response.ErrorListener errorListener, String accessToken){
+    public static GetCommentRequest newInstance(String subreddit, String article, int context, int depth, int limit, boolean showedit, boolean showmore, String sortOrder, Response.Listener<JSONArray> listener, Response.ErrorListener errorListener, String accessToken){
         Map<String,Object> params = new HashMap<String, Object>();
-        if(Utils.stringNotNullOrEmpty(ID36Article))
-            params.put(PARAM_ARTICLE, ID36Article);
-        if(Utils.stringNotNullOrEmpty(ID36comment))
-            params.put(PARAM_COMMENT, ID36comment);
         if(context >= 0 && context <= 8)
             params.put(PARAM_CONTEXT, context);
         if( depth > 0)

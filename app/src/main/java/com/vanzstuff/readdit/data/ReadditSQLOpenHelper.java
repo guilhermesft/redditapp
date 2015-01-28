@@ -51,7 +51,7 @@ public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
                 ReadditContract.Link.COLUMN_UPS + " INTEGER, " +
                 ReadditContract.Link.COLUMN_DOWNS + " INTEGER, " +
                 ReadditContract.Link.COLUMN_BANNED_BY + " TEXT, " +
-                ReadditContract.Link.COLUMN_ID + " TEXT, " +
+                ReadditContract.Link.COLUMN_ID + " TEXT UNIQUE, " +
                 ReadditContract.Link.COLUMN_APPROVED_BY + " TEXT, " +
                 ReadditContract.Link.COLUMN_NAME + " TEXT, " +
                 ReadditContract.Link.COLUMN_VISITED + " INTEGER, " +
@@ -83,10 +83,14 @@ public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
                 ReadditContract.Comment.COLUMN_SCORE_HIDDEN + " INTEGER, " +
                 ReadditContract.Comment.COLUMN_SUBREDDIT + " TEXT, " +
                 ReadditContract.Comment.COLUMN_SUBREDDIT_ID + " TEXT, " +
-                ReadditContract.Comment.COLUMN_ID + " TEXT, " +
+                ReadditContract.Comment.COLUMN_ID + " TEXT UNIQUE, " +
                 ReadditContract.Comment.COLUMN_SCORE + " INTEGER, " +
                 ReadditContract.Comment.COLUMN_CONTROVERSIALITY + " INTEGER, " +
                 ReadditContract.Comment.COLUMN_NAME + " TEXT, " +
+                ReadditContract.Comment.COLUMN_CREATED + " INTEGER, " +
+                ReadditContract.Comment.COLUMN_CREATED_UTC + " INTEGER, " +
+                ReadditContract.Comment.COLUMN_UPS + " INTEGER, " +
+                ReadditContract.Comment.COLUMN_DOWNS + " INTEGER, " +
                 ReadditContract.Comment.COLUMN_DISTINGUISHED + " TEXT);";
         final String CREATE_SUBSCRIBE = "CREATE TABLE " + ReadditContract.Subreddit.TABLE_NAME + " ( " +
                 ReadditContract.Subreddit._ID + " INTEGER PRIMARY KEY, " +
@@ -115,7 +119,7 @@ public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
                 ReadditContract.Subreddit.COLUMN_USER_IS_MODERATOR + " INTEGER DEFAULT 0, " +
                 ReadditContract.Subreddit.COLUMN_USER_IS_SUBSCRIBER + " INTEGER DEFAULT 0," +
                 ReadditContract.Subreddit.COLUMN_SUBMIT_TEXT_HTML + " TEXT," +
-                ReadditContract.Subreddit.COLUMN_ID + " TEXT," +
+                ReadditContract.Subreddit.COLUMN_ID + " TEXT UNIQUE," +
                 ReadditContract.Subreddit.COLUMN_SUBMIT_TEXT + " TEXT," +
                 ReadditContract.Subreddit.COLUMN_COLLAPSE_DELETED_COMMENTS + " INTEGER DEFAULT 0," +
                 ReadditContract.Subreddit.COLUMN_PUBLIC_DESCRIPTION_HTML + " TEXT," +

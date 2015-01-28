@@ -26,6 +26,7 @@ import com.vanzstuff.readdit.data.TagsLoader;
 import com.vanzstuff.readdit.fragments.AboutFragment;
 import com.vanzstuff.readdit.fragments.DetailFragment;
 import com.vanzstuff.readdit.fragments.FeedsFragment;
+import com.vanzstuff.readdit.sync.SyncAdapter;
 import com.vanzstuff.redditapp.R;
 
 public class MainActivity extends FragmentActivity implements FeedsFragment.CallBack, ListView.OnItemClickListener, View.OnClickListener, Handler.Callback{
@@ -99,8 +100,10 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
     protected void onResume() {
         super.onResume();
         User user = UserSession.getUser(this);
-        if ( user != null )
-            ((TextView)findViewById(R.id.drawer_username)).setText(user.name);
+        if ( user != null ) {
+            ((TextView) findViewById(R.id.drawer_username)).setText(user.name);
+            SyncAdapter.syncNow(this);
+        }
     }
 
     @Override

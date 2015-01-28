@@ -44,7 +44,7 @@ public class RedditApiUtils {
     public static final String KIND_SUBREDDIT = "t5";
     public static final String KIND_AWARD = "t6";
     public static final String KIND_PROMOCAMPAIGN = "t7";
-    public static final String KIND_LISTING = "listing";
+    public static final String KIND_LISTING = "Listing";
 
     private static final String sClientId = "7KxduDMf4c8Sig";
 
