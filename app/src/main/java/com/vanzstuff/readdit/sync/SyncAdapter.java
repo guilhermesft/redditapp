@@ -71,7 +71,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
-        Logger.w("### SYNC ADAPTER ###");
         syncUser(provider);
         syncSubreddit(provider);
         syncLinks(provider);
@@ -79,7 +78,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private void syncComment(ContentProviderClient provider) {
-        Logger.i("### syncComment ###");
         Cursor cursor = null;
         try {
             cursor = provider.query(ReadditContract.Link.CONTENT_URI, new String[]{
@@ -93,7 +91,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 mVolleyQueue.add(GetCommentRequest.newInstance(subreddit, article, 0, -1, -1, true, true, GetCommentRequest.PARAM_SORT_NEW, future, future, mAccessToken));
                 JSONArray result = future.get();
                 ContentValues[] comments = loadComments(result);
-                Set<ContentValues> newComments = new HashSet<ContentValues>();
+                Set<ContentValues> newComments = new HashSet<>();
                 for (ContentValues value : comments) {
                     String commentID = value.getAsString(ReadditContract.Comment.COLUMN_ID);
                     if (isCommentInDatabase(provider, commentID)) {
@@ -135,7 +133,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private ContentValues[] loadComments(JSONArray result) {
-        Set<ContentValues> valuesSet = new HashSet<ContentValues>();
+        Set<ContentValues> valuesSet = new HashSet<>();
         try {
             for (int i = 0; i < result.length(); i++) {
                 valuesSet.addAll(parseComments(result.getJSONObject(i)));
@@ -161,8 +159,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             //ok, it's a comment. Let's load it
             child = child.getJSONObject("data");
             ContentValues comment = new ContentValues();
-            if( !obj.isNull("replies"))
-                comments.addAll(parseComments(obj.getJSONObject("replies")));
+            if( !child.isNull("replies") && child.optJSONObject("replies") != null)
+                    comments.addAll(parseComments(child.getJSONObject("replies")));
             comment.put(ReadditContract.Comment.COLUMN_SUBREDDIT_ID, child.getString("subreddit_id"));
             if ( child.has("banned_by"))
                 comment.put(ReadditContract.Comment.COLUMN_BANNED_BY, child.getString("banned_by"));
@@ -203,7 +201,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private void syncLinks(ContentProviderClient provider) {
-        Logger.i("### syncLinks ###");
         Cursor cursor = null;
         try {
             Cursor subredditCursor = null;
@@ -215,7 +212,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 JSONObject result = future.get();
                 Logger.d(result.toString());
                 ContentValues[] linksValues = loadLinks(result);
-                Set<ContentValues> newLinks = new HashSet<ContentValues>();
+                Set<ContentValues> newLinks = new HashSet<>();
                 for(ContentValues value : linksValues ){
                     String linkID = value.getAsString(ReadditContract.Link.COLUMN_ID);
                     if(isLinkInDatabase(provider, linkID)){
@@ -305,7 +302,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private void syncSubreddit(ContentProviderClient provider) {
-        Logger.i("### syncSubreddit ###");
         Cursor cursor = null;
         try {
             RequestFuture<JSONObject> future = RequestFuture.newFuture();
@@ -404,7 +400,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
      * @param provider provider to access database
      */
     private void syncUser(ContentProviderClient provider){
-        Logger.i("### syncUser ###");
         Cursor cursor = null;
         try {
             cursor = provider.query(ReadditContract.User.CONTENT_URI, new String[] {
