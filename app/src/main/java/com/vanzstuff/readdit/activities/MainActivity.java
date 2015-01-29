@@ -3,6 +3,7 @@ package com.vanzstuff.readdit.activities;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PersistableBundle;
@@ -56,6 +57,8 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mFeedsFragment = (FeedsFragment) getSupportFragmentManager().findFragmentById(R.id.feeds_fragments);
+        if (savedInstanceState != null)
+            mFeedsFragment.loadUri(Uri.parse(savedInstanceState.getString(FeedsFragment.ARG_URI)));
         View detailFragContainer = findViewById(R.id.detail_fragment_container);
         mIsTwoPanelLayout = detailFragContainer != null && detailFragContainer.getVisibility() == View.VISIBLE;
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -150,18 +153,10 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
         if( parent.getId() == R.id.drawer_tags) {
             //user clicked in a tag
             mFeedsFragment.loadUri(ReadditContract.Link.buildLinkByTagIdUri(id));
-//            getSupportFragmentManager().beginTransaction()
-//                    .replace(R.id.feeds_fragment_container, FeedsFragment.newInstance(ReadditContract.Link.buildLinkByTagIdUri(id)))
-//                    .addToBackStack(null)
-//                    .commit();
         } else {
             //user clicked in a subreddit
             String subreddit = ((TextView)view.findViewById(android.R.id.text1)).getText().toString();
             mFeedsFragment.loadUri(ReadditContract.Link.buildLinkBySubredditDisplayName(subreddit));
-//            getSupportFragmentManager().beginTransaction()
-//                    .replace(R.id.feeds_fragment_container, FeedsFragment.newInstance(ReadditContract.Link.buildLinkBySubredditDisplayName(subreddit)))
-//                    .addToBackStack(null)
-//                    .commit();
         }
     }
 
@@ -185,6 +180,12 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
             Logger.d("About");
             new AboutFragment().show(getSupportFragmentManager(), "about");
         }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putString(FeedsFragment.ARG_URI, mFeedsFragment.getUri().toString());
+        super.onSaveInstanceState(outState);
     }
 
     @Override

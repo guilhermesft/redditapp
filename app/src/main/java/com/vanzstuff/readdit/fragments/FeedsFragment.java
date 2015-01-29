@@ -26,7 +26,7 @@ import android.net.Uri;
 public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>,FeedsAdapter.ItemSelectedListener {
 
     private static final int POST_INIT_CURSOR_LOADER = 0;
-    private static final String ARG_URI = "arg_uri";
+    public static final String ARG_URI = "arg_uri";
 
     private Uri mUri;
     /** RecyclerView responsable to show all post */
@@ -121,6 +121,10 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
     public void loadUri(Uri uri){
         mUri = uri;
         getLoaderManager().restartLoader(POST_INIT_CURSOR_LOADER, null, this);
+    }
+
+    public Uri getUri() {
+        return mUri;
     }
 
     /**

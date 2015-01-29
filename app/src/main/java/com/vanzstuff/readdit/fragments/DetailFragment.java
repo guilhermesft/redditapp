@@ -4,11 +4,14 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.app.NavUtils;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
@@ -195,5 +198,11 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mCommentList.setAdapter((ExpandableListAdapter)null);
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        getActivity().getActionBar().setHomeButtonEnabled(true);
     }
 }

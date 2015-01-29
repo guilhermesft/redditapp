@@ -2,6 +2,7 @@ package com.vanzstuff.readdit.activities;
 
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.view.MenuItem;
 
 import com.vanzstuff.readdit.fragments.DetailFragment;
 import com.vanzstuff.redditapp.R;
@@ -22,5 +23,14 @@ public class DetailActivity extends FragmentActivity {
                 .beginTransaction()
                 .add(R.id.detail_activity_container, DetailFragment.newInstance(postId))
                 .commit();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(android.R.id.home == item.getItemId()){
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
