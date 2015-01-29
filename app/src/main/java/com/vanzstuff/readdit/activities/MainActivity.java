@@ -5,6 +5,7 @@ import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PersistableBundle;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
@@ -22,6 +23,7 @@ import com.vanzstuff.readdit.User;
 import com.vanzstuff.readdit.UserSession;
 import com.vanzstuff.readdit.data.DatabaseContentObserver;
 import com.vanzstuff.readdit.data.ReadditContract;
+import com.vanzstuff.readdit.data.SubredditLoader;
 import com.vanzstuff.readdit.data.TagsLoader;
 import com.vanzstuff.readdit.fragments.AboutFragment;
 import com.vanzstuff.readdit.fragments.DetailFragment;
@@ -32,28 +34,30 @@ import com.vanzstuff.redditapp.R;
 public class MainActivity extends FragmentActivity implements FeedsFragment.CallBack, ListView.OnItemClickListener, View.OnClickListener, Handler.Callback{
 
     private static final String DETAIL_FRAGMENT_TAG = "detail_fragment_tag";
+    private static final int SUBREDDIT_LOADER = 0;
+    private static final int TAGS_LOADER = 1;
     /* Indicate if is two panel layout or not */
     private boolean mIsTwoPanelLayout = false;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     /* Navigation drawer views */
     private ListView mTagList;
+    private ListView mSubredditList;
     private Button mSettings;
     private Button mFriends;
     private Button mMessages;
     private Button mAbout;
     private ContentObserver mDatabaseObserver;
+    private FeedsFragment mFeedsFragment;
+    private DetailFragment mDetailFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if (findViewById(R.id.detail_fragment_container) != null )
-            mIsTwoPanelLayout = true;
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.feeds_fragment_container, FeedsFragment.newInstance(ReadditContract.Link.CONTENT_URI))
-                .commit();
-
+        mFeedsFragment = (FeedsFragment) getSupportFragmentManager().findFragmentById(R.id.feeds_fragments);
+        View detailFragContainer = findViewById(R.id.detail_fragment_container);
+        mIsTwoPanelLayout = detailFragContainer != null && detailFragContainer.getVisibility() == View.VISIBLE;
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.open_drawer, R.string.close_drawer){
             @Override
@@ -73,13 +77,22 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
             }
         };
         mDrawerLayout.setDrawerListener(mDrawerToggle);
+        mSubredditList = (ListView) findViewById(R.id.drawer_subreddits);
+        SimpleCursorAdapter subredditAdapter = new SimpleCursorAdapter(this,
+                android.R.layout.simple_list_item_1,
+                getContentResolver().query(ReadditContract.Subreddit.CONTENT_URI, null, null, null, null),
+                new String[]{ReadditContract.Subreddit.COLUMN_DISPLAY_NAME},
+                new int[]{android.R.id.text1}, 0);
+        getSupportLoaderManager().initLoader(SUBREDDIT_LOADER, null, new SubredditLoader(this, subredditAdapter));
+        mSubredditList.setAdapter(subredditAdapter);
+        mSubredditList.setOnItemClickListener(this);
         mTagList = (ListView) findViewById(R.id.drawer_tags);
         SimpleCursorAdapter tagAdapter = new SimpleCursorAdapter(this,
                 android.R.layout.simple_list_item_1,
                 getContentResolver().query(ReadditContract.Tag.CONTENT_URI, null, null, null, null),
                 new String[]{ReadditContract.Tag.COLUMN_NAME},
                 new int[]{android.R.id.text1}, 0);
-        getSupportLoaderManager().initLoader(0, null, new TagsLoader(this, tagAdapter));
+        getSupportLoaderManager().initLoader(TAGS_LOADER, null, new TagsLoader(this, tagAdapter));
         mTagList.setAdapter(tagAdapter);
         mTagList.setOnItemClickListener(this);
         mSettings = (Button) findViewById(R.id.drawer_settings);
@@ -134,10 +147,22 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.feeds_fragment_container, FeedsFragment.newInstance(ReadditContract.Link.buildLinkByTagIdUri(id)))
-                .addToBackStack(null)
-                .commit();
+        if( parent.getId() == R.id.drawer_tags) {
+            //user clicked in a tag
+            mFeedsFragment.loadUri(ReadditContract.Link.buildLinkByTagIdUri(id));
+//            getSupportFragmentManager().beginTransaction()
+//                    .replace(R.id.feeds_fragment_container, FeedsFragment.newInstance(ReadditContract.Link.buildLinkByTagIdUri(id)))
+//                    .addToBackStack(null)
+//                    .commit();
+        } else {
+            //user clicked in a subreddit
+            String subreddit = ((TextView)view.findViewById(android.R.id.text1)).getText().toString();
+            mFeedsFragment.loadUri(ReadditContract.Link.buildLinkBySubredditDisplayName(subreddit));
+//            getSupportFragmentManager().beginTransaction()
+//                    .replace(R.id.feeds_fragment_container, FeedsFragment.newInstance(ReadditContract.Link.buildLinkBySubredditDisplayName(subreddit)))
+//                    .addToBackStack(null)
+//                    .commit();
+        }
     }
 
     @Override
@@ -161,7 +186,6 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
             new AboutFragment().show(getSupportFragmentManager(), "about");
         }
     }
-
 
     @Override
     public boolean handleMessage(Message msg) {

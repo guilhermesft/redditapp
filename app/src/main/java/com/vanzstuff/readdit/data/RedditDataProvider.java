@@ -27,6 +27,7 @@ public class RedditDataProvider extends ContentProvider {
     private static final int POST_BY_TAGID = 107;
     private static final int ADD_TAG_NAME_TO_POST = 108;
     private static final int VOTE = 110;
+    private static final int LINK_BY_SUBREDDIT = 111;
 
 
     private SQLiteOpenHelper mOpenHelper;
@@ -61,6 +62,7 @@ public class RedditDataProvider extends ContentProvider {
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_USER,  USER);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_SUBREDDIT, SUBREDDIT);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_VOTE, VOTE);
+        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_LINK_BY_SUBREDDIT + "/*", LINK_BY_SUBREDDIT);
         return matcher;
     }
 
@@ -148,6 +150,17 @@ public class RedditDataProvider extends ContentProvider {
                         null,
                         null,
                         sortOrder);
+                break;
+            }
+            case LINK_BY_SUBREDDIT: {
+                cursor = db.query(ReadditContract.Link.TABLE_NAME,
+                        projection,
+                        ReadditContract.Link.COLUMN_SUBREDDIT + "=?",
+                        new String[]{ReadditContract.Link.getLinkBySubredditDisplayName(uri)},
+                        null,
+                        null,
+                        sortOrder);;
+                //TODO
                 break;
             }
             default:

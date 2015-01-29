@@ -15,6 +15,7 @@ public class ReadditContract {
     public static final String PATH_LINK = "post";
     public static final String PATH_LINK_BY_TAG = "post_tag" ;
     public static final String PATH_LINK_BY_TAGID = "post_tagid" ;
+    public static final String PATH_LINK_BY_SUBREDDIT = "post_subreddit";
     public static final String PATH_ADD_TAG_TO_LINK = "post_add_tag";
     public static final String PATH_ADD_TAG_NAME_TO_LINK = "post_add_tag_name";
     public static final String PATH_COMMENT = "comment";
@@ -61,6 +62,7 @@ public class ReadditContract {
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_LINK).build();
         public static final Uri CONTENT_URI_POST_BY_TAG = BASE_CONTENT_URI.buildUpon().appendPath(PATH_LINK_BY_TAG).build();
         public static final Uri CONTENT_URI_POST_BY_TAGID = BASE_CONTENT_URI.buildUpon().appendPath(PATH_LINK_BY_TAGID).build();
+        public static final Uri CONTENT_URI_POST_BY_SUBREDDIT = BASE_CONTENT_URI.buildUpon().appendPath(PATH_LINK_BY_SUBREDDIT).build();
         public static final Uri CONTENT_URI_ADD_TAG_TO_POST = BASE_CONTENT_URI.buildUpon().appendPath(PATH_ADD_TAG_TO_LINK).build();
         public static final Uri CONTENT_URI_ADD_TAG_NAME_TO_POST = BASE_CONTENT_URI.buildUpon().appendPath(PATH_ADD_TAG_NAME_TO_LINK).build();
         public static final String CONTENT_TYPE = MULTIPLE_ITEM_MIMETYPE +  CONTENT_AUTHORITY + "/" + PATH_LINK;
@@ -164,6 +166,24 @@ public class ReadditContract {
          * @return tag retrieved
          */
         static String getTagIdFromUri(Uri uri){
+            return uri.getPathSegments().get(1);
+        }
+
+        /**
+         * Build a URI to get all link from a subreddit name
+         * @param subreddit
+         * @return correspondent uri
+         */
+        public static Uri buildLinkBySubredditDisplayName(String subreddit){
+            return CONTENT_URI_POST_BY_SUBREDDIT.buildUpon().appendPath(subreddit).build();
+        }
+
+        /**
+         * Get the subreddit name of a uri built by buildLinkBySubredditDisplayName method
+         * @param uri built by buildLinkBySubredditDisplayName method
+         * @return subreddit name
+         */
+        public static String getLinkBySubredditDisplayName(Uri uri){
             return uri.getPathSegments().get(1);
         }
 

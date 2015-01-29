@@ -38,6 +38,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
+        android:text="@string/drawer_subreddit_header"/>
+    <ListView
+        android:id="@+id/drawer_subreddits"
+        android:choiceMode="singleChoice"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
         android:text="@string/drawer_tags_header"/>
     <ListView
         android:id="@+id/drawer_tags"

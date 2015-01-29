@@ -3,6 +3,7 @@ package com.vanzstuff.readdit.fragments;
 import android.app.Activity;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -27,20 +28,21 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
     private static final int POST_INIT_CURSOR_LOADER = 0;
     private static final String ARG_URI = "arg_uri";
 
+    private Uri mUri;
     /** RecyclerView responsable to show all post */
     private RecyclerView mRecyclerView;
     /** Activity listener */
     private CallBack mCallback;
 
-
     /**
      * Factory method to build a new FeedFragment
-     * @param postUri uri used to load the posts
+     * @param linkUri uri used to load the posts
      * @return new FeedsFragment instance
      */
-    public static final FeedsFragment newInstance(Uri postUri){
+    public static final FeedsFragment newInstance(Uri linkUri){
         Bundle args = new Bundle(1);
-        args.putString(ARG_URI, postUri.toString());
+        if ( linkUri != null )
+            args.putString(ARG_URI, linkUri.toString());
         FeedsFragment fragment = new FeedsFragment();
         fragment.setArguments(args);
         return fragment;
@@ -69,13 +71,14 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
     @Override
     public void onStop() {
         super.onStop();
-        getLoaderManager().getLoader(POST_INIT_CURSOR_LOADER).stopLoading();
+        if(getLoaderManager().getLoader(POST_INIT_CURSOR_LOADER) != null)
+            getLoaderManager().getLoader(POST_INIT_CURSOR_LOADER).stopLoading();
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        getLoaderManager().initLoader(POST_INIT_CURSOR_LOADER, getArguments(), this);
+        getLoaderManager().initLoader(POST_INIT_CURSOR_LOADER, null, this);
     }
 
     @Override
@@ -86,7 +89,10 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(getActivity(), Uri.parse(args.getString(ARG_URI, ReadditContract.Link.CONTENT_URI.toString())), null, null, null, ReadditContract.Link.COLUMN_CREATED);
+        if( mUri != null)
+            return new CursorLoader(getActivity(), mUri, null, null, null, ReadditContract.Link.COLUMN_CREATED);
+        else
+            return new CursorLoader(getActivity(), ReadditContract.Link.buildLinkBySubredditDisplayName("Hot"), null, null, null, ReadditContract.Link.COLUMN_CREATED);
     }
 
     @Override
@@ -103,6 +109,18 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
     @Override
     public void onPostClicked(long postId) {
         mCallback.onItemSelected(postId);
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if(getArguments() != null && getArguments().containsKey(ARG_URI) )
+            mUri = Uri.parse(getArguments().getString(ARG_URI));
+    }
+
+    public void loadUri(Uri uri){
+        mUri = uri;
+        getLoaderManager().restartLoader(POST_INIT_CURSOR_LOADER, null, this);
     }
 
     /**

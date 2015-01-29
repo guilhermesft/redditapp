@@ -9,9 +9,8 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <LinearLayout
-            android:orientation="vertical"
-            android:id="@+id/feeds_fragment_container"
+        <fragment
+            class="com.vanzstuff.readdit.fragments.FeedsFragment"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"/>
