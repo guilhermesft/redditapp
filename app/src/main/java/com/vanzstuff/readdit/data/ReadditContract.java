@@ -22,6 +22,8 @@ public class ReadditContract {
     public static final String PATH_SUBREDDIT = "subreddit";
     public static final String PATH_USER = "user";
     public static final String PATH_VOTE = "vote";
+    public static final String PATH_TAGXLINK_PREDEFINED = "tac_x_post_predefined";
+    public static final String PATH_TAGXLINK = "tac_x_post";
     public static final String MULTIPLE_ITEM_MIMETYPE = "vnd.android.cursor.dir/";
     public static final String SINGLE_ITEM_MIMETYPE = "vnd.android.cursor.item/";
 
@@ -50,7 +52,16 @@ public class ReadditContract {
         }
 
         public static final String TABLE_NAME = "tag";
+        /**
+         * Tag name
+         * type: text
+         */
         public static final String COLUMN_NAME = "name";
+        /**
+         * Indicate if the tag is created by the app and cannot be deleted
+         * type: integer
+         */
+        public static final String COLUMN_PREDEFINED = "predefined";
     }
 
     /**
@@ -390,9 +401,15 @@ public class ReadditContract {
     }
 
     public static final class TagXPost implements BaseColumns{
-        public static final String TABLE_NAME = "tag_x_post";
+        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_TAGXLINK).build();
+        public static final Uri CONTENT_URI_PREDEFINED = BASE_CONTENT_URI.buildUpon().appendPath(PATH_TAGXLINK_PREDEFINED).build();
+        public static final String CONTENT_TYPE_TAGXLINK_PREDEFINED = MULTIPLE_ITEM_MIMETYPE +  CONTENT_AUTHORITY + "/" + PATH_TAGXLINK_PREDEFINED;
+
+        public static final String TABLE_NAME = "tag_x_link";
         public static final String COLUMN_TAG = "tag";
-        public static final String COLUMN_POST = "post";
+        public static final String COLUMN_LINK = "post";
+        public static final String COLUMN_SYNC_STATUS = "sync_status";
+
     }
 
     /**

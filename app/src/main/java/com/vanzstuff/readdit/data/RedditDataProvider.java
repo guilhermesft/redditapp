@@ -19,32 +19,41 @@ public class RedditDataProvider extends ContentProvider {
 
     /* Possibles matches for UriMatcher */
     private static final int TAG = 100;
-    private static final int POST = 101;
+    private static final int LINK = 101;
     private static final int COMMENT = 102;
     private static final int USER = 103;
     private static final int SUBREDDIT = 104;
-    private static final int POST_BY_TAG = 105;
-    private static final int ADD_TAG_TO_POST = 106;
-    private static final int POST_BY_TAGID = 107;
-    private static final int ADD_TAG_NAME_TO_POST = 108;
+    private static final int LINK_BY_TAG = 105;
+    private static final int ADD_TAG_TO_LINK = 106;
+    private static final int LINK_BY_TAGID = 107;
+    private static final int ADD_TAG_NAME_TO_LINK = 108;
     private static final int VOTE = 110;
     private static final int LINK_BY_SUBREDDIT = 111;
+    private static final int TAG_X_LINK_PREDEFINED = 112;
+    private static final int TAG_X_LINK = 113;
 
 
     private SQLiteOpenHelper mOpenHelper;
 
     private static final UriMatcher sUriMatcher = buildUriMatcher();
-    private static final String sWherePostByTag = ReadditContract.TagXPost.TABLE_NAME + "." + ReadditContract.TagXPost.COLUMN_TAG + " = ?";
+    private static final String sWhereLinkByTag = ReadditContract.TagXPost.TABLE_NAME + "." + ReadditContract.TagXPost.COLUMN_TAG + " = ?";
     private static final String sWhereTagId = ReadditContract.Tag.COLUMN_NAME + " = ?";
-    private static final SQLiteQueryBuilder sPostByTagQueryBuilder;
+    private static final String sWhereTagXLinkPredefined = ReadditContract.Tag.TABLE_NAME + "." + ReadditContract.Tag.COLUMN_PREDEFINED + " = ?";
+    private static final SQLiteQueryBuilder sLinkByTagQueryBuilder;
     private static final SQLiteQueryBuilder sTagId;
+    private static final SQLiteQueryBuilder sTagXLinkPredefined;
 
     static {
-        sPostByTagQueryBuilder = new SQLiteQueryBuilder();
-        sPostByTagQueryBuilder.setTables(ReadditContract.Link.TABLE_NAME + " LEFT OUTER JOIN " + ReadditContract.TagXPost.TABLE_NAME + " ON (" +
-                ReadditContract.TagXPost.TABLE_NAME + "." + ReadditContract.TagXPost.COLUMN_POST + " = " + ReadditContract.Link.TABLE_NAME + "." + ReadditContract.Link._ID + ")");
+        sLinkByTagQueryBuilder = new SQLiteQueryBuilder();
+        sLinkByTagQueryBuilder.setTables(ReadditContract.Link.TABLE_NAME + " LEFT OUTER JOIN " + ReadditContract.TagXPost.TABLE_NAME + " ON (" +
+                ReadditContract.TagXPost.TABLE_NAME + "." + ReadditContract.TagXPost.COLUMN_LINK + " = " + ReadditContract.Link.TABLE_NAME + "." + ReadditContract.Link._ID + ")");
         sTagId = new SQLiteQueryBuilder();
         sTagId.setTables(ReadditContract.Tag.TABLE_NAME);
+        sTagXLinkPredefined = new SQLiteQueryBuilder();
+        sTagXLinkPredefined.setTables(ReadditContract.TagXPost.TABLE_NAME + " LEFT JOIN " + ReadditContract.Tag.TABLE_NAME + " ON ( " +
+                ReadditContract.Tag.TABLE_NAME + "." + ReadditContract.Tag.COLUMN_PREDEFINED + "=1 " +
+                "AND " + ReadditContract.Tag.TABLE_NAME + "." + ReadditContract.Tag._ID + " = " + ReadditContract.TagXPost.TABLE_NAME + "." + ReadditContract.TagXPost.COLUMN_TAG + ")" +
+                " LEFT JOIN " + ReadditContract.Link.TABLE_NAME + " ON ( " + ReadditContract.Link.TABLE_NAME + "." + ReadditContract.Link._ID + " = " + ReadditContract.TagXPost.TABLE_NAME + "." + ReadditContract.TagXPost.COLUMN_LINK + " )");
     }
 
     /**
@@ -54,16 +63,18 @@ public class RedditDataProvider extends ContentProvider {
     private static UriMatcher buildUriMatcher() {
         final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_TAG,  TAG);
-        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_LINK,  POST);
-        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_LINK_BY_TAG + "/*",  POST_BY_TAG);
-        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_LINK_BY_TAGID + "/#",  POST_BY_TAGID);
-        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_ADD_TAG_TO_LINK + "/#/#",  ADD_TAG_TO_POST);
-        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_ADD_TAG_NAME_TO_LINK + "/#/*",  ADD_TAG_NAME_TO_POST);
+        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_LINK, LINK);
+        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_LINK_BY_TAG + "/*", LINK_BY_TAG);
+        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_LINK_BY_TAGID + "/#", LINK_BY_TAGID);
+        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_ADD_TAG_TO_LINK + "/#/#", ADD_TAG_TO_LINK);
+        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_ADD_TAG_NAME_TO_LINK + "/#/*", ADD_TAG_NAME_TO_LINK);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_COMMENT,  COMMENT);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_USER,  USER);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_SUBREDDIT, SUBREDDIT);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_VOTE, VOTE);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_LINK_BY_SUBREDDIT + "/*", LINK_BY_SUBREDDIT);
+        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_TAGXLINK_PREDEFINED, TAG_X_LINK_PREDEFINED);
+        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_TAGXLINK, TAG_X_LINK);
         return matcher;
     }
 
@@ -99,7 +110,7 @@ public class RedditDataProvider extends ContentProvider {
                         sortOrder);
                 break;
             }
-            case POST:{
+            case LINK:{
                 cursor = db.query(ReadditContract.Link.TABLE_NAME,
                         projection,
                         selection,
@@ -129,14 +140,14 @@ public class RedditDataProvider extends ContentProvider {
                         sortOrder);
                 break;
             }
-            case POST_BY_TAG: {
+            case LINK_BY_TAG: {
                 cursor = getPostByTag(uri, projection, sortOrder);
                 break;
             }
-            case POST_BY_TAGID: {
-                cursor = sPostByTagQueryBuilder.query(mOpenHelper.getReadableDatabase(),
+            case LINK_BY_TAGID: {
+                cursor = sLinkByTagQueryBuilder.query(mOpenHelper.getReadableDatabase(),
                             projection,
-                            sWherePostByTag,
+                        sWhereLinkByTag,
                             new String[]{ReadditContract.Link.getTagIdFromUri(uri)},
                             null,
                             null,
@@ -160,8 +171,15 @@ public class RedditDataProvider extends ContentProvider {
                         new String[]{ReadditContract.Link.getLinkBySubredditDisplayName(uri)},
                         null,
                         null,
-                        sortOrder);;
-                //TODO
+                        sortOrder);
+                break;
+
+            }
+            case TAG_X_LINK_PREDEFINED:{
+                cursor = sTagXLinkPredefined.query(mOpenHelper.getReadableDatabase(),projection,
+                        sWhereTagXLinkPredefined,
+                        new String[]{"1"},
+                        null,null,sortOrder);
                 break;
             }
             default:
@@ -185,9 +203,9 @@ public class RedditDataProvider extends ContentProvider {
             if (cursor.moveToFirst()){
                 tag = cursor.getString(0);
                 cursor.close();
-                return sPostByTagQueryBuilder.query(mOpenHelper.getReadableDatabase(),
+                return sLinkByTagQueryBuilder.query(mOpenHelper.getReadableDatabase(),
                         projection,
-                        sWherePostByTag,
+                        sWhereLinkByTag,
                         new String[]{tag},
                         null,
                         null,
@@ -205,16 +223,18 @@ public class RedditDataProvider extends ContentProvider {
                 return ReadditContract.Tag.CONTENT_TYPE;
             case USER:
                 return ReadditContract.User.CONTENT_TYPE;
-            case POST:
+            case LINK:
                 return ReadditContract.Link.CONTENT_TYPE;
             case COMMENT:
                 return ReadditContract.Comment.CONTENT_TYPE;
             case SUBREDDIT:
                 return ReadditContract.Subreddit.CONTENT_TYPE;
-            case POST_BY_TAG:
+            case LINK_BY_TAG:
                 return ReadditContract.Link.CONTENT_TYPE_POST_BY_TAG;
             case VOTE:
                 return ReadditContract.Vote.CONTENT_TYPE;
+            case TAG_X_LINK_PREDEFINED:
+                return ReadditContract.TagXPost.CONTENT_TYPE_TAGXLINK_PREDEFINED;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -243,7 +263,7 @@ public class RedditDataProvider extends ContentProvider {
                         throw new android.database.SQLException("Failed to insert row into " + uri);
                     break;
                 }
-            case POST:{
+            case LINK:{
                 long id = db.insertOrThrow(ReadditContract.Link.TABLE_NAME, null, values);
                 if (id > 0)
                     returnUri = ReadditContract.Link.buildPostUri(id);
@@ -267,11 +287,12 @@ public class RedditDataProvider extends ContentProvider {
                     throw new android.database.SQLException("Failed to insert row into " + uri);
                 break;
             }
-            case ADD_TAG_TO_POST:{
+            case ADD_TAG_TO_LINK:{
                 returnUri = insertTagToPost(db, uri);
+                SyncAdapter.syncNow(getContext(), SyncAdapter.SYNC_TYPE_SAVED_HIDDEN);
                 break;
             }
-            case ADD_TAG_NAME_TO_POST: {
+            case ADD_TAG_NAME_TO_LINK: {
                 returnUri = insertTagNameToPost(db, uri);
                 break;
 
@@ -329,8 +350,9 @@ public class RedditDataProvider extends ContentProvider {
     private Uri insertTagToPost(SQLiteDatabase db, Uri uri) {
         long[] uriValues = ReadditContract.Link.getTagIdAndLinkIdFromUri(uri);
         ContentValues insertValues = new ContentValues();
-        insertValues.put(ReadditContract.TagXPost.COLUMN_POST, uriValues[0]);
+        insertValues.put(ReadditContract.TagXPost.COLUMN_LINK, uriValues[0]);
         insertValues.put(ReadditContract.TagXPost.COLUMN_TAG, uriValues[1]);
+        insertValues.put(ReadditContract.TagXPost.COLUMN_SYNC_STATUS, SyncAdapter.SYNC_STATUS_UPDATE);
         long id = db.insertOrThrow(ReadditContract.TagXPost.TABLE_NAME, null, insertValues);
         Uri returnUri;
         if (id > 0)
@@ -362,7 +384,7 @@ public class RedditDataProvider extends ContentProvider {
                 rowsDeleted = db.delete(ReadditContract.Tag.TABLE_NAME, selection, selectionArgs);
                 break;
             }
-            case POST:{
+            case LINK:{
                 rowsDeleted = db.delete(ReadditContract.Link.TABLE_NAME, selection, selectionArgs);
                 break;
             }
@@ -376,6 +398,10 @@ public class RedditDataProvider extends ContentProvider {
             }
             case VOTE:{
                 rowsDeleted = db.delete(ReadditContract.Vote.TABLE_NAME, selection, selectionArgs);
+                break;
+            }
+            case TAG_X_LINK:{
+                rowsDeleted = db.delete(ReadditContract.TagXPost.TABLE_NAME, selection, selectionArgs);
                 break;
             }
             default:
@@ -399,7 +425,7 @@ public class RedditDataProvider extends ContentProvider {
                 rowsUpdated = db.update(ReadditContract.User.TABLE_NAME, values, selection, selectionArgs );
                 break;
             }
-            case POST:{
+            case LINK:{
                 rowsUpdated = db.update(ReadditContract.Link.TABLE_NAME, values, selection, selectionArgs );
                 break;
             }
@@ -415,6 +441,10 @@ public class RedditDataProvider extends ContentProvider {
                 rowsUpdated = db.update(ReadditContract.Vote.TABLE_NAME, values, selection, selectionArgs );
                 break;
             }
+            case TAG_X_LINK:{
+                rowsUpdated = db.update(ReadditContract.TagXPost.TABLE_NAME, values, selection, selectionArgs );
+                break;
+            }
             default:
                 throw new UnsupportedOperationException("Unknown URI: " + uri);
         }
@@ -428,7 +458,7 @@ public class RedditDataProvider extends ContentProvider {
         final int match = sUriMatcher.match(uri);
 
         switch (match){
-            case POST:{
+            case LINK:{
                 int returnCount = 0;
                 db.beginTransaction();
                 try{

@@ -1,8 +1,11 @@
 package com.vanzstuff.readdit.data;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+
+import com.vanzstuff.readdit.PredefinedTags;
 
 public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
 
@@ -17,6 +20,7 @@ public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         final String CREATE_TAG = "CREATE TABLE " + ReadditContract.Tag.TABLE_NAME + " ( " +
                 ReadditContract.Tag._ID + " INTEGER PRIMARY KEY, " +
+                ReadditContract.Tag.COLUMN_PREDEFINED + " INTEGER DEFAULT 0, " +
                 ReadditContract.Tag.COLUMN_NAME + " TEXT UNIQUE NOT NULL );";
         final String CREATE_LINK = "CREATE TABLE " + ReadditContract.Link.TABLE_NAME + " ( " +
                 ReadditContract.Link._ID + " INTEGER PRIMARY KEY, " +
@@ -59,9 +63,11 @@ public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
                 ReadditContract.Link.COLUMN_SYNC_STATUS + " INTEGER, " +
                 ReadditContract.Link.COLUMN_LIKES + " INTEGER);";
         final String CREATE_TAG_X_POST = "CREATE TABLE " + ReadditContract.TagXPost.TABLE_NAME + " ( " +
+                ReadditContract.TagXPost._ID + " INTEGER PRIMARY KEY, " +
                 ReadditContract.TagXPost.COLUMN_TAG + " INTEGER REFERENCES " + ReadditContract.Tag.TABLE_NAME + "( " + ReadditContract.Tag._ID + ") , " +
-                ReadditContract.TagXPost.COLUMN_POST + " INTEGER REFERENCES " + ReadditContract.Link.TABLE_NAME + "( " + ReadditContract.Link._ID + "), " +
-                "PRIMARY KEY ( " + ReadditContract.TagXPost.COLUMN_TAG + ", " + ReadditContract.TagXPost.COLUMN_POST + " ));";
+                ReadditContract.TagXPost.COLUMN_LINK + " INTEGER REFERENCES " + ReadditContract.Link.TABLE_NAME + "( " + ReadditContract.Link._ID + "), " +
+                ReadditContract.TagXPost.COLUMN_SYNC_STATUS + " INTEGER DEFAULT 0);";
+
         final String CREATE_COMMENT = "CREATE TABLE " + ReadditContract.Comment.TABLE_NAME + " ( " +
                 ReadditContract.Comment._ID + " INTEGER PRIMARY KEY, " +
                 ReadditContract.Comment.COLUMN_APPROVED_BY + " TEXT, " +
@@ -165,6 +171,13 @@ public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_COMMENT);
         db.execSQL(CREATE_SUBSCRIBE);
         db.execSQL(CREATE_VOTE);
+        //insert predefined tags
+        for (PredefinedTags tag : PredefinedTags.values()){
+            ContentValues values = new ContentValues(2);
+            values.put(ReadditContract.Tag.COLUMN_NAME, tag.getName());
+            values.put(ReadditContract.Tag.COLUMN_PREDEFINED, 1);
+            db.insertOrThrow(ReadditContract.Tag.TABLE_NAME, null, values);
+        }
     }
 
     @Override

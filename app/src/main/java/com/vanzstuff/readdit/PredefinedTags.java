@@ -3,8 +3,7 @@ package com.vanzstuff.readdit;
 public enum PredefinedTags {
 
     SAVED("Saved"),
-    HIDDEN("Hidden"),
-    HOT("Hot");
+    HIDDEN("Hidden");
 
     private String mName;
 

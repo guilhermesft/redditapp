@@ -16,13 +16,18 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.RequestFuture;
 import com.android.volley.toolbox.Volley;
 import com.vanzstuff.readdit.Logger;
+import com.vanzstuff.readdit.PredefinedTags;
 import com.vanzstuff.readdit.Utils;
 import com.vanzstuff.readdit.data.ReadditContract;
 import com.vanzstuff.readdit.redditapi.AboutRequest;
 import com.vanzstuff.readdit.redditapi.GetCommentRequest;
 import com.vanzstuff.readdit.redditapi.GetLinks;
+import com.vanzstuff.readdit.redditapi.HideLinkRequest;
 import com.vanzstuff.readdit.redditapi.MySubredditRequest;
 import com.vanzstuff.readdit.redditapi.RedditApiUtils;
+import com.vanzstuff.readdit.redditapi.SaveRequest;
+import com.vanzstuff.readdit.redditapi.UnhideRequest;
+import com.vanzstuff.readdit.redditapi.UnsaveRequest;
 import com.vanzstuff.readdit.redditapi.VoteRequest;
 import com.vanzstuff.redditapp.R;
 
@@ -40,15 +45,18 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private String mAccessToken;
 
     /*Synchronization status for control by syncadapters*/
-    public static final int SYNC_STATUS_NONE = 0x0;
-    public static final int SYNC_STATUS_UPDATE = 0x1;
+    public static final int SYNC_STATUS_NONE = 0;
+    public static final int SYNC_STATUS_UPDATE = 1;
+    public static final int SYNC_STATUS_DELETE = 2;
     public static final String EXTRA_SYNC_TYPE = "sync_type";
     public static final int SYNC_TYPE_VOTES = 0x1;
     public static final int SYNC_TYPE_SUBREDDIT = 0x2;
     public static final int SYNC_TYPE_COMMENTS = 0x4;
     public static final int SYNC_TYPE_LINKS = 0x6;
     public static final int SYNC_TYPE_USER = 0x8;
-    public static final int SYNC_TYPE_ALL = SYNC_TYPE_COMMENTS | SYNC_TYPE_VOTES | SYNC_TYPE_SUBREDDIT | SYNC_TYPE_LINKS | SYNC_TYPE_USER;
+    public static final int SYNC_TYPE_SAVED_HIDDEN = 0x10;
+    public static final int SYNC_TYPE_ALL = SYNC_TYPE_COMMENTS | SYNC_TYPE_VOTES | SYNC_TYPE_SUBREDDIT
+            | SYNC_TYPE_LINKS | SYNC_TYPE_USER | SYNC_TYPE_SAVED_HIDDEN;
 
 
     public SyncAdapter(Context context, boolean autoInitialize) {
@@ -78,16 +86,72 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
         int syncType = extras.getInt(EXTRA_SYNC_TYPE);
-        if( (syncType & SYNC_TYPE_USER) > 0 )
+        if( (syncType & SYNC_TYPE_USER) == SYNC_TYPE_USER )
             syncUser(provider);
-        if( (syncType & SYNC_TYPE_VOTES) > 0 )
+        if( (syncType & SYNC_TYPE_VOTES) == SYNC_TYPE_VOTES )
             syncVotes(provider);
-        if( (syncType & SYNC_TYPE_SUBREDDIT) > 0 )
+        if( (syncType & SYNC_TYPE_SUBREDDIT) == SYNC_TYPE_SUBREDDIT )
             syncSubreddit(provider);
-        if( (syncType & SYNC_TYPE_LINKS) > 0 )
+        if( (syncType & SYNC_TYPE_LINKS) == SYNC_TYPE_LINKS )
             syncLinks(provider);
-        if( (syncType & SYNC_TYPE_COMMENTS) > 0 )
+        if( (syncType & SYNC_TYPE_COMMENTS) == SYNC_TYPE_COMMENTS )
             syncComment(provider);
+        if( (syncType & SYNC_TYPE_SAVED_HIDDEN) == SYNC_TYPE_SAVED_HIDDEN )
+            syncSavedHidden(provider);
+    }
+
+    private void syncSavedHidden(ContentProviderClient provider) {
+        Cursor cursor = null;
+        try{
+            cursor = provider.query(ReadditContract.TagXPost.CONTENT_URI_PREDEFINED, new String[]{
+                    ReadditContract.Tag.TABLE_NAME + "." + ReadditContract.Tag.COLUMN_NAME,
+                    ReadditContract.Link.TABLE_NAME + "." + ReadditContract.Link.COLUMN_NAME,
+                    ReadditContract.TagXPost.TABLE_NAME + "." + ReadditContract.TagXPost.COLUMN_SYNC_STATUS,
+                    ReadditContract.TagXPost.TABLE_NAME + "." + ReadditContract.TagXPost._ID}, null, null, null);
+            while(cursor.move(1)){
+                String tag = cursor.getString(0);
+                String fullname = cursor.getString(1);
+                int syncStatus = cursor.getInt(2);
+                long id = cursor.getLong(3);
+                if(PredefinedTags.SAVED.getName().equals(tag)){
+                    RequestFuture<JSONObject> future = RequestFuture.newFuture();
+                    if ( syncStatus == SYNC_STATUS_UPDATE) {
+                        mVolleyQueue.add(SaveRequest.newInstance(fullname, null, future, future, mAccessToken));
+                        future.get();
+                        ContentValues values = new ContentValues(1);
+                        values.put(ReadditContract.TagXPost.COLUMN_SYNC_STATUS, SYNC_STATUS_NONE);
+                        provider.update(ReadditContract.TagXPost.CONTENT_URI, values, ReadditContract.TagXPost._ID + "=?", new String[]{String.valueOf(id)});
+                    } else if (syncStatus == SYNC_STATUS_DELETE){
+                        mVolleyQueue.add(UnsaveRequest.newInstance(fullname, future, future, mAccessToken));
+                        future.get();
+                        provider.delete(ReadditContract.TagXPost.CONTENT_URI, ReadditContract.TagXPost._ID + "=?", new String[]{String.valueOf(id)});
+                    }
+                } else if ( PredefinedTags.HIDDEN.getName().equals(tag)){
+                    RequestFuture<JSONObject> future = RequestFuture.newFuture();
+                    if ( syncStatus == SYNC_STATUS_UPDATE) {
+                        mVolleyQueue.add(HideLinkRequest.newInstance(fullname, future, future, mAccessToken));
+                        future.get();
+                        ContentValues values = new ContentValues(1);
+                        values.put(ReadditContract.TagXPost.COLUMN_SYNC_STATUS, SYNC_STATUS_NONE);
+                        provider.update(ReadditContract.TagXPost.CONTENT_URI, values, ReadditContract.TagXPost._ID + "=?", new String[]{String.valueOf(id)});
+                    } else if (syncStatus == SYNC_STATUS_DELETE){
+                        mVolleyQueue.add(UnhideRequest.newInstance(fullname, future, future, mAccessToken));
+                        future.get();
+                        provider.delete(ReadditContract.TagXPost.CONTENT_URI, ReadditContract.TagXPost._ID + "=?", new String[]{String.valueOf(id)});
+                    }
+                }
+            }
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } finally {
+            if(cursor != null)
+                cursor.close();
+        }
+
     }
 
     /**
@@ -99,19 +163,15 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         try{
             cursor = provider.query(ReadditContract.Vote.CONTENT_URI, null,
                     ReadditContract.Vote.COLUMN_SYNC_STATUS + "=?", new String[]{String.valueOf(SYNC_STATUS_NONE)}, null);
-            while (cursor.move(1)){
+            while (cursor.move(1)) {
                 long id = cursor.getLong(cursor.getColumnIndex(ReadditContract.Vote._ID));
                 int voteDirection = cursor.getInt(cursor.getColumnIndex(ReadditContract.Vote.COLUMN_DIRECTION));
                 String fullname = cursor.getString(cursor.getColumnIndex(ReadditContract.Vote.COLUMN_THING_FULLNAME));
                 RequestFuture<JSONObject> future = RequestFuture.newFuture();
                 mVolleyQueue.add(VoteRequest.newInstance(voteDirection, fullname, mAccessToken, future, future));
                 JSONObject result = future.get();
-                Logger.i(result.toString());
-                if(setThingToSync(provider, fullname)) {
-                    int ret = provider.delete(ReadditContract.Vote.CONTENT_URI, ReadditContract.Vote._ID + "=?", new String[]{String.valueOf(id)});
-                    if (ret == 1)
-                        Logger.i("Vote deleted");
-                }
+                if (setThingToSync(provider, fullname))
+                    provider.delete(ReadditContract.Vote.CONTENT_URI, ReadditContract.Vote._ID + "=?", new String[]{String.valueOf(id)});
             }
         } catch (RemoteException e) {
             e.printStackTrace();

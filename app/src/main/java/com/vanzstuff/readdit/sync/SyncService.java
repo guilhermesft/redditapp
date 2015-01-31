@@ -4,9 +4,6 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 
-/**
- * Created by vanz on 22/01/15.
- */
 public class SyncService extends Service {
 
     // Storage for an instance of the sync adapter

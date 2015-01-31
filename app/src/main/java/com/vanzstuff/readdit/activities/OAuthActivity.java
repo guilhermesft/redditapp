@@ -60,7 +60,8 @@ public class OAuthActivity extends FragmentActivity implements Response.ErrorLis
             }
         });
         mWebView.loadUrl( RedditApiUtils.generateAuthorizationUri(UUID.randomUUID().toString(), RedditApiUtils.SCOPE_HISTORY,
-                RedditApiUtils.SCOPE_IDENTITY, RedditApiUtils.SCOPE_MYSUBREDDITS, RedditApiUtils.SCOPE_READ, RedditApiUtils.SCOPE_VOTE).toString());
+                RedditApiUtils.SCOPE_IDENTITY, RedditApiUtils.SCOPE_MYSUBREDDITS, RedditApiUtils.SCOPE_READ, RedditApiUtils.SCOPE_VOTE,
+                RedditApiUtils.SCOPE_SAVE, RedditApiUtils.SCOPE_REPORT).toString());
 
     }
 
