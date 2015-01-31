@@ -380,6 +380,10 @@ public class ReadditContract {
          * Type: integer
          */
         public static final String COLUMN_VISITED = "visited";
+        /**
+         * Type: integer
+         */
+        public static final String COLUMN_SYNC_STATUS = "sync_status";
 
 
 
@@ -567,6 +571,10 @@ public class ReadditContract {
          * type: text
          */
         public static final String COLUMN_NAME = "name";
+        /**
+         * type: integer
+         */
+        public static final String COLUMN_SYNC_STATUS = "sync_status";
 
     }
 
@@ -750,10 +758,10 @@ public class ReadditContract {
         public static final String CONTENT_TYPE = MULTIPLE_ITEM_MIMETYPE + CONTENT_AUTHORITY + "/" + PATH_VOTE;
         public static final String TABLE_NAME = "vote";
         /**
-         * The post voted
+         * The thing voted
          * Type: long
          */
-        public static final String COLUMN_POST = "post";
+        public static final String COLUMN_THING_FULLNAME = "post";
         /**
          * The user that has voted in the post
          * Type: long
@@ -764,6 +772,11 @@ public class ReadditContract {
          * Type: int
          */
         public static final String COLUMN_DIRECTION = "direction";
+        /**
+         * Synchronization status
+         * type: integer
+         */
+        public static final String COLUMN_SYNC_STATUS = "sync_status";
 
 
         public static Uri buildVoteUri(long id){

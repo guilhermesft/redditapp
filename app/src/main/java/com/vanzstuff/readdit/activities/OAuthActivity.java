@@ -42,6 +42,8 @@ public class OAuthActivity extends FragmentActivity implements Response.ErrorLis
         mWebView = (WebView) findViewById(R.id.oauth_dialog_webview);
         mWebView.clearCache(true);
         mWebView.getSettings().setJavaScriptEnabled(true);
+        mWebView.getSettings().setLoadWithOverviewMode(true);
+        mWebView.getSettings().setUseWideViewPort(true);
         mWebView.setWebViewClient(new WebViewClient(){
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -57,9 +59,8 @@ public class OAuthActivity extends FragmentActivity implements Response.ErrorLis
                 return true;
             }
         });
-        mWebView.loadUrl( RedditApiUtils.generateAuthorizationUri(UUID.randomUUID().toString(), RedditApiUtils.SCOPE_EDIT,
-                RedditApiUtils.SCOPE_FLAIR, RedditApiUtils.SCOPE_MODLOG, RedditApiUtils.SCOPE_MODFLAIR, RedditApiUtils.SCOPE_MODCONFIG, RedditApiUtils.SCOPE_HISTORY,
-                RedditApiUtils.SCOPE_IDENTITY, RedditApiUtils.SCOPE_MYSUBREDDITS, RedditApiUtils.SCOPE_READ).toString());
+        mWebView.loadUrl( RedditApiUtils.generateAuthorizationUri(UUID.randomUUID().toString(), RedditApiUtils.SCOPE_HISTORY,
+                RedditApiUtils.SCOPE_IDENTITY, RedditApiUtils.SCOPE_MYSUBREDDITS, RedditApiUtils.SCOPE_READ, RedditApiUtils.SCOPE_VOTE).toString());
 
     }
 

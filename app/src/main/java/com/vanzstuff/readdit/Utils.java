@@ -14,6 +14,15 @@ public class Utils {
     }
 
     /**
+     * Check if String s is null or empty
+     * @param s
+     * @return true if string s is null or empty. Otherwise, false
+     */
+    public static final boolean stringNullOrEmpty(String s) {
+        return s == null || s.isEmpty();
+    }
+
+    /**
      * Check if the String s is alphanumeric.
      * @param s
      * @return true if the string s is alphanumeric. Otherwise, false

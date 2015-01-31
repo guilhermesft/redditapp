@@ -11,19 +11,19 @@ import android.content.SyncResult;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.util.Log;
 
 import com.android.volley.RequestQueue;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
 import com.android.volley.toolbox.Volley;
 import com.vanzstuff.readdit.Logger;
+import com.vanzstuff.readdit.Utils;
 import com.vanzstuff.readdit.data.ReadditContract;
 import com.vanzstuff.readdit.redditapi.AboutRequest;
 import com.vanzstuff.readdit.redditapi.GetCommentRequest;
 import com.vanzstuff.readdit.redditapi.GetLinks;
 import com.vanzstuff.readdit.redditapi.MySubredditRequest;
 import com.vanzstuff.readdit.redditapi.RedditApiUtils;
+import com.vanzstuff.readdit.redditapi.VoteRequest;
 import com.vanzstuff.redditapp.R;
 
 import org.json.JSONArray;
@@ -41,9 +41,15 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     /*Synchronization status for control by syncadapters*/
     public static final int SYNC_STATUS_NONE = 0x0;
-    public static final int SYNC_STATUS_RUNNING = 0x1;
-    public static final int SYNC_STATUS_UPDATE = 0x2;
-    public static final int SYNC_STATUS_DELETE = 0x4;
+    public static final int SYNC_STATUS_UPDATE = 0x1;
+    public static final String EXTRA_SYNC_TYPE = "sync_type";
+    public static final int SYNC_TYPE_VOTES = 0x1;
+    public static final int SYNC_TYPE_SUBREDDIT = 0x2;
+    public static final int SYNC_TYPE_COMMENTS = 0x4;
+    public static final int SYNC_TYPE_LINKS = 0x6;
+    public static final int SYNC_TYPE_USER = 0x8;
+    public static final int SYNC_TYPE_ALL = SYNC_TYPE_COMMENTS | SYNC_TYPE_VOTES | SYNC_TYPE_SUBREDDIT | SYNC_TYPE_LINKS | SYNC_TYPE_USER;
+
 
     public SyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
@@ -71,10 +77,72 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
-        syncUser(provider);
-        syncSubreddit(provider);
-        syncLinks(provider);
-        syncComment(provider);
+        int syncType = extras.getInt(EXTRA_SYNC_TYPE);
+        if( (syncType & SYNC_TYPE_USER) > 0 )
+            syncUser(provider);
+        if( (syncType & SYNC_TYPE_VOTES) > 0 )
+            syncVotes(provider);
+        if( (syncType & SYNC_TYPE_SUBREDDIT) > 0 )
+            syncSubreddit(provider);
+        if( (syncType & SYNC_TYPE_LINKS) > 0 )
+            syncLinks(provider);
+        if( (syncType & SYNC_TYPE_COMMENTS) > 0 )
+            syncComment(provider);
+    }
+
+    /**
+     * Method send to the server the user votes
+     * @param provider
+     */
+    private void syncVotes(ContentProviderClient provider) {
+        Cursor cursor = null;
+        try{
+            cursor = provider.query(ReadditContract.Vote.CONTENT_URI, null,
+                    ReadditContract.Vote.COLUMN_SYNC_STATUS + "=?", new String[]{String.valueOf(SYNC_STATUS_NONE)}, null);
+            while (cursor.move(1)){
+                long id = cursor.getLong(cursor.getColumnIndex(ReadditContract.Vote._ID));
+                int voteDirection = cursor.getInt(cursor.getColumnIndex(ReadditContract.Vote.COLUMN_DIRECTION));
+                String fullname = cursor.getString(cursor.getColumnIndex(ReadditContract.Vote.COLUMN_THING_FULLNAME));
+                RequestFuture<JSONObject> future = RequestFuture.newFuture();
+                mVolleyQueue.add(VoteRequest.newInstance(voteDirection, fullname, mAccessToken, future, future));
+                JSONObject result = future.get();
+                Logger.i(result.toString());
+                if(setThingToSync(provider, fullname)) {
+                    int ret = provider.delete(ReadditContract.Vote.CONTENT_URI, ReadditContract.Vote._ID + "=?", new String[]{String.valueOf(id)});
+                    if (ret == 1)
+                        Logger.i("Vote deleted");
+                }
+            }
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } finally {
+            if(cursor!=null)
+                cursor.close();
+        }
+    }
+
+    private boolean setThingToSync(ContentProviderClient provider, String thing) {
+        if(Utils.stringNullOrEmpty(thing))
+            return false;
+        int lineUpdated = 0;
+        try {
+            ContentValues value = new ContentValues(1);
+            if (thing.startsWith(RedditApiUtils.KIND_LINK)) {
+                    value.put(ReadditContract.Link.COLUMN_SYNC_STATUS, SYNC_STATUS_UPDATE);
+                lineUpdated = provider.update(ReadditContract.Link.CONTENT_URI, value, ReadditContract.Link.COLUMN_NAME + "=?", new String[]{thing});
+            } else if (thing.startsWith(RedditApiUtils.KIND_COMMENT)) {
+                value.put(ReadditContract.Comment.COLUMN_SYNC_STATUS, SYNC_STATUS_UPDATE);
+                lineUpdated = provider.update(ReadditContract.Comment.CONTENT_URI, value, ReadditContract.Comment.COLUMN_NAME + "=?", new String[]{thing});
+            }
+        } catch (RemoteException e) {
+            e.printStackTrace();
+            Logger.e(e.getLocalizedMessage(), e);
+        }
+        return lineUpdated == 1;
     }
 
     private void syncComment(ContentProviderClient provider) {
@@ -410,7 +478,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 Logger.d("updating " + name);
                 String accessToken = cursor.getString(2);
                 ContentValues content = new ContentValues(1);
-                content.put(ReadditContract.User.COLUMN_SYNC_STATUS, SYNC_STATUS_RUNNING);
+                content.put(ReadditContract.User.COLUMN_SYNC_STATUS, SYNC_STATUS_UPDATE);
                 provider.update(ReadditContract.User.CONTENT_URI, content, ReadditContract.User._ID + "=?", new String[]{String.valueOf(id)});
                 RequestFuture<JSONObject> future = RequestFuture.newFuture();
                 mVolleyQueue.add(AboutRequest.newInstance(name, future, future, accessToken));
@@ -456,10 +524,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
     }
 
-    public static void syncNow(Context context){
+    public static void syncNow(Context context, int syncType){
         Bundle bundle = new Bundle(1);
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        bundle.putInt(EXTRA_SYNC_TYPE, syncType);
         context.getContentResolver().requestSync(SyncAdapter.getSyncAccount(context), context.getString(R.string.content_authority), bundle);
     }
 

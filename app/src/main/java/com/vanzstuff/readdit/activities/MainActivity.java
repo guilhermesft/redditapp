@@ -2,11 +2,9 @@ package com.vanzstuff.readdit.activities;
 
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
-import android.os.PersistableBundle;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
@@ -22,7 +20,6 @@ import android.widget.TextView;
 import com.vanzstuff.readdit.Logger;
 import com.vanzstuff.readdit.User;
 import com.vanzstuff.readdit.UserSession;
-import com.vanzstuff.readdit.data.DatabaseContentObserver;
 import com.vanzstuff.readdit.data.ReadditContract;
 import com.vanzstuff.readdit.data.SubredditLoader;
 import com.vanzstuff.readdit.data.TagsLoader;
@@ -45,10 +42,7 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
     private ListView mTagList;
     private ListView mSubredditList;
     private Button mSettings;
-    private Button mFriends;
-    private Button mMessages;
     private Button mAbout;
-    private ContentObserver mDatabaseObserver;
     private FeedsFragment mFeedsFragment;
     private DetailFragment mDetailFragment;
 
@@ -100,16 +94,10 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
         mTagList.setOnItemClickListener(this);
         mSettings = (Button) findViewById(R.id.drawer_settings);
         mSettings.setOnClickListener(this);
-        mFriends = (Button) findViewById(R.id.drawer_friends);
-        mFriends.setOnClickListener(this);
-        mMessages = (Button) findViewById(R.id.drawer_messages);
-        mMessages.setOnClickListener(this);
         mAbout = (Button) findViewById(R.id.drawer_about);
         mAbout.setOnClickListener(this);
         findViewById(R.id.drawer_profile_container).setOnClickListener(this);
         getActionBar().setHomeButtonEnabled(true);
-        mDatabaseObserver = new DatabaseContentObserver(this, new Handler(this));
-        getContentResolver().registerContentObserver(ReadditContract.User.CONTENT_URI, false, mDatabaseObserver);
     }
 
     @Override
@@ -118,7 +106,7 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
         User user = UserSession.getUser(this);
         if ( user != null ) {
             ((TextView) findViewById(R.id.drawer_username)).setText(user.name);
-            SyncAdapter.syncNow(this);
+            SyncAdapter.syncNow(this, SyncAdapter.SYNC_TYPE_VOTES);
         }
     }
 
@@ -163,13 +151,7 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
     @Override
     public void onClick(View v) {
         //let's verify which button has been clicked
-        if ( v.getId() == R.id.drawer_friends){
-            Logger.d("friends");
-            //TODO
-        } else if ( v.getId() == R.id.drawer_messages) {
-            Logger.d("Messages");
-            //TODO
-        } else if ( v.getId() == R.id.drawer_profile_container) {
+       if ( v.getId() == R.id.drawer_profile_container) {
             Logger.d("Profile");
             Intent intent = new Intent(this, OAuthActivity.class);
             startActivity(intent);
@@ -184,7 +166,8 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putString(FeedsFragment.ARG_URI, mFeedsFragment.getUri().toString());
+        if(mFeedsFragment.getUri() != null)
+            outState.putString(FeedsFragment.ARG_URI, mFeedsFragment.getUri().toString());
         super.onSaveInstanceState(outState);
     }
 

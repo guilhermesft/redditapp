@@ -54,6 +54,7 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
     private ImageButton mLabelButton;
     private ExpandableListView mCommentList;
     private long mPostID;
+    private String mFullname;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -91,6 +92,7 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
                     new String[]{String.valueOf(String.valueOf(mPostID))},
                     null);
             if (cursor.moveToFirst()) {
+                mFullname = cursor.getString(cursor.getColumnIndex(ReadditContract.Link.COLUMN_NAME));
                 String selfText = cursor.getString(cursor.getColumnIndex(ReadditContract.Link.COLUMN_SELFTEXT));
                 final String url = cursor.getString(cursor.getColumnIndex(ReadditContract.Link.COLUMN_URL));
                 View contentView = null;
@@ -166,23 +168,11 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
      */
     private void vote(int voteDirection){
         User user = UserSession.getUser(getActivity());
-        Cursor cursor = getActivity().getContentResolver().query(ReadditContract.Vote.CONTENT_URI, new String[]{ReadditContract.Vote._ID},
-                ReadditContract.Vote.COLUMN_POST + "=? AND " + ReadditContract.Vote.COLUMN_USER + "=?",
-                new String[]{String.valueOf(mPostID), String.valueOf(user.name)},
-                null);
         ContentValues values = new ContentValues(2);
         values.put(ReadditContract.Vote.COLUMN_USER, user.name);
-        values.put(ReadditContract.Vote.COLUMN_POST, mPostID);
+        values.put(ReadditContract.Vote.COLUMN_THING_FULLNAME, mFullname);
         values.put(ReadditContract.Vote.COLUMN_DIRECTION, voteDirection);
-        if ( cursor.moveToFirst()){
-            //user already has voted in the post. Update de vote
-            getActivity().getContentResolver().update(ReadditContract.Vote.CONTENT_URI, values,ReadditContract.Vote.COLUMN_POST + "=? AND " + ReadditContract.Vote.COLUMN_USER + "=?",
-                    new String[]{String.valueOf(mPostID), String.valueOf(user.name)});
-        } else {
-            //user has not voted in the post. Insert a vote
-            getActivity().getContentResolver().insert(ReadditContract.Vote.CONTENT_URI, values);
-        }
-        cursor.close();
+        getActivity().getContentResolver().insert(ReadditContract.Vote.CONTENT_URI, values);
     }
 
     @Override

@@ -56,6 +56,7 @@ public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
                 ReadditContract.Link.COLUMN_NAME + " TEXT, " +
                 ReadditContract.Link.COLUMN_VISITED + " INTEGER, " +
                 ReadditContract.Link.COLUMN_GILDED + " INTEGER, " +
+                ReadditContract.Link.COLUMN_SYNC_STATUS + " INTEGER, " +
                 ReadditContract.Link.COLUMN_LIKES + " INTEGER);";
         final String CREATE_TAG_X_POST = "CREATE TABLE " + ReadditContract.TagXPost.TABLE_NAME + " ( " +
                 ReadditContract.TagXPost.COLUMN_TAG + " INTEGER REFERENCES " + ReadditContract.Tag.TABLE_NAME + "( " + ReadditContract.Tag._ID + ") , " +
@@ -91,6 +92,7 @@ public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
                 ReadditContract.Comment.COLUMN_CREATED_UTC + " INTEGER, " +
                 ReadditContract.Comment.COLUMN_UPS + " INTEGER, " +
                 ReadditContract.Comment.COLUMN_DOWNS + " INTEGER, " +
+                ReadditContract.Comment.COLUMN_SYNC_STATUS + " INTEGER, " +
                 ReadditContract.Comment.COLUMN_DISTINGUISHED + " TEXT);";
         final String CREATE_SUBSCRIBE = "CREATE TABLE " + ReadditContract.Subreddit.TABLE_NAME + " ( " +
                 ReadditContract.Subreddit._ID + " INTEGER PRIMARY KEY, " +
@@ -130,7 +132,8 @@ public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
         final String CREATE_VOTE = "CREATE TABLE " + ReadditContract.Vote.TABLE_NAME + " ( " +
                 ReadditContract.Vote._ID + " INTEGER PRIMARY KEY, " +
                 ReadditContract.Vote.COLUMN_USER + " TEXT NOT NULL , " +
-                ReadditContract.Vote.COLUMN_POST + " INTEGER REFERENCES " + ReadditContract.Link.TABLE_NAME + "( " + ReadditContract.Link._ID + ") , " +
+                ReadditContract.Vote.COLUMN_THING_FULLNAME + " TEXT NOT NULL, " +
+                ReadditContract.Vote.COLUMN_SYNC_STATUS + " INTEGER DEFAULT 0, " +
                 ReadditContract.Vote.COLUMN_DIRECTION + " INTEGER NOT NULL DEFAULT 0 );";
         final String CREATE_USER = "CREATE TABLE " + ReadditContract.User.TABLE_NAME + " ( " +
                 ReadditContract.User._ID + " INTEGER PRIMARY KEY, " +

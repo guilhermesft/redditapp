@@ -10,6 +10,7 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 
 import com.vanzstuff.readdit.Utils;
+import com.vanzstuff.readdit.sync.SyncAdapter;
 
 /**
  * ContentProvider manages the app data
@@ -235,10 +236,10 @@ public class RedditDataProvider extends ContentProvider {
             }
             case USER: {
                     long id = db.insertOrThrow(ReadditContract.User.TABLE_NAME, null, values);
-                    if (id > 0)
+                    if (id > 0) {
                         returnUri = ReadditContract.User.buildUserUri(id);
-
-                    else
+                        SyncAdapter.syncNow(getContext(), SyncAdapter.SYNC_TYPE_ALL);
+                    } else
                         throw new android.database.SQLException("Failed to insert row into " + uri);
                     break;
                 }
@@ -277,9 +278,10 @@ public class RedditDataProvider extends ContentProvider {
             }
             case VOTE: {
                 long id = db.insertOrThrow(ReadditContract.Vote.TABLE_NAME, null, values);
-                if (id > 0)
+                if (id > 0) {
                     returnUri = ReadditContract.Vote.buildVoteUri(id);
-                else
+                    SyncAdapter.syncNow(getContext(), SyncAdapter.SYNC_TYPE_VOTES);
+                } else
                     throw new android.database.SQLException("Failed to insert row into " + uri);
                 break;
             }

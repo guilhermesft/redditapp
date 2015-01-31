@@ -46,7 +46,7 @@ public class RedditApiUtils {
     public static final String KIND_PROMOCAMPAIGN = "t7";
     public static final String KIND_LISTING = "Listing";
 
-    private static final String sClientId = "7KxduDMf4c8Sig";
+    private static final String sClientId = "7xvK--C_5EZf3Q";
 
 
 

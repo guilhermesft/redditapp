@@ -69,6 +69,7 @@ public class BaseRedditApiJsonRequest extends JsonObjectRequest {
         for(String key : mParams.keySet()){
             builder.append(key + "=" + mParams.get(key) + "&");
         }
+        Logger.d(builder.substring(0, builder.length()-1));
         return builder.substring(0, builder.length()-1).getBytes();
     }
 
