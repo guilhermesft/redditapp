@@ -35,6 +35,7 @@ import com.vanzstuff.readdit.VolleyWrapper;
 import com.vanzstuff.readdit.data.ReadditContract;
 import com.vanzstuff.readdit.redditapi.RedditApiUtils;
 import com.vanzstuff.readdit.redditapi.VoteRequest;
+import com.vanzstuff.readdit.sync.SyncAdapter;
 import com.vanzstuff.redditapp.R;
 
 import java.util.UUID;
@@ -86,7 +87,6 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
         mPostID = getArguments().getLong(ARG_POST_ID, -1);
         Cursor cursor = null;
         try {
-            //TODO - review
             cursor = getActivity().getContentResolver().query(ReadditContract.Link.CONTENT_URI, null,
                     ReadditContract.Link._ID + " = ?",
                     new String[]{String.valueOf(String.valueOf(mPostID))},
@@ -151,13 +151,13 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
                 vote(VoteRequest.VOTE_DOWN);
             else
                 Toast.makeText(getActivity(), getString(R.string.need_login), Toast.LENGTH_LONG).show();
-        }else if ( v.getId() == R.id.action_menu_save){
+        } else if ( v.getId() == R.id.action_menu_save){
             //add the tag saved to the post
             getActivity().getContentResolver().insert(ReadditContract.Link.buildAddTagUri(mPostID, PredefinedTags.SAVED.getName()), null);
-        }else if ( v.getId() == R.id.action_menu_hide){
+        } else if ( v.getId() == R.id.action_menu_hide){
             //add the tag hidden to the post
             getActivity().getContentResolver().insert(ReadditContract.Link.buildAddTagUri(mPostID, PredefinedTags.HIDDEN.getName()), null);
-        }else if ( v.getId() == R.id.action_menu_label){
+        } else if ( v.getId() == R.id.action_menu_label){
             InputTagFragment.newInstance(mPostID).show(getActivity().getSupportFragmentManager(), "InputTagFragment");
         }
     }
@@ -172,6 +172,7 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
         values.put(ReadditContract.Vote.COLUMN_USER, user.name);
         values.put(ReadditContract.Vote.COLUMN_THING_FULLNAME, mFullname);
         values.put(ReadditContract.Vote.COLUMN_DIRECTION, voteDirection);
+        values.put(ReadditContract.Vote.COLUMN_SYNC_STATUS, SyncAdapter.SYNC_STATUS_UPDATE);
         getActivity().getContentResolver().insert(ReadditContract.Vote.CONTENT_URI, values);
     }
 
@@ -182,7 +183,6 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-
     }
 
     @Override

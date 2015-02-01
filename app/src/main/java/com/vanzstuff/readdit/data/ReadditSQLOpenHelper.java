@@ -42,7 +42,8 @@ public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
                 ReadditContract.Link.COLUMN_SCORE + " INTEGER, " +
                 ReadditContract.Link.COLUMN_SELFTEXT + " TEXT, " +
                 ReadditContract.Link.COLUMN_SELFTEXT_HTML + " TEXT, " +
-                ReadditContract.Link.COLUMN_SUBREDDIT + " TEXT, " +
+                ReadditContract.Link.COLUMN_SUBREDDIT + " TEXT REFERENCES " + ReadditContract.Subreddit.TABLE_NAME + "( " +
+                                                    ReadditContract.Subreddit.COLUMN_DISPLAY_NAME + " ) ON DELETE CASCADE ON UPDATE CASCADE, " +
                 ReadditContract.Link.COLUMN_SUBREDDIT_ID + " TEXT, " +
                 ReadditContract.Link.COLUMN_THUMBNAIL + " TEXT, " +
                 ReadditContract.Link.COLUMN_TITLE + " TEXT, " +
@@ -57,7 +58,7 @@ public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
                 ReadditContract.Link.COLUMN_BANNED_BY + " TEXT, " +
                 ReadditContract.Link.COLUMN_ID + " TEXT UNIQUE, " +
                 ReadditContract.Link.COLUMN_APPROVED_BY + " TEXT, " +
-                ReadditContract.Link.COLUMN_NAME + " TEXT, " +
+                ReadditContract.Link.COLUMN_NAME + " TEXT UNIQUE, " +
                 ReadditContract.Link.COLUMN_VISITED + " INTEGER, " +
                 ReadditContract.Link.COLUMN_GILDED + " INTEGER, " +
                 ReadditContract.Link.COLUMN_SYNC_STATUS + " INTEGER, " +
@@ -81,7 +82,7 @@ public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
                 ReadditContract.Comment.COLUMN_GILDED + " INTEGER, " +
                 ReadditContract.Comment.COLUMN_LIKES + " INTEGER, " +
                 ReadditContract.Comment.COLUMN_LINK_AUTHOR + " TEXT, " +
-                ReadditContract.Comment.COLUMN_LINK_ID + " TEXT, " +
+                ReadditContract.Comment.COLUMN_LINK_ID + " TEXT REFERENCES "  + ReadditContract.Link.TABLE_NAME + " ( " + ReadditContract.Link.COLUMN_NAME + ") ON DELETE CASCADE ON UPDATE CASCADE, " +
                 ReadditContract.Comment.COLUMN_LINK_TITLE + " TEXT, " +
                 ReadditContract.Comment.COLUMN_LINK_URL + " TEXT, " +
                 ReadditContract.Comment.COLUMN_NUM_REPORTS + " INTEGER, " +
@@ -107,7 +108,7 @@ public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
                 ReadditContract.Subreddit.COLUMN_COMMENT_SCORE_HIDE_MINS + " INTEGER DEFAULT 0, " +
                 ReadditContract.Subreddit.COLUMN_DESCRIPTION + " TEXT, " +
                 ReadditContract.Subreddit.COLUMN_DESCRIPTION_HTML + " TEXT, " +
-                ReadditContract.Subreddit.COLUMN_DISPLAY_NAME + " TEXT, " +
+                ReadditContract.Subreddit.COLUMN_DISPLAY_NAME + " TEXT UNIQUE, " +
                 ReadditContract.Subreddit.COLUMN_HEADER_IMG + " TEXT, " +
                 ReadditContract.Subreddit.COLUMN_HEADER_WIDTH + " INTEGER, " +
                 ReadditContract.Subreddit.COLUMN_HEADER_HEIGHT + " INTEGER, " +

@@ -160,6 +160,7 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
             startActivity(new Intent(this, SettingsActivity.class));
         } else if ( v.getId() == R.id.drawer_about){
             Logger.d("About");
+           SyncAdapter.syncNow(this, SyncAdapter.SYNC_TYPE_SUBREDDIT | SyncAdapter.SYNC_TYPE_LINKS);
             new AboutFragment().show(getSupportFragmentManager(), "about");
         }
     }

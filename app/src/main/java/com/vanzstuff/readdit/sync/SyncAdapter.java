@@ -162,7 +162,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         Cursor cursor = null;
         try{
             cursor = provider.query(ReadditContract.Vote.CONTENT_URI, null,
-                    ReadditContract.Vote.COLUMN_SYNC_STATUS + "=?", new String[]{String.valueOf(SYNC_STATUS_NONE)}, null);
+                    ReadditContract.Vote.COLUMN_SYNC_STATUS + "=?", new String[]{String.valueOf(SYNC_STATUS_UPDATE)}, null);
             while (cursor.move(1)) {
                 long id = cursor.getLong(cursor.getColumnIndex(ReadditContract.Vote._ID));
                 int voteDirection = cursor.getInt(cursor.getColumnIndex(ReadditContract.Vote.COLUMN_DIRECTION));
@@ -233,11 +233,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     int ret = provider.bulkInsert(ReadditContract.Comment.CONTENT_URI, newComments.toArray(new ContentValues[newComments.size()]));
                     Logger.i(ret + " comments inserted");
             }
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
+        } catch (Exception e) {
+            Logger.e(e.getLocalizedMessage(), e);
             e.printStackTrace();
         } finally {
             if (cursor != null)
@@ -330,41 +327,52 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     private void syncLinks(ContentProviderClient provider) {
         Cursor cursor = null;
+        Cursor subredditCursor = null;
+        Cursor linkCursor = null;
         try {
-            Cursor subredditCursor = null;
             subredditCursor = provider.query(ReadditContract.Subreddit.CONTENT_URI, null, null, null, null);
             while (subredditCursor.move(1)) {
+                Set<String> databaseLinks = new HashSet<>();
                 String subreddit = subredditCursor.getString(subredditCursor.getColumnIndex(ReadditContract.Subreddit.COLUMN_DISPLAY_NAME));
+                //get all link from database to compare with retrieved ones
+                linkCursor = provider.query(ReadditContract.Link.CONTENT_URI, new String[]{ReadditContract.Link.COLUMN_ID},
+                        ReadditContract.Link.COLUMN_SUBREDDIT + "=?", new String[]{subreddit}, null);
+                while(linkCursor.move(1))
+                    databaseLinks.add(linkCursor.getString(0));
+                linkCursor.close();
                 RequestFuture<JSONObject> future = RequestFuture.newFuture();
                 mVolleyQueue.add(GetLinks.newInstance(subreddit, null, null, -1, 50, mAccessToken, future, future));
                 JSONObject result = future.get();
-                Logger.d(result.toString());
+                //parse json
                 ContentValues[] linksValues = loadLinks(result);
                 Set<ContentValues> newLinks = new HashSet<>();
                 for(ContentValues value : linksValues ){
                     String linkID = value.getAsString(ReadditContract.Link.COLUMN_ID);
-                    if(isLinkInDatabase(provider, linkID)){
-                        if (provider.update(ReadditContract.Link.CONTENT_URI, value, ReadditContract.Link.COLUMN_ID + "=?", new String[]{linkID}) > 0)
-                            Logger.i(linkID + " updated");
-
-                    } else
+                    //check if link is already in database
+                    if(isLinkInDatabase(provider, linkID)) {
+                        //update data
+                        provider.update(ReadditContract.Link.CONTENT_URI, value, ReadditContract.Link.COLUMN_ID + "=?", new String[]{linkID});
+                        //this link cannot be deleted, remove it
+                        databaseLinks.remove(linkID);
+                    } else {
+                        //new link, needs to be inserted
                         newLinks.add(value);
+                    }
                 }
-                int ret = provider.bulkInsert(ReadditContract.Link.CONTENT_URI, newLinks.toArray(new ContentValues[newLinks.size()]));
-                Logger.i(ret + " link inserted");
+                provider.bulkInsert(ReadditContract.Link.CONTENT_URI, newLinks.toArray(new ContentValues[newLinks.size()]));
+                for(String linkID : databaseLinks)
+                    provider.delete(ReadditContract.Link.CONTENT_URI, ReadditContract.Link.COLUMN_ID + "=?", new String[]{linkID});
             }
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
+            //TODO - improve exception handling
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if ( cursor != null){
+            if ( cursor != null)
                 cursor.close();
-            }
+            if ( subredditCursor != null)
+                subredditCursor.close();
+            if ( linkCursor != null && !linkCursor.isClosed())
+                linkCursor.close();
         }
     }
 
@@ -433,30 +441,37 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         Cursor cursor = null;
         try {
             RequestFuture<JSONObject> future = RequestFuture.newFuture();
+            //get all user's subreddit
             mVolleyQueue.add(MySubredditRequest.newInstance(MySubredditRequest.PATH_SUBSCRIBER, null, null, -1, 50, future, future, mAccessToken));
             JSONObject result = future.get();
+            //parse the json
             ContentValues[] subredditsValues = loadSubreddits(result);
+            // get all subreddits in the database to compare with retrieved ones.
+            Set<String> databaseSubreddits = new HashSet<String>();
+            cursor = provider.query(ReadditContract.Subreddit.CONTENT_URI, new String[]{ReadditContract.Subreddit.COLUMN_ID}, null, null, null);
+            while(cursor.move(1))
+                databaseSubreddits.add(cursor.getString(0));
             Set<ContentValues> newSubreddits = new HashSet<ContentValues>();
             //we need to update subreddit that already in the database and insert new ones
             for( ContentValues value : subredditsValues){
                 String subredditId = value.getAsString(ReadditContract.Subreddit.COLUMN_ID);
+                //check if in necessary update or insert new subreddit
                 if(isSubredditInDatabase(provider, subredditId)) {
+                    value.put(ReadditContract.Subreddit.COLUMN_SYNC_STATUS, SYNC_STATUS_NONE);
                     provider.update(ReadditContract.Subreddit.CONTENT_URI, value, ReadditContract.Subreddit.COLUMN_ID + "=?", new String[]{subredditId});
-                    Logger.i(subredditId + " updated");
-                } else
+                    databaseSubreddits.remove(subredditId);
+                } else {
                     newSubreddits.add(value);
-
+                }
             }
-            int rowsCount = provider.bulkInsert(ReadditContract.Subreddit.CONTENT_URI, newSubreddits.toArray(new ContentValues[newSubreddits.size()]));
-            Logger.i(rowsCount + " subreddits inserted");
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            Logger.e(e.getCause().getLocalizedMessage(), e.getCause());
-            e.printStackTrace();
-        } catch (JSONException e) {
+            //insert new subreddits
+            provider.bulkInsert(ReadditContract.Subreddit.CONTENT_URI, newSubreddits.toArray(new ContentValues[newSubreddits.size()]));
+            //delete subreddits that is already in database but is not in user's subreddit list
+            for( String subredditId : databaseSubreddits)
+                provider.delete(ReadditContract.Subreddit.CONTENT_URI, ReadditContract.Subreddit.COLUMN_ID + "=?" , new String[]{subredditId});
+            //TODO - improve exception handling
+        } catch (Exception e) {
+            Logger.e(e.getLocalizedMessage(), e);
             e.printStackTrace();
         } finally {
             if ( cursor != null )
