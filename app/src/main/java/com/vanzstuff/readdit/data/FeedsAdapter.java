@@ -1,28 +1,38 @@
 package com.vanzstuff.readdit.data;
 
+import android.content.Context;
 import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.volley.toolbox.NetworkImageView;
+import com.vanzstuff.readdit.Utils;
+import com.vanzstuff.readdit.VolleyWrapper;
 import com.vanzstuff.redditapp.R;
 
 public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> {
 
+    private final Context mContext;
     private Cursor mCursor;
     private ItemSelectedListener mListener;
 
-    public FeedsAdapter(Cursor cursor, ItemSelectedListener listener){
+    public FeedsAdapter(Cursor cursor, ItemSelectedListener listener, Context context){
         mCursor = cursor;
         mListener = listener;
+        mContext = context;
         setHasStableIds(true);
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.post_item, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.link_item, parent, false);
         return new ViewHolder(v);
     }
 
@@ -30,10 +40,33 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> 
     public void onBindViewHolder(ViewHolder holder, int position) {
         mCursor.moveToPosition(position);
         holder.mTxtTitle.setText(mCursor.getString(mCursor.getColumnIndex(ReadditContract.Link.COLUMN_TITLE)));
-        holder.mTxtUser.setText(mCursor.getString(mCursor.getColumnIndex(ReadditContract.Link.COLUMN_AUTHOR)));
-        holder.mTxtTime.setText(mCursor.getString(mCursor.getColumnIndex(ReadditContract.Link.COLUMN_CREATED)));
-        holder.mTxtVotes.setText(mCursor.getString(mCursor.getColumnIndex(ReadditContract.Link.COLUMN_UPS)));
-        holder.mTxtThread.setText(mCursor.getString(mCursor.getColumnIndex(ReadditContract.Link.COLUMN_NUM_COMMENTS)));
+        holder.mTxtUser.setText(Html.fromHtml(String.format(mContext.getString(R.string.link_item_user_in_subreddit),
+                mCursor.getString(mCursor.getColumnIndex(ReadditContract.Link.COLUMN_AUTHOR)),
+                mCursor.getString(mCursor.getColumnIndex(ReadditContract.Link.COLUMN_SUBREDDIT)))));
+        long timestamp = mCursor.getLong(mCursor.getColumnIndex(ReadditContract.Link.COLUMN_CREATED));
+        holder.mTxtTime.setText(DateUtils.getRelativeTimeSpanString(timestamp, System.currentTimeMillis(),DateUtils.HOUR_IN_MILLIS,
+                DateUtils.FORMAT_ABBREV_RELATIVE));
+        holder.mTxtVotes.setText(String.format(mContext.getString(R.string.link_item_ups), mCursor.getInt(mCursor.getColumnIndex(ReadditContract.Link.COLUMN_UPS))));
+        holder.mTxtComments.setText(String.format(mContext.getString(R.string.link_item_comments), mCursor.getInt(mCursor.getColumnIndex(ReadditContract.Link.COLUMN_NUM_COMMENTS))));
+        holder.mTxtDomain.setText(mCursor.getString(mCursor.getColumnIndex(ReadditContract.Link.COLUMN_DOMAIN)));
+        String thumbnail = mCursor.getString(mCursor.getColumnIndex(ReadditContract.Link.COLUMN_THUMBNAIL));
+        String url = mCursor.getString(mCursor.getColumnIndex(ReadditContract.Link.COLUMN_URL));
+        ImageView thumnailView = null;
+        if(Utils.isImageUrl(thumbnail)){
+            NetworkImageView niv = new NetworkImageView(mContext);
+            niv.setImageUrl(thumbnail, VolleyWrapper.getInstance().getImageLoader());
+            thumnailView = niv;
+        } else if ( Utils.isImageUrl(url) ){
+            NetworkImageView niv = new NetworkImageView(mContext);
+            niv.setImageUrl(url, VolleyWrapper.getInstance().getImageLoader());
+            thumnailView = niv;
+        }
+        if( thumnailView != null ) {
+            thumnailView.setMaxHeight((int) mContext.getResources().getDimension(R.dimen.default_thumnail_height));
+            thumnailView.setMaxWidth((int) mContext.getResources().getDimension(R.dimen.default_thumnail_width));
+            holder.mThumnailContainer.addView(thumnailView);
+        }
+
     }
 
     @Override
@@ -51,9 +84,11 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> 
     public final class ViewHolder extends RecyclerView.ViewHolder{
         public TextView mTxtTitle;
         public TextView mTxtVotes;
-        public TextView mTxtThread;
+        public TextView mTxtComments;
         public TextView mTxtUser;
         public TextView mTxtTime;
+        public TextView mTxtDomain;
+        public FrameLayout mThumnailContainer;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -63,11 +98,13 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> 
                     mListener.onPostClicked(getItemId());
                 }
             });
-            mTxtTitle = (TextView) itemView.findViewById(R.id.post_item_title);
-            mTxtVotes = (TextView) itemView.findViewById(R.id.post_item_votes);
-            mTxtThread = (TextView) itemView.findViewById(R.id.post_item_thread);
-            mTxtUser = (TextView) itemView.findViewById(R.id.post_item_user);
-            mTxtTime = (TextView) itemView.findViewById(R.id.post_item_time);
+            mThumnailContainer = (FrameLayout) itemView.findViewById(R.id.link_item_thumbnail_container);
+            mTxtTitle = (TextView) itemView.findViewById(R.id.link_item_title);
+            mTxtVotes = (TextView) itemView.findViewById(R.id.link_item_votes);
+            mTxtComments = (TextView) itemView.findViewById(R.id.link_item_comments);
+            mTxtUser = (TextView) itemView.findViewById(R.id.link_item_user);
+            mTxtTime = (TextView) itemView.findViewById(R.id.link_item_time);
+            mTxtDomain = (TextView) itemView.findViewById(R.id.link_item_domain);
         }
     }
 

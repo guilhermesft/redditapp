@@ -92,12 +92,12 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
         if( mUri != null)
             return new CursorLoader(getActivity(), mUri, null, null, null, ReadditContract.Link.COLUMN_CREATED);
         else
-            return new CursorLoader(getActivity(), ReadditContract.Link.buildLinkBySubredditDisplayName("Hot"), null, null, null, ReadditContract.Link.COLUMN_CREATED);
+            return new CursorLoader(getActivity(), ReadditContract.Link.CONTENT_URI, null, null, null, ReadditContract.Link.COLUMN_CREATED);
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mRecyclerView.swapAdapter(new FeedsAdapter(data, this), false);
+        mRecyclerView.swapAdapter(new FeedsAdapter(data, this, getActivity()), false);
     }
 
     @Override

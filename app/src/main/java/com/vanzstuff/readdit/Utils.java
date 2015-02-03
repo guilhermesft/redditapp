@@ -2,7 +2,7 @@ package com.vanzstuff.readdit;
 
 public class Utils {
 
-    private static final String URL_IMAGE = "^.+\\.[jpg|jpeg|png|gif]$";
+    private static final String URL_IMAGE = "^.+[jpg|jpeg|png|gif]$";
 
     /**
      * Check if String s is not null or empty

@@ -32,5 +32,10 @@
     <string name="sync_account_type">com.vanzstuff.readdit.account</string>
     <string name="content_authority">com.vanzstuff.readdit.provider</string>
     <string name="drawer_subreddit_header">Subreddit</string>
+    <string name="in">in</string>
+    <string name="link_item_user_in_subreddit">&lt;b>%1$s&lt;/b> in &lt;b>%2$s&lt;/b></string>
+    <string name="link_item_ups">%1$d votes</string>
+    <string name="link_item_comments">%1$d comments</string>
+    <string name="link_item_date">%1$s</string>
 
 </resources>

@@ -219,7 +219,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 mVolleyQueue.add(GetCommentRequest.newInstance(subreddit, article, 0, -1, -1, true, true, GetCommentRequest.PARAM_SORT_NEW, future, future, mAccessToken));
                 JSONArray result = future.get();
                 ContentValues[] comments = loadComments(result);
-                Set<ContentValues> newComments = new HashSet<>();
+                Set<ContentValues> newComments = new HashSet();
                 for (ContentValues value : comments) {
                     String commentID = value.getAsString(ReadditContract.Comment.COLUMN_ID);
                     if (isCommentInDatabase(provider, commentID)) {
@@ -332,7 +332,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         try {
             subredditCursor = provider.query(ReadditContract.Subreddit.CONTENT_URI, null, null, null, null);
             while (subredditCursor.move(1)) {
-                Set<String> databaseLinks = new HashSet<>();
+                Set<String> databaseLinks = new HashSet();
                 String subreddit = subredditCursor.getString(subredditCursor.getColumnIndex(ReadditContract.Subreddit.COLUMN_DISPLAY_NAME));
                 //get all link from database to compare with retrieved ones
                 linkCursor = provider.query(ReadditContract.Link.CONTENT_URI, new String[]{ReadditContract.Link.COLUMN_ID},
@@ -345,7 +345,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 JSONObject result = future.get();
                 //parse json
                 ContentValues[] linksValues = loadLinks(result);
-                Set<ContentValues> newLinks = new HashSet<>();
+                Set<ContentValues> newLinks = new HashSet();
                 for(ContentValues value : linksValues ){
                     String linkID = value.getAsString(ReadditContract.Link.COLUMN_ID);
                     //check if link is already in database
