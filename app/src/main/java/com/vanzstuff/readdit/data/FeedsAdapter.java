@@ -8,8 +8,6 @@ import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.volley.toolbox.NetworkImageView;
@@ -19,6 +17,8 @@ import com.vanzstuff.redditapp.R;
 
 public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> {
 
+    private static final int TYPE_WITH_THUMBNAIL = 1;
+    private static final int TYPE_WITHOUT_THUMBNAIL = 2;
     private final Context mContext;
     private Cursor mCursor;
     private ItemSelectedListener mListener;
@@ -32,8 +32,20 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> 
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.link_item, parent, false);
-        return new ViewHolder(v);
+        if ( viewType == TYPE_WITHOUT_THUMBNAIL)
+            return new ViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.link_item, parent, false), TYPE_WITHOUT_THUMBNAIL);
+        else
+            return new ViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.link_item_with_thumbnail, parent, false),TYPE_WITH_THUMBNAIL);
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        mCursor.moveToPosition(position);
+        String thumbnailUrl = mCursor.getString(mCursor.getColumnIndex(ReadditContract.Link.COLUMN_THUMBNAIL));
+        String url = mCursor.getString(mCursor.getColumnIndex(ReadditContract.Link.COLUMN_URL));
+        if (Utils.isImageUrl(thumbnailUrl) || Utils.isImageUrl(url))
+            return TYPE_WITH_THUMBNAIL;
+        return TYPE_WITHOUT_THUMBNAIL;
     }
 
     @Override
@@ -49,24 +61,15 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> 
         holder.mTxtVotes.setText(String.format(mContext.getString(R.string.link_item_ups), mCursor.getInt(mCursor.getColumnIndex(ReadditContract.Link.COLUMN_UPS))));
         holder.mTxtComments.setText(String.format(mContext.getString(R.string.link_item_comments), mCursor.getInt(mCursor.getColumnIndex(ReadditContract.Link.COLUMN_NUM_COMMENTS))));
         holder.mTxtDomain.setText(mCursor.getString(mCursor.getColumnIndex(ReadditContract.Link.COLUMN_DOMAIN)));
-        String thumbnail = mCursor.getString(mCursor.getColumnIndex(ReadditContract.Link.COLUMN_THUMBNAIL));
-        String url = mCursor.getString(mCursor.getColumnIndex(ReadditContract.Link.COLUMN_URL));
-        ImageView thumnailView = null;
-        if(Utils.isImageUrl(thumbnail)){
-            NetworkImageView niv = new NetworkImageView(mContext);
-            niv.setImageUrl(thumbnail, VolleyWrapper.getInstance().getImageLoader());
-            thumnailView = niv;
-        } else if ( Utils.isImageUrl(url) ){
-            NetworkImageView niv = new NetworkImageView(mContext);
-            niv.setImageUrl(url, VolleyWrapper.getInstance().getImageLoader());
-            thumnailView = niv;
+        if( holder.mViewType == TYPE_WITH_THUMBNAIL) {
+            String thumbnailUrl = mCursor.getString(mCursor.getColumnIndex(ReadditContract.Link.COLUMN_THUMBNAIL));
+            String url = mCursor.getString(mCursor.getColumnIndex(ReadditContract.Link.COLUMN_URL));
+            if (Utils.isImageUrl(thumbnailUrl)) {
+                holder.mThumbnail.setImageUrl(thumbnailUrl, VolleyWrapper.getInstance().getImageLoader());
+            } else  {
+                holder.mThumbnail.setImageUrl(url, VolleyWrapper.getInstance().getImageLoader());
+            }
         }
-        if( thumnailView != null ) {
-            thumnailView.setMaxHeight((int) mContext.getResources().getDimension(R.dimen.default_thumnail_height));
-            thumnailView.setMaxWidth((int) mContext.getResources().getDimension(R.dimen.default_thumnail_width));
-            holder.mThumnailContainer.addView(thumnailView);
-        }
-
     }
 
     @Override
@@ -88,17 +91,19 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> 
         public TextView mTxtUser;
         public TextView mTxtTime;
         public TextView mTxtDomain;
-        public FrameLayout mThumnailContainer;
+        public NetworkImageView mThumbnail;
+        public int mViewType;
 
-        public ViewHolder(View itemView) {
+        public ViewHolder(View itemView, int viewType) {
             super(itemView);
+            mViewType = viewType;
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     mListener.onPostClicked(getItemId());
                 }
             });
-            mThumnailContainer = (FrameLayout) itemView.findViewById(R.id.link_item_thumbnail_container);
+            mThumbnail = (NetworkImageView) itemView.findViewById(R.id.link_item_thumbnail);
             mTxtTitle = (TextView) itemView.findViewById(R.id.link_item_title);
             mTxtVotes = (TextView) itemView.findViewById(R.id.link_item_votes);
             mTxtComments = (TextView) itemView.findViewById(R.id.link_item_comments);

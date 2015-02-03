@@ -13,7 +13,9 @@
         <item name="android:textColor">#2e7d32</item>
     </style>
 
-    <style name="link_item_title_style"></style>
+    <style name="link_item_title_style">
+        <item name="android:textStyle">bold</item>
+    </style>
 
     <style name="link_item_domain_style">
         <item name="android:textColor">#81c784</item>

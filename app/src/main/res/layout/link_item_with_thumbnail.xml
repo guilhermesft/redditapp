@@ -7,10 +7,17 @@
     android:paddingEnd="@dimen/default_padding"
     android:layout_margin="@dimen/default_margin">
 
+    <com.android.volley.toolbox.NetworkImageView
+        android:id="@+id/link_item_thumbnail"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_width="@dimen/default_thumbnail_width"
+        android:layout_height="@dimen/default_thumbnail_height"/>
+
     <TextView
         android:id="@+id/link_item_user"
         android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true"
+        android:layout_toStartOf="@id/link_item_thumbnail"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingStart="@dimen/default_padding"
@@ -21,7 +28,6 @@
         android:id="@+id/link_item_domain"
         android:layout_below="@id/link_item_user"
         android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingStart="@dimen/default_padding"
@@ -34,7 +40,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/link_item_domain"
         android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true"
+        android:layout_toStartOf="@id/link_item_thumbnail"
         android:paddingStart="@dimen/default_padding"
         android:paddingTop="@dimen/default_padding"
         style="@style/link_item_title_style"
