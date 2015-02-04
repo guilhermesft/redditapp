@@ -3,6 +3,7 @@ package com.vanzstuff.readdit.activities;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.webkit.WebView;
@@ -66,10 +67,11 @@ public class OAuthActivity extends FragmentActivity implements Response.ErrorLis
     }
 
     private void saveAccessToken(String url) {
-        Pattern p = Pattern.compile("#access_token=([\\w|-]+)&" );
-        Matcher matcher = p.matcher(url);
-        if ( matcher.find() ){
-            mAccessToken = matcher.group(1);
+//        Pattern p = Pattern.compile("#access_token=([\\w|-]+)&" );
+//        Matcher matcher = p.matcher(url);
+        Uri uri = Uri.parse(url.replace("#", "?"));
+        if(uri.getQueryParameterNames().contains("access_token")) {
+            mAccessToken = uri.getQueryParameter("access_token");
             GetMeRequest request = new GetMeRequest(mAccessToken, this, this);
             request.setTag(REQUEST_TAG);
             VolleyWrapper.getInstance().addToRequestQueue(request);

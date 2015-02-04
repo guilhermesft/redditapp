@@ -258,7 +258,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private ContentValues[] loadComments(JSONArray result) {
-        Set<ContentValues> valuesSet = new HashSet<>();
+        Set<ContentValues> valuesSet = new HashSet();
         try {
             for (int i = 0; i < result.length(); i++) {
                 valuesSet.addAll(parseComments(result.getJSONObject(i)));
