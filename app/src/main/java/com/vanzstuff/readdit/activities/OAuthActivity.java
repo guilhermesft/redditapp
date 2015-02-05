@@ -67,8 +67,6 @@ public class OAuthActivity extends FragmentActivity implements Response.ErrorLis
     }
 
     private void saveAccessToken(String url) {
-//        Pattern p = Pattern.compile("#access_token=([\\w|-]+)&" );
-//        Matcher matcher = p.matcher(url);
         Uri uri = Uri.parse(url.replace("#", "?"));
         if(uri.getQueryParameterNames().contains("access_token")) {
             mAccessToken = uri.getQueryParameter("access_token");
