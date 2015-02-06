@@ -10,10 +10,13 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.vanzstuff.readdit.Logger;
 import com.vanzstuff.readdit.data.FeedsAdapter;
 import com.vanzstuff.redditapp.R;
 import com.vanzstuff.readdit.data.ReadditContract;
@@ -126,6 +129,8 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
     public Uri getUri() {
         return mUri;
     }
+
+
 
     /**
      * Interface to enable communication between the fragment and the activity
