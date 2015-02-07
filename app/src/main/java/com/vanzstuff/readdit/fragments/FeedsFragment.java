@@ -16,6 +16,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.vanzstuff.readdit.DividerItemDecoration;
 import com.vanzstuff.readdit.Logger;
 import com.vanzstuff.readdit.data.FeedsAdapter;
 import com.vanzstuff.redditapp.R;
@@ -67,6 +68,7 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_feeds, container, false);
         mRecyclerView = (RecyclerView) v.findViewById(R.id.fragment_feeds_recycler_view);
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST));
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         return v;
     }
@@ -100,7 +102,7 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mRecyclerView.swapAdapter(new FeedsAdapter(data, this, getActivity()), false);
+        mRecyclerView.swapAdapter(new FeedsAdapter(data, this, mRecyclerView, getActivity()), false);
     }
 
     @Override

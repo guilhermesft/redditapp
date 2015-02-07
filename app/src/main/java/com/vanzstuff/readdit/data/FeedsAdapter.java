@@ -27,15 +27,16 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> 
     private static final int TYPE_WITH_THUMBNAIL = 1;
     private static final int TYPE_WITHOUT_THUMBNAIL = 2;
     private final Context mContext;
+    private final RecyclerView mRecyclerView;
 
     private Cursor mCursor;
     private ItemSelectedListener mListener;
 
-    public FeedsAdapter(Cursor cursor, ItemSelectedListener listener, Context context){
+    public FeedsAdapter(Cursor cursor, ItemSelectedListener listener, RecyclerView recyclerView, Context context){
         mCursor = cursor;
         mListener = listener;
         mContext = context;
-
+        mRecyclerView = recyclerView;
         setHasStableIds(true);
     }
 
@@ -62,6 +63,7 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> 
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
+        holder.reset();
         mCursor.moveToPosition(position);
         holder.mTxtTitle.setText(mCursor.getString(mCursor.getColumnIndex(ReadditContract.Link.COLUMN_TITLE)));
         holder.mTxtUser.setText(Html.fromHtml(String.format(mContext.getString(R.string.link_item_user_in_subreddit),
@@ -105,20 +107,17 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> 
         public TextView mTxtDomain;
         public NetworkImageView mThumbnail;
         public int mViewType;
-        private GestureDetectorCompat mDetector;
 
         public ViewHolder(View itemView, int viewType) {
             super(itemView);
-            itemView.invalidate();
             mViewType = viewType;
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mListener.onPostClicked(getItemId());
+                   // mListener.onPostClicked(getItemId());
                 }
             });
-            mDetector = new GestureDetectorCompat(mContext,new GestureListener(itemView));
-            itemView.setOnTouchListener(new FeedsItemTouchListener());
+            itemView.setOnTouchListener(new FeedsItemTouchListener(mRecyclerView));
             mThumbnail = (NetworkImageView) itemView.findViewById(R.id.link_item_thumbnail);
             mTxtTitle = (TextView) itemView.findViewById(R.id.link_item_title);
             mTxtVotes = (TextView) itemView.findViewById(R.id.link_item_votes);
@@ -126,6 +125,11 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> 
             mTxtUser = (TextView) itemView.findViewById(R.id.link_item_user);
             mTxtTime = (TextView) itemView.findViewById(R.id.link_item_time);
             mTxtDomain = (TextView) itemView.findViewById(R.id.link_item_domain);
+        }
+
+        public void reset(){
+            itemView.setTranslationX(0);
+            itemView.setAlpha(1);
         }
     }
 
@@ -138,41 +142,5 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> 
          * @param postId clicked item position
          */
         public void onPostClicked(long postId);
-    }
-
-    class GestureListener extends GestureDetector.SimpleOnGestureListener{
-
-        private static final float SWIPE_MAX_OFF_PATH = 50;
-        private static final float SWIPE_MIN_DISTANCE = 30;
-        private static final float SWIPE_THRESHOLD_VELOCITY = 10;
-
-        private View mView;
-
-        public GestureListener(View view){
-            mView = view;
-        }
-
-
-        @Override
-        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            try {
-                if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH)
-                    return false;
-                // right to left swipe
-                if(e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-                    Logger.d("Left Swipe");
-                }  else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-                    Logger.d("Right Swipe");
-                }
-            } catch (Exception e) {
-                Logger.e(e.getLocalizedMessage(), e);
-            }
-            return false;
-        }
-
-        @Override
-        public boolean onDown(MotionEvent e) {
-            return true;
-        }
     }
 }

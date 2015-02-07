@@ -1,21 +1,32 @@
 package com.vanzstuff.readdit;
 
+import android.support.v7.widget.RecyclerView;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
+import android.view.ViewConfiguration;
 
 public class FeedsItemTouchListener implements View.OnTouchListener{
 
-    private static final float MIN_X_DELTA = 50;
-    private static final float MIN_X_VELOCITY = 15;
     private static final long ANIMATION_DURATION = 100;
+    private final RecyclerView mRecyclerView;
+    private final ViewConfiguration mVc;
+    private final int mSlop;
+    private final int mMinFlyingVelocity;
+    private final int mMaxFlyingVelocity;
     private VelocityTracker mVeloTracker;
     private float mDownTouchXPosition;
     private float mDownTouchYPosition;
     private boolean mSwiping;
     private int mViewWidth;
+    private int mSwipingSlop;
 
-    public FeedsItemTouchListener(){
+    public FeedsItemTouchListener(RecyclerView recyclerView){
+        mRecyclerView = recyclerView;
+        mVc = ViewConfiguration.get(recyclerView.getContext());
+        mSlop = mVc.getScaledTouchSlop();
+        mMinFlyingVelocity = mVc.getScaledMinimumFlingVelocity();
+        mMaxFlyingVelocity = mVc.getScaledMaximumFlingVelocity();
     }
 
     @Override
@@ -23,66 +34,64 @@ public class FeedsItemTouchListener implements View.OnTouchListener{
         mViewWidth = v.getWidth();
         switch (event.getActionMasked()){
             case MotionEvent.ACTION_DOWN: {
-                Logger.d("DOWN");
-                if ( !mSwiping ) {
-                    mDownTouchXPosition = event.getRawX();
-                    mDownTouchYPosition = event.getRawY();
-                    mVeloTracker = VelocityTracker.obtain();
-                    mVeloTracker.addMovement(event);
-                }
+                mDownTouchXPosition = event.getRawX();
+                mDownTouchYPosition = event.getRawY();
+                mVeloTracker = VelocityTracker.obtain();
+                mVeloTracker.addMovement(event);
                 return false;
             }
             case MotionEvent.ACTION_MOVE: {
-                Logger.d("MOVE");
-                if ( mSwiping ) {
-                    float xDelta = event.getRawX() - mDownTouchXPosition;
-                    v.setTranslationX(xDelta);
-                }
-                if(!mSwiping)
+                mVeloTracker.addMovement(event);
+                final float deltaX = event.getRawX() - mDownTouchXPosition;
+                final float deltaY = event.getRawY() - mDownTouchYPosition;
+                if(!mSwiping && Math.abs(deltaX) < mSlop && Math.abs(deltaY) < Math.abs(deltaX) * 0.5){
                     mSwiping = true;
-                return true;
+                    mSwipingSlop = deltaX > 0 ? mSlop : -mSlop;
+                    mRecyclerView.requestDisallowInterceptTouchEvent(true);
+                    MotionEvent cancelEvent = MotionEvent.obtain(event);
+                    cancelEvent.setAction(MotionEvent.ACTION_CANCEL);
+                    mRecyclerView.onTouchEvent(cancelEvent);
+                    cancelEvent.recycle();
+                }
+                if ( mSwiping ) {
+                    v.setTranslationX(deltaX - mSwipingSlop);
+                    mRecyclerView.requestDisallowInterceptTouchEvent(true);
+                    return true;
+                }
+                return false;
             }
             case MotionEvent.ACTION_UP: {
-                Logger.d("UP");
-                if ( mSwiping ) {
-                    if(mVeloTracker == null)
-                        break;
-                    float xDelta = event.getRawX() - mDownTouchXPosition;
-                    float yDelta = event.getRawY() - mDownTouchYPosition;
-                    mVeloTracker.addMovement(event);
-                    mVeloTracker.computeCurrentVelocity(1000);
-                    if (Math.abs(xDelta) >= (mViewWidth * 0.5)) {
-                        if (xDelta > 0) {
-                            Logger.d("SWIPE RIGHT");
-                            v.animate().translationX(mViewWidth)
-                                    .setDuration(ANIMATION_DURATION)
-                                    .start();
-                        } else {
-                            Logger.d("SWIPE LEFT");
-                            v.animate().translationX(-mViewWidth)
-                                    .setDuration(ANIMATION_DURATION)
-                                    .start();
-
-                        }
-                        mDownTouchXPosition = 0;
-                        mDownTouchYPosition = 0;
+                if(mVeloTracker == null)
+                    break;
+                final float xDelta = event.getRawX() - mDownTouchXPosition;
+                mVeloTracker.addMovement(event);
+                mVeloTracker.computeCurrentVelocity(1000);
+                final float absVelocityX = Math.abs(mVeloTracker.getXVelocity());
+                final float absVelocityY = Math.abs(mVeloTracker.getYVelocity());
+                if (Math.abs(xDelta) > (mViewWidth * 0.35) && mSwiping && absVelocityX > absVelocityY
+                        && absVelocityX > mMinFlyingVelocity && absVelocityX < mMaxFlyingVelocity) {
+                    int animationTranslation;
+                    if (xDelta > 0) {
+                        animationTranslation = v.getWidth();
                     } else {
-                        v.animate().translationX(0)
-                                .setDuration(ANIMATION_DURATION)
-                                .start();
+                        animationTranslation = -v.getWidth();
                     }
-                    mSwiping = false;
+                    v.animate().translationX(animationTranslation)
+                            .setDuration(ANIMATION_DURATION)
+                            .alpha(0)
+                            .start();
+                    break;
                 }
-                return true;
             }
             case MotionEvent.ACTION_CANCEL: {
-                Logger.d("CANCEL");
                 v.animate().translationX(0)
                         .setDuration(ANIMATION_DURATION)
                         .start();
                 mSwiping = false;
+                mSwipingSlop = 0;
                 mDownTouchXPosition = 0;
                 mDownTouchYPosition = 0;
+                mVeloTracker = null;
                 return true;
             }
 
