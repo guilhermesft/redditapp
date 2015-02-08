@@ -114,10 +114,10 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mListener.onPostClicked(getItemId());
+//                    mListener.onLinkClicked(getItemId());
                 }
             });
-            itemView.setOnTouchListener(new FeedsItemTouchListener(mRecyclerView));
+            itemView.setOnTouchListener(new FeedsItemTouchListener(mRecyclerView, mListener));
             mThumbnail = (NetworkImageView) itemView.findViewById(R.id.link_item_thumbnail);
             mTxtTitle = (TextView) itemView.findViewById(R.id.link_item_title);
             mTxtVotes = (TextView) itemView.findViewById(R.id.link_item_votes);
@@ -141,6 +141,8 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> 
          * Method called when a item in the RecyclerView is clicked
          * @param postId clicked item position
          */
-        public void onPostClicked(long postId);
+        public void onLinkClicked(long postId);
+        public void onLinkSaved(long postId);
+        public void onLinkHidden(long postId);
     }
 }

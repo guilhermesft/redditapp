@@ -10,6 +10,7 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -112,8 +113,20 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
     }
 
     @Override
-    public void onPostClicked(long postId) {
+    public void onLinkClicked(long postId) {
         mCallback.onItemSelected(postId);
+    }
+
+    @Override
+    public void onLinkSaved(long postId) {
+        Logger.d("SAVED " + postId);
+        //TODO
+    }
+
+    @Override
+    public void onLinkHidden(long postId) {
+        Logger.d("HIDEEN " + postId);
+        //TODO
     }
 
     @Override

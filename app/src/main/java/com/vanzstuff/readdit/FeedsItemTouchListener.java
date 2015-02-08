@@ -6,6 +6,8 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 
+import com.vanzstuff.readdit.data.FeedsAdapter;
+
 public class FeedsItemTouchListener implements View.OnTouchListener{
 
     private static final long ANIMATION_DURATION = 100;
@@ -14,6 +16,7 @@ public class FeedsItemTouchListener implements View.OnTouchListener{
     private final int mSlop;
     private final int mMinFlyingVelocity;
     private final int mMaxFlyingVelocity;
+    private final FeedsAdapter.ItemSelectedListener mListener;
     private VelocityTracker mVeloTracker;
     private float mDownTouchXPosition;
     private float mDownTouchYPosition;
@@ -21,12 +24,13 @@ public class FeedsItemTouchListener implements View.OnTouchListener{
     private int mViewWidth;
     private int mSwipingSlop;
 
-    public FeedsItemTouchListener(RecyclerView recyclerView){
+    public FeedsItemTouchListener(RecyclerView recyclerView, FeedsAdapter.ItemSelectedListener listener){
         mRecyclerView = recyclerView;
         mVc = ViewConfiguration.get(recyclerView.getContext());
         mSlop = mVc.getScaledTouchSlop();
         mMinFlyingVelocity = mVc.getScaledMinimumFlingVelocity();
         mMaxFlyingVelocity = mVc.getScaledMaximumFlingVelocity();
+        mListener = listener;
     }
 
     @Override
@@ -75,14 +79,16 @@ public class FeedsItemTouchListener implements View.OnTouchListener{
                         && absVelocityX > mMinFlyingVelocity && absVelocityX < mMaxFlyingVelocity) {
                     int animationTranslation;
                     if (xDelta > 0) {
-                        animationTranslation = v.getWidth();
+                        slideRight(v);
+//                        animationTranslation = v.getWidth();
                     } else {
-                        animationTranslation = -v.getWidth();
+                        slideLeft(v);
+//                        animationTranslation = -v.getWidth();
                     }
-                    v.animate().translationX(animationTranslation)
-                            .setDuration(ANIMATION_DURATION)
-                            .alpha(0)
-                            .start();
+//                    v.animate().translationX(animationTranslation)
+//                            .setDuration(ANIMATION_DURATION)
+//                            .alpha(0)
+//                            .start();
                     break;
                 }
             }
@@ -100,5 +106,21 @@ public class FeedsItemTouchListener implements View.OnTouchListener{
 
         }
         return false;
+    }
+
+    public void slideRight(View v){
+        v.animate().translationX(v.getWidth())
+                .setDuration(ANIMATION_DURATION)
+                .alpha(0)
+                .start();
+        mListener.onLinkSaved(mRecyclerView.getChildItemId(v));
+    }
+
+    public void slideLeft(View v){
+        v.animate().translationX(-v.getWidth())
+                .setDuration(ANIMATION_DURATION)
+                .alpha(0)
+                .start();
+        mListener.onLinkHidden(mRecyclerView.getChildItemId(v));
     }
 }
