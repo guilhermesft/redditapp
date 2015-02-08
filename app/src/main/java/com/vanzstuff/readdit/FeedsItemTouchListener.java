@@ -55,14 +55,17 @@ public class FeedsItemTouchListener implements View.OnTouchListener{
                 }
                 if ( mSwiping ) {
                     v.setTranslationX(deltaX - mSwipingSlop);
-                    mRecyclerView.requestDisallowInterceptTouchEvent(true);
+//                    mRecyclerView.requestDisallowInterceptTouchEvent(true);
                     return true;
                 }
                 return false;
             }
             case MotionEvent.ACTION_UP: {
-                if(mVeloTracker == null)
+                if(mVeloTracker == null){
                     break;
+                }
+                if ( !mSwiping && mDownTouchXPosition != 0 && mDownTouchYPosition != 0)
+                    v.performClick();
                 final float xDelta = event.getRawX() - mDownTouchXPosition;
                 mVeloTracker.addMovement(event);
                 mVeloTracker.computeCurrentVelocity(1000);

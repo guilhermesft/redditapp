@@ -114,7 +114,7 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                   // mListener.onPostClicked(getItemId());
+                    mListener.onPostClicked(getItemId());
                 }
             });
             itemView.setOnTouchListener(new FeedsItemTouchListener(mRecyclerView));
