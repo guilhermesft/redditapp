@@ -98,6 +98,8 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> 
         return super.getItemId(position);
     }
 
+
+
     public final class ViewHolder extends RecyclerView.ViewHolder{
         public TextView mTxtTitle;
         public TextView mTxtVotes;

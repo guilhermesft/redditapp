@@ -1,6 +1,9 @@
 package com.vanzstuff.readdit;
 
+import android.graphics.Rect;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -17,6 +20,7 @@ public class FeedsItemTouchListener implements View.OnTouchListener{
     private final int mMinFlyingVelocity;
     private final int mMaxFlyingVelocity;
     private final FeedsAdapter.ItemSelectedListener mListener;
+    private final GestureDetector mDetector;
     private VelocityTracker mVeloTracker;
     private float mDownTouchXPosition;
     private float mDownTouchYPosition;
@@ -31,6 +35,24 @@ public class FeedsItemTouchListener implements View.OnTouchListener{
         mMinFlyingVelocity = mVc.getScaledMinimumFlingVelocity();
         mMaxFlyingVelocity = mVc.getScaledMaximumFlingVelocity();
         mListener = listener;
+        mDetector = new GestureDetector(recyclerView.getContext(), new GestureDetector.SimpleOnGestureListener(){
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                Rect rect = null;
+                int[] location = new int[2];
+                mRecyclerView.getLocationOnScreen(location);
+                for(int i = 0; i < mRecyclerView.getChildCount(); i++){
+                    rect = new Rect();
+                    View child = mRecyclerView.getChildAt(i);
+                    child.getHitRect(rect);
+                    if (rect.contains((int)e.getRawX() - location[0], (int)e.getRawY() - location[1])){
+                        mListener.onLinkClicked(mRecyclerView.getChildItemId(child));
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
     }
 
     @Override
@@ -42,9 +64,12 @@ public class FeedsItemTouchListener implements View.OnTouchListener{
                 mDownTouchYPosition = event.getRawY();
                 mVeloTracker = VelocityTracker.obtain();
                 mVeloTracker.addMovement(event);
-                return false;
+                return mDetector.onTouchEvent(event);
             }
             case MotionEvent.ACTION_MOVE: {
+                boolean detectorConsume = mDetector.onTouchEvent(event);
+                if (detectorConsume)
+                    return true;
                 mVeloTracker.addMovement(event);
                 final float deltaX = event.getRawX() - mDownTouchXPosition;
                 final float deltaY = event.getRawY() - mDownTouchYPosition;
@@ -59,12 +84,14 @@ public class FeedsItemTouchListener implements View.OnTouchListener{
                 }
                 if ( mSwiping ) {
                     v.setTranslationX(deltaX - mSwipingSlop);
-//                    mRecyclerView.requestDisallowInterceptTouchEvent(true);
-                    return true;
+                    mRecyclerView.requestDisallowInterceptTouchEvent(true);
                 }
                 return false;
             }
             case MotionEvent.ACTION_UP: {
+                boolean detectorConsume = mDetector.onTouchEvent(event);
+                if (detectorConsume)
+                    return true;
                 if(mVeloTracker == null){
                     break;
                 }
@@ -77,19 +104,12 @@ public class FeedsItemTouchListener implements View.OnTouchListener{
                 final float absVelocityY = Math.abs(mVeloTracker.getYVelocity());
                 if (Math.abs(xDelta) > (mViewWidth * 0.35) && mSwiping && absVelocityX > absVelocityY
                         && absVelocityX > mMinFlyingVelocity && absVelocityX < mMaxFlyingVelocity) {
-                    int animationTranslation;
                     if (xDelta > 0) {
                         slideRight(v);
-//                        animationTranslation = v.getWidth();
                     } else {
                         slideLeft(v);
-//                        animationTranslation = -v.getWidth();
                     }
-//                    v.animate().translationX(animationTranslation)
-//                            .setDuration(ANIMATION_DURATION)
-//                            .alpha(0)
-//                            .start();
-                    break;
+                    return true;
                 }
             }
             case MotionEvent.ACTION_CANCEL: {
