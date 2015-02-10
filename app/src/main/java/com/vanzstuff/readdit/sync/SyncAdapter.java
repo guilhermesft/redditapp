@@ -1,43 +1,43 @@
  package com.vanzstuff.readdit.sync;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
-import android.content.AbstractThreadedSyncAdapter;
-import android.content.ContentProviderClient;
-import android.content.ContentResolver;
-import android.content.ContentValues;
-import android.content.Context;
-import android.content.SyncResult;
-import android.database.Cursor;
-import android.os.Bundle;
-import android.os.RemoteException;
+ import android.accounts.Account;
+ import android.accounts.AccountManager;
+ import android.content.AbstractThreadedSyncAdapter;
+ import android.content.ContentProviderClient;
+ import android.content.ContentResolver;
+ import android.content.ContentValues;
+ import android.content.Context;
+ import android.content.SyncResult;
+ import android.database.Cursor;
+ import android.os.Bundle;
+ import android.os.RemoteException;
 
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.RequestFuture;
-import com.android.volley.toolbox.Volley;
-import com.vanzstuff.readdit.Logger;
-import com.vanzstuff.readdit.PredefinedTags;
-import com.vanzstuff.readdit.Utils;
-import com.vanzstuff.readdit.data.ReadditContract;
-import com.vanzstuff.readdit.redditapi.AboutRequest;
-import com.vanzstuff.readdit.redditapi.GetCommentRequest;
-import com.vanzstuff.readdit.redditapi.GetLinks;
-import com.vanzstuff.readdit.redditapi.HideLinkRequest;
-import com.vanzstuff.readdit.redditapi.MySubredditRequest;
-import com.vanzstuff.readdit.redditapi.RedditApiUtils;
-import com.vanzstuff.readdit.redditapi.SaveRequest;
-import com.vanzstuff.readdit.redditapi.UnhideRequest;
-import com.vanzstuff.readdit.redditapi.UnsaveRequest;
-import com.vanzstuff.readdit.redditapi.VoteRequest;
-import com.vanzstuff.redditapp.R;
+ import com.android.volley.RequestQueue;
+ import com.android.volley.toolbox.RequestFuture;
+ import com.android.volley.toolbox.Volley;
+ import com.vanzstuff.readdit.Logger;
+ import com.vanzstuff.readdit.PredefinedTags;
+ import com.vanzstuff.readdit.Utils;
+ import com.vanzstuff.readdit.data.ReadditContract;
+ import com.vanzstuff.readdit.redditapi.AboutRequest;
+ import com.vanzstuff.readdit.redditapi.GetCommentRequest;
+ import com.vanzstuff.readdit.redditapi.GetLinks;
+ import com.vanzstuff.readdit.redditapi.HideLinkRequest;
+ import com.vanzstuff.readdit.redditapi.MySubredditRequest;
+ import com.vanzstuff.readdit.redditapi.RedditApiUtils;
+ import com.vanzstuff.readdit.redditapi.SaveRequest;
+ import com.vanzstuff.readdit.redditapi.UnhideRequest;
+ import com.vanzstuff.readdit.redditapi.UnsaveRequest;
+ import com.vanzstuff.readdit.redditapi.VoteRequest;
+ import com.vanzstuff.redditapp.R;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+ import org.json.JSONArray;
+ import org.json.JSONException;
+ import org.json.JSONObject;
 
-import java.util.concurrent.ExecutionException;
-import java.util.Set;
-import java.util.HashSet;
+ import java.util.HashSet;
+ import java.util.Set;
+ import java.util.concurrent.ExecutionException;
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
 

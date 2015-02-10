@@ -2,16 +2,12 @@ package com.vanzstuff.readdit.fragments;
 
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
-import android.support.v4.app.NavUtils;
-import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
@@ -20,25 +16,19 @@ import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.toolbox.NetworkImageView;
-import com.android.volley.toolbox.Volley;
-import com.vanzstuff.readdit.CommentListAdapter;
 import com.vanzstuff.readdit.PredefinedTags;
 import com.vanzstuff.readdit.User;
 import com.vanzstuff.readdit.UserSession;
 import com.vanzstuff.readdit.Utils;
 import com.vanzstuff.readdit.VolleyWrapper;
 import com.vanzstuff.readdit.data.ReadditContract;
-import com.vanzstuff.readdit.redditapi.RedditApiUtils;
 import com.vanzstuff.readdit.redditapi.VoteRequest;
 import com.vanzstuff.readdit.sync.SyncAdapter;
 import com.vanzstuff.redditapp.R;
-
-import java.util.UUID;
 
 /**
  * Fragment that show the detail info about some reddit post

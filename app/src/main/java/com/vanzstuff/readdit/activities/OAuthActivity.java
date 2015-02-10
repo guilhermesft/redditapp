@@ -12,22 +12,16 @@ import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.RequestFuture;
 import com.vanzstuff.readdit.Logger;
 import com.vanzstuff.readdit.VolleyWrapper;
 import com.vanzstuff.readdit.data.ReadditContract;
-import com.vanzstuff.readdit.redditapi.AboutRequest;
 import com.vanzstuff.readdit.redditapi.GetMeRequest;
 import com.vanzstuff.readdit.redditapi.RedditApiUtils;
 import com.vanzstuff.redditapp.R;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class OAuthActivity extends FragmentActivity implements Response.ErrorListener, Response.Listener<JSONObject> {
 

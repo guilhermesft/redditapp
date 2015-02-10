@@ -2,6 +2,7 @@ package com.vanzstuff.readdit.fragments;
 
 import android.app.Activity;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -10,20 +11,15 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
-import android.view.GestureDetector;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.vanzstuff.readdit.DividerItemDecoration;
-import com.vanzstuff.readdit.Logger;
+import com.vanzstuff.readdit.PredefinedTags;
 import com.vanzstuff.readdit.data.FeedsAdapter;
-import com.vanzstuff.redditapp.R;
 import com.vanzstuff.readdit.data.ReadditContract;
-
-import android.net.Uri;
+import com.vanzstuff.redditapp.R;
 
 /**
  * Fragment that encapsulate all logic to show a list with all post acquire from a given Uri
@@ -113,20 +109,18 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
     }
 
     @Override
-    public void onLinkClicked(long postId) {
-        mCallback.onItemSelected(postId);
+    public void onLinkClicked(long linkID) {
+        mCallback.onItemSelected(linkID);
     }
 
     @Override
-    public void onLinkSaved(long postId) {
-        Logger.d("SAVED " + postId);
-        //TODO
+    public void onLinkSaved(long linkID) {
+        getActivity().getContentResolver().insert(ReadditContract.Link.buildAddTagUri(linkID, PredefinedTags.SAVED.getName()), null);
     }
 
     @Override
-    public void onLinkHidden(long postId) {
-        Logger.d("HIDEEN " + postId);
-        //TODO
+    public void onLinkHidden(long linkID) {
+        getActivity().getContentResolver().insert(ReadditContract.Link.buildAddTagUri(linkID, PredefinedTags.HIDDEN.getName()), null);
     }
 
     @Override

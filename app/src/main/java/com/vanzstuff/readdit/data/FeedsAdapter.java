@@ -1,23 +1,17 @@
 package com.vanzstuff.readdit.data;
 
-import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.database.Cursor;
-import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.text.format.DateUtils;
-import android.view.GestureDetector;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.android.volley.toolbox.NetworkImageView;
 import com.vanzstuff.readdit.FeedsItemTouchListener;
-import com.vanzstuff.readdit.Logger;
 import com.vanzstuff.readdit.Utils;
 import com.vanzstuff.readdit.VolleyWrapper;
 import com.vanzstuff.redditapp.R;
@@ -113,12 +107,6 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> 
         public ViewHolder(View itemView, int viewType) {
             super(itemView);
             mViewType = viewType;
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-//                    mListener.onLinkClicked(getItemId());
-                }
-            });
             itemView.setOnTouchListener(new FeedsItemTouchListener(mRecyclerView, mListener));
             mThumbnail = (NetworkImageView) itemView.findViewById(R.id.link_item_thumbnail);
             mTxtTitle = (TextView) itemView.findViewById(R.id.link_item_title);
@@ -141,10 +129,10 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> 
     public interface ItemSelectedListener {
         /**
          * Method called when a item in the RecyclerView is clicked
-         * @param postId clicked item position
+         * @param linkID clicked item position
          */
-        public void onLinkClicked(long postId);
-        public void onLinkSaved(long postId);
-        public void onLinkHidden(long postId);
+        public void onLinkClicked(long linkID);
+        public void onLinkSaved(long linkID);
+        public void onLinkHidden(long linkID);
     }
 }

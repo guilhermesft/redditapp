@@ -5,12 +5,11 @@ import android.net.Uri;
 import com.android.volley.AuthFailureError;
 import com.android.volley.Response;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.vanzstuff.readdit.Logger;
-
-import java.util.Map;
-import java.util.HashMap;
 
 import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Base class for Reddit API requests

@@ -1,14 +1,10 @@
 package com.vanzstuff.readdit.redditapi;
 
-import android.content.ContentValues;
 import android.net.Uri;
-
-import org.json.JSONObject;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.List;
 
 public class RedditApiUtils {
 

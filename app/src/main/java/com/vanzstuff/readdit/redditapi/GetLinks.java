@@ -1,7 +1,6 @@
 package com.vanzstuff.readdit.redditapi;
 
 import com.android.volley.Response;
-import com.vanzstuff.readdit.Utils;
 
 import org.json.JSONObject;
 

@@ -4,8 +4,8 @@ import com.android.volley.Response;
 
 import org.json.JSONObject;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Request used to get the messages

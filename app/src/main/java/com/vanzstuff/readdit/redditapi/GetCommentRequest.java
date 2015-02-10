@@ -9,10 +9,9 @@ import com.vanzstuff.readdit.Logger;
 import com.vanzstuff.readdit.Utils;
 
 import org.json.JSONArray;
-import org.json.JSONObject;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Get the comment tree for a given Link article.

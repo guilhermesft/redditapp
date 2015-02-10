@@ -2,7 +2,6 @@ package com.vanzstuff.readdit;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.media.Image;
 import android.util.LruCache;
 
 import com.android.volley.Request;

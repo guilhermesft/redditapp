@@ -5,8 +5,8 @@ import com.vanzstuff.readdit.Utils;
 
 import org.json.JSONObject;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Request to save a link or comment
