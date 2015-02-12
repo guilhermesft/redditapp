@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 
 import com.vanzstuff.readdit.data.FeedsAdapter;
+import com.vanzstuff.redditapp.R;
 
 public class FeedsItemTouchListener implements View.OnTouchListener{
 
@@ -63,7 +64,8 @@ public class FeedsItemTouchListener implements View.OnTouchListener{
                 mDownTouchYPosition = event.getRawY();
                 mVeloTracker = VelocityTracker.obtain();
                 mVeloTracker.addMovement(event);
-                return mDetector.onTouchEvent(event);
+                mDetector.onTouchEvent(event);
+                return true;
             }
             case MotionEvent.ACTION_MOVE: {
                 boolean detectorConsume = mDetector.onTouchEvent(event);
@@ -108,6 +110,7 @@ public class FeedsItemTouchListener implements View.OnTouchListener{
                     } else {
                         slideLeft(v);
                     }
+                    mRecyclerView.requestDisallowInterceptTouchEvent(false);
                     return true;
                 }
             }
