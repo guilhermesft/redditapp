@@ -13,4 +13,5 @@
     <dimen name="actions_menu_height">48dp</dimen>
     <dimen name="default_thumbnail_width">60dp</dimen>
     <dimen name="default_thumbnail_height">60dp</dimen>
+    <dimen name="comment_height">200dp</dimen>
 </resources>

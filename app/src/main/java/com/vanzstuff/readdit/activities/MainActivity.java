@@ -20,6 +20,7 @@ import android.widget.TextView;
 import com.vanzstuff.readdit.Logger;
 import com.vanzstuff.readdit.User;
 import com.vanzstuff.readdit.UserSession;
+import com.vanzstuff.readdit.Utils;
 import com.vanzstuff.readdit.data.ReadditContract;
 import com.vanzstuff.readdit.data.SubredditLoader;
 import com.vanzstuff.readdit.data.TagsLoader;
@@ -51,7 +52,7 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mFeedsFragment = (FeedsFragment) getSupportFragmentManager().findFragmentById(R.id.feeds_fragments);
-        if (savedInstanceState != null)
+        if (savedInstanceState != null && Utils.stringNotNullOrEmpty(savedInstanceState.getString(FeedsFragment.ARG_URI)))
             mFeedsFragment.loadUri(Uri.parse(savedInstanceState.getString(FeedsFragment.ARG_URI)));
         View detailFragContainer = findViewById(R.id.detail_fragment_container);
         mIsTwoPanelLayout = detailFragContainer != null && detailFragContainer.getVisibility() == View.VISIBLE;

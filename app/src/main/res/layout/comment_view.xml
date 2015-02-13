@@ -1,46 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/comment_root"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="@dimen/default_padding">
 
-    <ImageButton
-        android:id="@+id/expand_comment_buttom"
-        android:layout_width="@dimen/expand_comment_width"
-        android:layout_height="@dimen/expand_comment_height"
-        android:background="@drawable/ic_action_expand"
-        android:layout_alignParentLeft="true"/>
-
     <TextView
-        android:id="@+id/comment_user_txt"
+        android:id="@+id/comment_user"
         android:layout_width="wrap_content"
         android:layout_height="@dimen/expand_comment_height"
-        android:layout_toEndOf="@id/expand_comment_buttom"
         android:paddingLeft="@dimen/default_padding"
         android:paddingRight="@dimen/default_padding"
         android:gravity="center_vertical"
         android:text="Vanz"/>
 
     <TextView
-        android:id="@+id/comment_date_txt"
+        android:id="@+id/comment_time"
         android:layout_width="wrap_content"
         android:layout_height="@dimen/expand_comment_height"
-        android:layout_toEndOf="@id/comment_user_txt"
+        android:layout_toEndOf="@id/comment_user"
         android:gravity="center_vertical"
         android:text="5 days ago"/>
 
-    <ImageButton
-        android:id="@+id/actions_comment_buttom"
-        android:layout_width="@dimen/actions_comment_width"
-        android:layout_height="@dimen/actions_comment_height"
-        android:layout_alignParentEnd="true"
-        android:background="@drawable/ic_action_overflow"/>
-
     <TextView
-        android:id="@+id/comment_text_txt"
+        android:id="@+id/comment_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/expand_comment_buttom"
+        android:layout_below="@id/comment_user"
+        android:paddingLeft="@dimen/default_padding"
         android:text="@string/fake_text"/>
 
 </RelativeLayout>

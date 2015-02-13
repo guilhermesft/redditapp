@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,6 +26,7 @@ import com.vanzstuff.readdit.User;
 import com.vanzstuff.readdit.UserSession;
 import com.vanzstuff.readdit.Utils;
 import com.vanzstuff.readdit.VolleyWrapper;
+import com.vanzstuff.readdit.data.CommentAdapter;
 import com.vanzstuff.readdit.data.ReadditContract;
 import com.vanzstuff.readdit.redditapi.VoteRequest;
 import com.vanzstuff.readdit.sync.SyncAdapter;
@@ -66,12 +68,6 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        getLoaderManager().initLoader(COMMENT_CURSOR, getArguments(), this);
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
         mPostID = getArguments().getLong(ARG_POST_ID, -1);
@@ -83,6 +79,7 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
                     null);
             if (cursor.moveToFirst()) {
                 mFullname = cursor.getString(cursor.getColumnIndex(ReadditContract.Link.COLUMN_NAME));
+                getLoaderManager().initLoader(COMMENT_CURSOR, getArguments(), this);
                 String selfText = cursor.getString(cursor.getColumnIndex(ReadditContract.Link.COLUMN_SELFTEXT));
                 final String url = cursor.getString(cursor.getColumnIndex(ReadditContract.Link.COLUMN_URL));
                 View contentView = null;
@@ -168,11 +165,16 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        if ( id == COMMENT_CURSOR )
+            return new CursorLoader(getActivity(), ReadditContract.Comment.CONTENT_URI, null,
+                    ReadditContract.Comment.COLUMN_PARENT_ID + "=?",
+                    new String[]{mFullname}, null);
         return null;
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        mCommentList.setAdapter(new CommentAdapter(getActivity(), data));
     }
 
     @Override
