@@ -26,11 +26,11 @@ import com.vanzstuff.redditapp.R;
  */
 public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>,FeedsAdapter.ItemSelectedListener {
 
-    private static final int POST_INIT_CURSOR_LOADER = 0;
+    private static final int LINK_INIT_CURSOR_LOADER = 0;
     public static final String ARG_URI = "arg_uri";
 
     private Uri mUri;
-    /** RecyclerView responsable to show all post */
+    /** RecyclerView responsable to show all links */
     private RecyclerView mRecyclerView;
     /** Activity listener */
     private CallBack mCallback;
@@ -73,20 +73,20 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
     @Override
     public void onStop() {
         super.onStop();
-        if(getLoaderManager().getLoader(POST_INIT_CURSOR_LOADER) != null)
-            getLoaderManager().getLoader(POST_INIT_CURSOR_LOADER).stopLoading();
+        if(getLoaderManager().getLoader(LINK_INIT_CURSOR_LOADER) != null)
+            getLoaderManager().getLoader(LINK_INIT_CURSOR_LOADER).stopLoading();
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        getLoaderManager().initLoader(POST_INIT_CURSOR_LOADER, null, this);
+        getLoaderManager().initLoader(LINK_INIT_CURSOR_LOADER, null, this);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        getLoaderManager().destroyLoader(POST_INIT_CURSOR_LOADER);
+        getLoaderManager().destroyLoader(LINK_INIT_CURSOR_LOADER);
     }
 
     @Override
@@ -132,7 +132,7 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
 
     public void loadUri(Uri uri){
         mUri = uri;
-        getLoaderManager().restartLoader(POST_INIT_CURSOR_LOADER, null, this);
+        getLoaderManager().restartLoader(LINK_INIT_CURSOR_LOADER, null, this);
     }
 
     public Uri getUri() {
