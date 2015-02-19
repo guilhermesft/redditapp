@@ -42,15 +42,8 @@ import java.util.ArrayList;
 public class DetailFragment extends Fragment implements View.OnClickListener, LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String ARG_LINK_ID = "post_id";
-    private static final int COMMENT_LOADER = 1;
     private static final int LINK_LOADER = 2;
     /*Activity that holds the fragment*/
-    private ImageButton mUpVoteButton;
-    private ImageButton mDownVoteButton;
-    private ImageButton mSaveButton;
-    private ImageButton mHideButton;
-    private ImageButton mLabelButton;
-    private RecyclerView mCommentList;
     private long mPostID;
     private String mFullname;
 
@@ -71,19 +64,6 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         View v = inflater.inflate(R.layout.fragment_detail, container, false);
-//        mUpVoteButton = (ImageButton) v.findViewById(R.id.action_menu_up_vote);
-//        mUpVoteButton.setOnClickListener(this);
-//        mDownVoteButton= (ImageButton) v.findViewById(R.id.action_menu_down_vote);
-//        mDownVoteButton.setOnClickListener(this);
-//        mSaveButton = (ImageButton) v.findViewById(R.id.action_menu_save);
-//        mSaveButton.setOnClickListener(this);
-//        mHideButton = (ImageButton) v.findViewById(R.id.action_menu_hide);
-//        mHideButton.setOnClickListener(this);
-//        mLabelButton = (ImageButton) v.findViewById(R.id.action_menu_label);
-//        mLabelButton.setOnClickListener(this);
-//        mCommentList = (RecyclerView) v.findViewById(R.id.comment_list);
-//        mCommentList.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST));
-//        mCommentList.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
         return v;
     }
 
@@ -91,7 +71,6 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
     public void onResume() {
         super.onResume();
         getLoaderManager().initLoader(LINK_LOADER, getArguments(), this);
-        getLoaderManager().initLoader(COMMENT_LOADER, getArguments(), this);
         mPostID = getArguments().getLong(ARG_LINK_ID, -1);
     }
 
@@ -178,11 +157,7 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        if ( id == COMMENT_LOADER)
-            return new CursorLoader(getActivity(), ReadditContract.Comment.buildCommentByLinkIdUri(args.getLong(ARG_LINK_ID, -1)),
-                    new String[]{ ReadditContract.Comment.TABLE_NAME + ".*" },
-                    null, null, null);
-        else if (id == LINK_LOADER )
+       if (id == LINK_LOADER )
             return new CursorLoader(getActivity(), ReadditContract.Link.CONTENT_URI, null,
                     ReadditContract.Link._ID + " = ?",
                     new String[]{String.valueOf(args.getLong(ARG_LINK_ID, -1))},
@@ -192,34 +167,13 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        if ( loader.getId() == COMMENT_LOADER) {
-//            List<CommentAdapter.Comment> comments = new ArrayList<>(data.getCount());
-//            int idPos = data.getColumnIndex(ReadditContract.Comment._ID);
-//            int bodyPos = data.getColumnIndex(ReadditContract.Comment.COLUMN_BODY);
-//            int timePos = data.getColumnIndex(ReadditContract.Comment.COLUMN_CREATED_UTC);
-//            int userPos = data.getColumnIndex(ReadditContract.Comment.COLUMN_AUTHOR);
-//            int parentPos = data.getColumnIndex(ReadditContract.Comment.COLUMN_PARENT_ID);
-//            int namePos = data.getColumnIndex(ReadditContract.Comment.COLUMN_NAME);
-//            while ( data.move(1)){
-//                CommentAdapter.Comment c = new CommentAdapter.Comment();
-//                c.id = data.getLong(idPos);
-//                c.timestamp = data.getLong(timePos);
-//                c.user = data.getString(userPos);
-//                c.parent = data.getString(parentPos);
-//                c.name = data.getString(namePos);
-//                c.content = data.getString(bodyPos);
-//                comments.add(c);
-//            }
-//            RecyclerView.Adapter commentAdapter = new CommentAdapter(getActivity(), comments);
-//            mCommentList.swapAdapter(commentAdapter, true);
-        } else if ( loader.getId() == LINK_LOADER ) {
+        if ( loader.getId() == LINK_LOADER ) {
             populateView(data);
         }
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-//        mCommentList.swapAdapter(null, false);
     }
 
     @Override
