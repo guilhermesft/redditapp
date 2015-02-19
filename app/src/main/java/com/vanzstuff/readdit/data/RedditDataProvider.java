@@ -31,6 +31,7 @@ public class RedditDataProvider extends ContentProvider {
     private static final int LINK_BY_SUBREDDIT = 111;
     private static final int TAG_X_LINK_PREDEFINED = 112;
     private static final int TAG_X_LINK = 113;
+    private static final int COMMENT_BY_LINK_ID = 114;
 
 
     private SQLiteOpenHelper mOpenHelper;
@@ -39,9 +40,11 @@ public class RedditDataProvider extends ContentProvider {
     private static final String sWhereLinkByTag = ReadditContract.TagXPost.TABLE_NAME + "." + ReadditContract.TagXPost.COLUMN_TAG + " = ?";
     private static final String sWhereTagId = ReadditContract.Tag.COLUMN_NAME + " = ?";
     private static final String sWhereTagXLinkPredefined = ReadditContract.Tag.TABLE_NAME + "." + ReadditContract.Tag.COLUMN_PREDEFINED + " = ?";
+    private static final String sWhereCommentByLinkId = ReadditContract.Link.TABLE_NAME + "." + ReadditContract.Link._ID + " =?";
     private static final SQLiteQueryBuilder sLinkByTagQueryBuilder;
     private static final SQLiteQueryBuilder sTagId;
     private static final SQLiteQueryBuilder sTagXLinkPredefined;
+    private static final SQLiteQueryBuilder sCommentByLinkId;
 
     static {
         sLinkByTagQueryBuilder = new SQLiteQueryBuilder();
@@ -54,6 +57,9 @@ public class RedditDataProvider extends ContentProvider {
                 ReadditContract.Tag.TABLE_NAME + "." + ReadditContract.Tag.COLUMN_PREDEFINED + "=1 " +
                 "AND " + ReadditContract.Tag.TABLE_NAME + "." + ReadditContract.Tag._ID + " = " + ReadditContract.TagXPost.TABLE_NAME + "." + ReadditContract.TagXPost.COLUMN_TAG + ")" +
                 " LEFT JOIN " + ReadditContract.Link.TABLE_NAME + " ON ( " + ReadditContract.Link.TABLE_NAME + "." + ReadditContract.Link._ID + " = " + ReadditContract.TagXPost.TABLE_NAME + "." + ReadditContract.TagXPost.COLUMN_LINK + " )");
+        sCommentByLinkId = new SQLiteQueryBuilder();
+        sCommentByLinkId.setTables(ReadditContract.Comment.TABLE_NAME + " LEFT JOIN " + ReadditContract.Link.TABLE_NAME + " ON ( " +
+                ReadditContract.Link.TABLE_NAME + "." + ReadditContract.Link.COLUMN_NAME + " = " + ReadditContract.Comment.TABLE_NAME + "." + ReadditContract.Comment.COLUMN_LINK_ID + " )");
     }
 
     /**
@@ -69,6 +75,7 @@ public class RedditDataProvider extends ContentProvider {
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_ADD_TAG_TO_LINK + "/#/#", ADD_TAG_TO_LINK);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_ADD_TAG_NAME_TO_LINK + "/#/*", ADD_TAG_NAME_TO_LINK);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_COMMENT,  COMMENT);
+        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_COMMENT_LINK + "/#",  COMMENT_BY_LINK_ID);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_USER,  USER);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_SUBREDDIT, SUBREDDIT);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_VOTE, VOTE);
@@ -180,6 +187,13 @@ public class RedditDataProvider extends ContentProvider {
                         sWhereTagXLinkPredefined,
                         new String[]{"1"},
                         null,null,sortOrder);
+                break;
+            }
+            case COMMENT_BY_LINK_ID: {
+                cursor = sCommentByLinkId.query(mOpenHelper.getReadableDatabase(), projection,
+                        sWhereCommentByLinkId,
+                        new String[]{uri.getPathSegments().get(1)},
+                        null, null, null);
                 break;
             }
             default:

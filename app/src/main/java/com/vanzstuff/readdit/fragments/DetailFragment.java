@@ -22,7 +22,6 @@ import android.widget.Toast;
 
 import com.android.volley.toolbox.NetworkImageView;
 import com.vanzstuff.readdit.DividerItemDecoration;
-import com.vanzstuff.readdit.Logger;
 import com.vanzstuff.readdit.PredefinedTags;
 import com.vanzstuff.readdit.User;
 import com.vanzstuff.readdit.UserSession;
@@ -30,25 +29,21 @@ import com.vanzstuff.readdit.Utils;
 import com.vanzstuff.readdit.VolleyWrapper;
 import com.vanzstuff.readdit.data.CommentAdapter;
 import com.vanzstuff.readdit.data.ReadditContract;
-import com.vanzstuff.readdit.redditapi.RedditApiUtils;
 import com.vanzstuff.readdit.redditapi.VoteRequest;
 import com.vanzstuff.readdit.sync.SyncAdapter;
 import com.vanzstuff.redditapp.R;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Collections;
 
 /**
  * Fragment that show the detail info about some reddit post
  */
 public class DetailFragment extends Fragment implements View.OnClickListener, LoaderManager.LoaderCallbacks<Cursor> {
 
-    private static final String ARG_POST_ID = "post_id";
-    private static final String PARENT_URI_ARG = "comment_parent";
-    private static final int COMMENT_CURSOR = 1;
-    private static final int ADAPTER_COMMENT_CURSOR = 2;
+    private static final String ARG_LINK_ID = "post_id";
+    private static final int COMMENT_LOADER = 1;
+    private static final int LINK_LOADER = 2;
     /*Activity that holds the fragment*/
     private ImageButton mUpVoteButton;
     private ImageButton mDownVoteButton;
@@ -67,7 +62,7 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
     public static DetailFragment newInstance(long postID) {
         DetailFragment fragment = new DetailFragment();
         Bundle args = new Bundle(1);
-        args.putLong(DetailFragment.ARG_POST_ID, postID);
+        args.putLong(DetailFragment.ARG_LINK_ID, postID);
         fragment.setArguments(args);
         return fragment;
     }
@@ -88,54 +83,52 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
         mLabelButton.setOnClickListener(this);
         mCommentList = (RecyclerView) v.findViewById(R.id.comment_list);
         mCommentList.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST));
-        mCommentList.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mCommentList.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
         return v;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        mPostID = getArguments().getLong(ARG_POST_ID, -1);
-        Cursor cursor = null;
-        try {
-            cursor = getActivity().getContentResolver().query(ReadditContract.Link.CONTENT_URI, null,
-                    ReadditContract.Link._ID + " = ?",
-                    new String[]{String.valueOf(String.valueOf(mPostID))},
-                    null);
-            if (cursor.moveToFirst()) {
-                mFullname = cursor.getString(cursor.getColumnIndex(ReadditContract.Link.COLUMN_NAME));
-                getLoaderManager().initLoader(COMMENT_CURSOR, getArguments(), this);
-                String selfText = cursor.getString(cursor.getColumnIndex(ReadditContract.Link.COLUMN_SELFTEXT));
-                final String url = cursor.getString(cursor.getColumnIndex(ReadditContract.Link.COLUMN_URL));
-                View contentView = null;
-                if (Utils.stringNotNullOrEmpty(selfText)) {
-                    //is a text post
-                    TextView txt = new TextView(getActivity());
-                    txt.setText(selfText);
-                    contentView = txt;
-                } else if ( Utils.isImageUrl(url) ){
-                    NetworkImageView networkImageView = new NetworkImageView(getActivity());
-                    networkImageView.setImageUrl(url, VolleyWrapper.getInstance().getImageLoader());
-                    contentView = networkImageView;
-                }else{
-                    WebView webView = new WebView(getActivity());
-                    webView.getSettings().setJavaScriptEnabled(true);
-                    webView.setWebViewClient(new WebViewClient(){
-                        @Override
-                        public boolean shouldOverrideUrlLoading(WebView view, String urlLoading) {
-                            return url.equals(urlLoading);
-                        }
-                    });
-                    webView.loadUrl( url );
-                    contentView = webView;
+        getLoaderManager().initLoader(LINK_LOADER, getArguments(), this);
+        getLoaderManager().initLoader(COMMENT_LOADER, getArguments(), this);
+        mPostID = getArguments().getLong(ARG_LINK_ID, -1);
+    }
+
+    /**
+     * populate the view using the cursor from the loader
+     * @param cursor
+     */
+    private void populateView(Cursor cursor) {
+        if ( !cursor.moveToFirst() )
+            return;
+        mFullname = cursor.getString(cursor.getColumnIndex(ReadditContract.Link.COLUMN_NAME));
+        String selfText = cursor.getString(cursor.getColumnIndex(ReadditContract.Link.COLUMN_SELFTEXT));
+        final String url = cursor.getString(cursor.getColumnIndex(ReadditContract.Link.COLUMN_URL));
+        View contentView = null;
+        if (Utils.stringNotNullOrEmpty(selfText)) {
+            //is a text post
+            TextView txt = new TextView(getActivity());
+            txt.setText(selfText);
+            contentView = txt;
+        } else if ( Utils.isImageUrl(url) ){
+            NetworkImageView networkImageView = new NetworkImageView(getActivity());
+            networkImageView.setImageUrl(url, VolleyWrapper.getInstance().getImageLoader());
+            contentView = networkImageView;
+        }else{
+            WebView webView = new WebView(getActivity());
+            webView.getSettings().setJavaScriptEnabled(true);
+            webView.setWebViewClient(new WebViewClient(){
+                @Override
+                public boolean shouldOverrideUrlLoading(WebView view, String urlLoading) {
+                    return url.equals(urlLoading);
                 }
-                FrameLayout container = (FrameLayout) getView().findViewById(R.id.content_container);
-                container.addView(contentView);
-            }
-        } finally {
-            if ( cursor != null )
-                cursor.close();
+            });
+            webView.loadUrl( url );
+            contentView = webView;
         }
+        FrameLayout container = (FrameLayout) getView().findViewById(R.id.content_container);
+        container.addView(contentView);
     }
 
     @Override
@@ -177,45 +170,43 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        if ( id == COMMENT_CURSOR )
-            return new CursorLoader(getActivity(), ReadditContract.Comment.CONTENT_URI, null,
-                    ReadditContract.Comment.COLUMN_LINK_ID + "=?",
-                    new String[]{mFullname}, null);
+        if ( id == COMMENT_LOADER)
+            return new CursorLoader(getActivity(), ReadditContract.Comment.buildCommentByLinkIdUri(args.getLong(ARG_LINK_ID, -1)),
+                    new String[]{ ReadditContract.Comment.TABLE_NAME + ".*" },
+                    null, null, null);
+        else if (id == LINK_LOADER )
+            return new CursorLoader(getActivity(), ReadditContract.Link.CONTENT_URI, null,
+                    ReadditContract.Link._ID + " = ?",
+                    new String[]{String.valueOf(args.getLong(ARG_LINK_ID, -1))},
+                    null);
         return null;
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        List<CommentAdapter.Comment> comments = new ArrayList<>(data.getCount());
-        int idPos = data.getColumnIndex(ReadditContract.Comment._ID);
-        int bodyPos = data.getColumnIndex(ReadditContract.Comment.COLUMN_BODY);
-        int timePos = data.getColumnIndex(ReadditContract.Comment.COLUMN_CREATED_UTC);
-        int userPos = data.getColumnIndex(ReadditContract.Comment.COLUMN_AUTHOR);
-        int parentPos = data.getColumnIndex(ReadditContract.Comment.COLUMN_PARENT_ID);
-        int namePos = data.getColumnIndex(ReadditContract.Comment.COLUMN_NAME);
-        while ( data.move(1)){
-            CommentAdapter.Comment c = new CommentAdapter.Comment();
-            c.id = data.getLong(idPos);
-            c.timestamp = data.getLong(timePos);
-            c.user = data.getString(userPos);
-            c.parent = data.getString(parentPos);
-            c.name = data.getString(namePos);
-            c.content = data.getString(bodyPos);
-            comments.add(c);
-        }
-        Collections.sort(comments, new Comparator<CommentAdapter.Comment>() {
-            @Override
-            public int compare(CommentAdapter.Comment lhs, CommentAdapter.Comment rhs) {
-                Logger.d("comparator");
-                if (!lhs.parent.equals(rhs.parent) && !lhs.name.equals(rhs.parent)) return 0;
-                if (lhs.name.equals(rhs.parent)) return -1; //lhs is the rhs parent. lhs have to be before rhs
-                if (lhs.parent.equals(rhs.parent)) return (int) (lhs.timestamp - rhs.timestamp); //they're siblings. sort by creation time
-                if (lhs.parent.startsWith(RedditApiUtils.KIND_LINK)) return -1; // lhs it's root comment
-                if (rhs.parent.startsWith(RedditApiUtils.KIND_LINK)) return 1; // rhs it's root comment
-                return 0;
+        if ( loader.getId() == COMMENT_LOADER) {
+            List<CommentAdapter.Comment> comments = new ArrayList<>(data.getCount());
+            int idPos = data.getColumnIndex(ReadditContract.Comment._ID);
+            int bodyPos = data.getColumnIndex(ReadditContract.Comment.COLUMN_BODY);
+            int timePos = data.getColumnIndex(ReadditContract.Comment.COLUMN_CREATED_UTC);
+            int userPos = data.getColumnIndex(ReadditContract.Comment.COLUMN_AUTHOR);
+            int parentPos = data.getColumnIndex(ReadditContract.Comment.COLUMN_PARENT_ID);
+            int namePos = data.getColumnIndex(ReadditContract.Comment.COLUMN_NAME);
+            while ( data.move(1)){
+                CommentAdapter.Comment c = new CommentAdapter.Comment();
+                c.id = data.getLong(idPos);
+                c.timestamp = data.getLong(timePos);
+                c.user = data.getString(userPos);
+                c.parent = data.getString(parentPos);
+                c.name = data.getString(namePos);
+                c.content = data.getString(bodyPos);
+                comments.add(c);
             }
-        });
-        mCommentList.swapAdapter(new CommentAdapter(getActivity(), comments), true);
+            RecyclerView.Adapter commentAdapter = new CommentAdapter(getActivity(), comments);
+            mCommentList.swapAdapter(commentAdapter, true);
+        } else if ( loader.getId() == LINK_LOADER ) {
+            populateView(data);
+        }
     }
 
     @Override

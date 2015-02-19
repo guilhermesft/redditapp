@@ -24,8 +24,10 @@ public class ReadditContract {
     public static final String PATH_VOTE = "vote";
     public static final String PATH_TAGXLINK_PREDEFINED = "tac_x_post_predefined";
     public static final String PATH_TAGXLINK = "tac_x_post";
+    public static final String PATH_COMMENT_LINK = "comment_link";
     public static final String MULTIPLE_ITEM_MIMETYPE = "vnd.android.cursor.dir/";
     public static final String SINGLE_ITEM_MIMETYPE = "vnd.android.cursor.item/";
+
 
 
     /**
@@ -417,6 +419,7 @@ public class ReadditContract {
      */
     public static final class Comment implements BaseColumns{
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_COMMENT).build();
+        public static final Uri CONTENT_URI_COMMENT_BY_LINK = BASE_CONTENT_URI.buildUpon().appendPath(PATH_COMMENT_LINK).build();
         public static final String CONTENT_TYPE = MULTIPLE_ITEM_MIMETYPE + CONTENT_AUTHORITY + "/" + PATH_COMMENT;
 
         public static Uri buildCommentUri(long id){
@@ -432,6 +435,15 @@ public class ReadditContract {
             if ( uri.getPathSegments().size() == 2)
                 return Long.parseLong(uri.getPathSegments().get(1));
             return -1l;
+        }
+
+        /**
+         * Build the URI used to get all comments from given linkId
+         * @param linkId link's ID
+         * @return uri
+         */
+        public static Uri buildCommentByLinkIdUri(long linkId){
+            return CONTENT_URI_COMMENT_BY_LINK.buildUpon().appendPath(String.valueOf(linkId)).build();
         }
 
         public static final String TABLE_NAME = "comment";
