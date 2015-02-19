@@ -71,19 +71,19 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         View v = inflater.inflate(R.layout.fragment_detail, container, false);
-        mUpVoteButton = (ImageButton) v.findViewById(R.id.action_menu_up_vote);
-        mUpVoteButton.setOnClickListener(this);
-        mDownVoteButton= (ImageButton) v.findViewById(R.id.action_menu_down_vote);
-        mDownVoteButton.setOnClickListener(this);
-        mSaveButton = (ImageButton) v.findViewById(R.id.action_menu_save);
-        mSaveButton.setOnClickListener(this);
-        mHideButton = (ImageButton) v.findViewById(R.id.action_menu_hide);
-        mHideButton.setOnClickListener(this);
-        mLabelButton = (ImageButton) v.findViewById(R.id.action_menu_label);
-        mLabelButton.setOnClickListener(this);
-        mCommentList = (RecyclerView) v.findViewById(R.id.comment_list);
-        mCommentList.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST));
-        mCommentList.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
+//        mUpVoteButton = (ImageButton) v.findViewById(R.id.action_menu_up_vote);
+//        mUpVoteButton.setOnClickListener(this);
+//        mDownVoteButton= (ImageButton) v.findViewById(R.id.action_menu_down_vote);
+//        mDownVoteButton.setOnClickListener(this);
+//        mSaveButton = (ImageButton) v.findViewById(R.id.action_menu_save);
+//        mSaveButton.setOnClickListener(this);
+//        mHideButton = (ImageButton) v.findViewById(R.id.action_menu_hide);
+//        mHideButton.setOnClickListener(this);
+//        mLabelButton = (ImageButton) v.findViewById(R.id.action_menu_label);
+//        mLabelButton.setOnClickListener(this);
+//        mCommentList = (RecyclerView) v.findViewById(R.id.comment_list);
+//        mCommentList.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST));
+//        mCommentList.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
         return v;
     }
 
@@ -145,20 +145,28 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
                 Toast.makeText(getActivity(), getString(R.string.need_login), Toast.LENGTH_LONG).show();
         } else if ( v.getId() == R.id.action_menu_save){
             //add the tag saved to the post
-            getActivity().getContentResolver().insert(ReadditContract.Link.buildAddTagUri(mPostID, PredefinedTags.SAVED.getName()), null);
+            save();
         } else if ( v.getId() == R.id.action_menu_hide){
             //add the tag hidden to the post
-            getActivity().getContentResolver().insert(ReadditContract.Link.buildAddTagUri(mPostID, PredefinedTags.HIDDEN.getName()), null);
+            hide();
         } else if ( v.getId() == R.id.action_menu_label){
             InputTagFragment.newInstance(mPostID).show(getActivity().getSupportFragmentManager(), "InputTagFragment");
         }
+    }
+
+    public void hide() {
+        getActivity().getContentResolver().insert(ReadditContract.Link.buildAddTagUri(mPostID, PredefinedTags.HIDDEN.getName()), null);
+    }
+
+    public void save() {
+        getActivity().getContentResolver().insert(ReadditContract.Link.buildAddTagUri(mPostID, PredefinedTags.SAVED.getName()), null);
     }
 
     /**
      * Method insert or update the user vote in the mPostID
      * @param voteDirection vote direction from VoteRequest.VOTE_UP or VoteRequest.VOTE_DOWN
      */
-    private void vote(int voteDirection){
+    public void vote(int voteDirection){
         User user = UserSession.getUser(getActivity());
         ContentValues values = new ContentValues(2);
         values.put(ReadditContract.Vote.COLUMN_USER, user.name);
@@ -185,25 +193,25 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         if ( loader.getId() == COMMENT_LOADER) {
-            List<CommentAdapter.Comment> comments = new ArrayList<>(data.getCount());
-            int idPos = data.getColumnIndex(ReadditContract.Comment._ID);
-            int bodyPos = data.getColumnIndex(ReadditContract.Comment.COLUMN_BODY);
-            int timePos = data.getColumnIndex(ReadditContract.Comment.COLUMN_CREATED_UTC);
-            int userPos = data.getColumnIndex(ReadditContract.Comment.COLUMN_AUTHOR);
-            int parentPos = data.getColumnIndex(ReadditContract.Comment.COLUMN_PARENT_ID);
-            int namePos = data.getColumnIndex(ReadditContract.Comment.COLUMN_NAME);
-            while ( data.move(1)){
-                CommentAdapter.Comment c = new CommentAdapter.Comment();
-                c.id = data.getLong(idPos);
-                c.timestamp = data.getLong(timePos);
-                c.user = data.getString(userPos);
-                c.parent = data.getString(parentPos);
-                c.name = data.getString(namePos);
-                c.content = data.getString(bodyPos);
-                comments.add(c);
-            }
-            RecyclerView.Adapter commentAdapter = new CommentAdapter(getActivity(), comments);
-            mCommentList.swapAdapter(commentAdapter, true);
+//            List<CommentAdapter.Comment> comments = new ArrayList<>(data.getCount());
+//            int idPos = data.getColumnIndex(ReadditContract.Comment._ID);
+//            int bodyPos = data.getColumnIndex(ReadditContract.Comment.COLUMN_BODY);
+//            int timePos = data.getColumnIndex(ReadditContract.Comment.COLUMN_CREATED_UTC);
+//            int userPos = data.getColumnIndex(ReadditContract.Comment.COLUMN_AUTHOR);
+//            int parentPos = data.getColumnIndex(ReadditContract.Comment.COLUMN_PARENT_ID);
+//            int namePos = data.getColumnIndex(ReadditContract.Comment.COLUMN_NAME);
+//            while ( data.move(1)){
+//                CommentAdapter.Comment c = new CommentAdapter.Comment();
+//                c.id = data.getLong(idPos);
+//                c.timestamp = data.getLong(timePos);
+//                c.user = data.getString(userPos);
+//                c.parent = data.getString(parentPos);
+//                c.name = data.getString(namePos);
+//                c.content = data.getString(bodyPos);
+//                comments.add(c);
+//            }
+//            RecyclerView.Adapter commentAdapter = new CommentAdapter(getActivity(), comments);
+//            mCommentList.swapAdapter(commentAdapter, true);
         } else if ( loader.getId() == LINK_LOADER ) {
             populateView(data);
         }
@@ -211,7 +219,7 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        mCommentList.swapAdapter(null, false);
+//        mCommentList.swapAdapter(null, false);
     }
 
     @Override
