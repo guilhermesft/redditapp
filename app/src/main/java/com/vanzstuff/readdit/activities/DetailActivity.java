@@ -57,6 +57,7 @@ public class DetailActivity extends FragmentActivity implements View.OnClickList
             }
             case R.id.action_menu_comments: {
                 mFloatingMenu.collapse();
+                mFloatingMenu.setVisibility(View.INVISIBLE);
                 getSupportFragmentManager()
                         .beginTransaction()
                         .add(R.id.detail_activity_container, CommentFragment.newInstance(mLinkID), DETAIL_FRAGMENT_TAG)

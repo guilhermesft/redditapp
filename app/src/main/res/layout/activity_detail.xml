@@ -9,49 +9,55 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             tools:layout="@layout/fragment_detail"/>
-
     <com.getbase.floatingactionbutton.FloatingActionsMenu
         android:id="@+id/floating_menu"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
+        fab:fab_addButtonSize="mini"
         fab:fab_labelStyle="@style/menu_labels_style">
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/action_menu_save"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            fab:fab_colorNormal="#FFFFFF"
+            fab:fab_size="mini"
+            fab:fab_icon="@drawable/ic_action_save"
             fab:fab_title="Save"/>
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/action_menu_hide"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            fab:fab_colorNormal="#FFFFFF"
+            fab:fab_icon="@drawable/ic_action_remove"
+            fab:fab_size="mini"
             fab:fab_title="Hidde"/>
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/action_menu_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            fab:fab_colorNormal="#FFFFFF"
+            fab:fab_icon="@drawable/ic_action_new_label"
+            fab:fab_size="mini"
             fab:fab_title="Tag"/>
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/action_menu_comments"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            fab:fab_colorNormal="#FFFFFF"
+            fab:fab_size="mini"
+            fab:fab_icon="@drawable/ic_action_chat"
             fab:fab_title="Comments"/>
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/action_menu_up_vote"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            fab:fab_colorNormal="#FFFFFF"
+            fab:fab_icon="@drawable/ic_action_good"
+            fab:fab_size="mini"
             fab:fab_title="Up!"/>
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/action_menu_down_vote"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            fab:fab_colorNormal="#FFFFFF"
+            fab:fab_icon="@drawable/ic_action_bad"
+            fab:fab_size="mini"
             fab:fab_title="Down!"/>
         </com.getbase.floatingactionbutton.FloatingActionsMenu>
 </RelativeLayout>
