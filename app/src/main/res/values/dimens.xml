@@ -8,7 +8,7 @@
     <dimen name="expand_comment_height">48dp</dimen>
     <dimen name="actions_comment_width">48dp</dimen>
     <dimen name="actions_comment_height">48dp</dimen>
-    <dimen name="default_padding">8dp</dimen>
+    <dimen name="default_padding">5dp</dimen>
     <dimen name="actions_menu_width">48dp</dimen>
     <dimen name="actions_menu_height">48dp</dimen>
     <dimen name="default_thumbnail_width">60dp</dimen>

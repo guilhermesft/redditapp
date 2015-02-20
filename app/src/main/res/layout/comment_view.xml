@@ -1,33 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/comment_root"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:padding="@dimen/default_padding">
+    android:layout_height="match_parent"
+    android:background="@color/background_gray">
 
-    <TextView
-        android:id="@+id/comment_user"
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="wrap_content"
-        android:layout_height="@dimen/expand_comment_height"
-        android:paddingLeft="@dimen/default_padding"
-        android:paddingRight="@dimen/default_padding"
-        android:gravity="center_vertical"
-        android:text="Vanz"/>
-
-    <TextView
-        android:id="@+id/comment_time"
-        android:layout_width="wrap_content"
-        android:layout_height="@dimen/expand_comment_height"
-        android:layout_toEndOf="@id/comment_user"
-        android:gravity="center_vertical"
-        android:text="5 days ago"/>
-
-    <TextView
-        android:id="@+id/comment_content"
+        android:layout_height="match_parent"
+        android:background="@color/background_green">
+        <LinearLayout
+            android:id="@+id/comment_depth_space"
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_height="match_parent"/>
+    </LinearLayout>
+    <RelativeLayout
+        android:id="@+id/comment_root"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/comment_user"
-        android:paddingLeft="@dimen/default_padding"
-        android:text="@string/fake_text"/>
+        android:padding="@dimen/default_padding">
 
-</RelativeLayout>
+        <TextView
+            android:id="@+id/comment_user"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="@dimen/default_padding"
+            android:paddingRight="@dimen/default_padding"
+            android:paddingTop="@dimen/default_padding"
+            style="@style/comment_user"
+            android:text="Vanz"/>
+
+        <TextView
+            android:id="@+id/comment_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/comment_user"
+            android:layout_alignBaseline="@id/comment_user"
+            android:paddingLeft="@dimen/default_padding"
+            android:paddingRight="@dimen/default_padding"
+            android:paddingTop="@dimen/default_padding"
+            style="@style/link_item_domain_style"
+            android:text="5 days ago"/>
+
+        <TextView
+            android:id="@+id/comment_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/comment_user"
+            android:paddingLeft="@dimen/default_padding"
+            android:paddingTop="@dimen/default_padding"
+            android:text="@string/fake_text"/>
+    </RelativeLayout>
+</LinearLayout>

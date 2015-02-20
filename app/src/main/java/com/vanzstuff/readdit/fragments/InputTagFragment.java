@@ -16,7 +16,7 @@ import com.vanzstuff.redditapp.R;
 
 /**
  * Dialog where the user inserts the post's tags
- */
+*/
 public class InputTagFragment extends DialogFragment implements View.OnClickListener {
 
     private static final String ARG_POST = "post";

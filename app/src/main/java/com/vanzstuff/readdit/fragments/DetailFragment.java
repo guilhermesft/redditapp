@@ -17,6 +17,8 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -88,14 +90,22 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
         if (Utils.stringNotNullOrEmpty(selfText)) {
             //is a text post
             TextView txt = new TextView(getActivity());
+            int defaultPadding = (int) getResources().getDimension(R.dimen.default_padding);
+            txt.setPadding(defaultPadding,defaultPadding,defaultPadding,defaultPadding);
+            txt.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            txt.setTextAppearance(getActivity(), R.style.link_text);
             txt.setText(selfText);
-            contentView = txt;
+            ScrollView scrollView = new ScrollView(getActivity());
+            scrollView.addView(txt);
+            contentView = scrollView;
         } else if ( Utils.isImageUrl(url) ){
             NetworkImageView networkImageView = new NetworkImageView(getActivity());
+            networkImageView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
             networkImageView.setImageUrl(url, VolleyWrapper.getInstance().getImageLoader());
             contentView = networkImageView;
         }else{
             WebView webView = new WebView(getActivity());
+            webView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
             webView.getSettings().setJavaScriptEnabled(true);
             webView.setWebViewClient(new WebViewClient(){
                 @Override
@@ -129,14 +139,27 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
             //add the tag hidden to the post
             hide();
         } else if ( v.getId() == R.id.action_menu_label){
-            InputTagFragment.newInstance(mPostID).show(getActivity().getSupportFragmentManager(), "InputTagFragment");
+            addTag();
         }
     }
 
+    /**
+     * Add tags to the current link
+     */
+    public void addTag() {
+        InputTagFragment.newInstance(mPostID).show(getActivity().getSupportFragmentManager(), "InputTagFragment");
+    }
+
+    /**
+     * Hide the current link
+     */
     public void hide() {
         getActivity().getContentResolver().insert(ReadditContract.Link.buildAddTagUri(mPostID, PredefinedTags.HIDDEN.getName()), null);
     }
 
+    /**
+     * Save the current link
+     */
     public void save() {
         getActivity().getContentResolver().insert(ReadditContract.Link.buildAddTagUri(mPostID, PredefinedTags.SAVED.getName()), null);
     }

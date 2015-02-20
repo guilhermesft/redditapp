@@ -5,4 +5,5 @@
     <color name="background_green">#e8f5e9</color>
     <color name="background_green_light_dark">#c8e6c9</color>
     <color name="black">#000000</color>
+    <color name="dark_green">#2e7d32</color>
 </resources>
