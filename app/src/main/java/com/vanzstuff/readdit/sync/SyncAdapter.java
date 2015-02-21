@@ -17,6 +17,7 @@
  import com.android.volley.toolbox.Volley;
  import com.vanzstuff.readdit.Logger;
  import com.vanzstuff.readdit.PredefinedTags;
+ import com.vanzstuff.readdit.R;
  import com.vanzstuff.readdit.Utils;
  import com.vanzstuff.readdit.data.ReadditContract;
  import com.vanzstuff.readdit.redditapi.AboutRequest;
@@ -29,7 +30,6 @@
  import com.vanzstuff.readdit.redditapi.UnhideRequest;
  import com.vanzstuff.readdit.redditapi.UnsaveRequest;
  import com.vanzstuff.readdit.redditapi.VoteRequest;
- import com.vanzstuff.redditapp.R;
 
  import org.json.JSONArray;
  import org.json.JSONException;
@@ -85,19 +85,19 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
-//        int syncType = extras.getInt(EXTRA_SYNC_TYPE);
-//        if( (syncType & SYNC_TYPE_USER) == SYNC_TYPE_USER )
-//            syncUser(provider);
-//        if( (syncType & SYNC_TYPE_VOTES) == SYNC_TYPE_VOTES )
-//            syncVotes(provider);
-//        if( (syncType & SYNC_TYPE_SUBREDDIT) == SYNC_TYPE_SUBREDDIT )
-//            syncSubreddit(provider);
-//        if( (syncType & SYNC_TYPE_LINKS) == SYNC_TYPE_LINKS )
-//            syncLinks(provider);
-//        if( (syncType & SYNC_TYPE_COMMENTS) == SYNC_TYPE_COMMENTS )
-//            syncComment(provider);
-//        if( (syncType & SYNC_TYPE_SAVED_HIDDEN) == SYNC_TYPE_SAVED_HIDDEN )
-//            syncSavedHidden(provider);
+        int syncType = extras.getInt(EXTRA_SYNC_TYPE);
+        if( (syncType & SYNC_TYPE_USER) == SYNC_TYPE_USER )
+            syncUser(provider);
+        if( (syncType & SYNC_TYPE_VOTES) == SYNC_TYPE_VOTES )
+            syncVotes(provider);
+        if( (syncType & SYNC_TYPE_SUBREDDIT) == SYNC_TYPE_SUBREDDIT )
+            syncSubreddit(provider);
+        if( (syncType & SYNC_TYPE_LINKS) == SYNC_TYPE_LINKS )
+            syncLinks(provider);
+        if( (syncType & SYNC_TYPE_COMMENTS) == SYNC_TYPE_COMMENTS )
+            syncComment(provider);
+        if( (syncType & SYNC_TYPE_SAVED_HIDDEN) == SYNC_TYPE_SAVED_HIDDEN )
+            syncSavedHidden(provider);
     }
 
     private void syncSavedHidden(ContentProviderClient provider) {

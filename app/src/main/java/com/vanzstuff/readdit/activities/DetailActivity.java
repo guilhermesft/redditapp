@@ -9,12 +9,12 @@ import android.view.View;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.vanzstuff.readdit.Logger;
+import com.vanzstuff.readdit.R;
 import com.vanzstuff.readdit.UserSession;
 import com.vanzstuff.readdit.data.ReadditContract;
 import com.vanzstuff.readdit.fragments.CommentFragment;
 import com.vanzstuff.readdit.fragments.DetailFragment;
 import com.vanzstuff.readdit.redditapi.VoteRequest;
-import com.vanzstuff.redditapp.R;
 
 public class DetailActivity extends FragmentActivity implements View.OnClickListener {
 

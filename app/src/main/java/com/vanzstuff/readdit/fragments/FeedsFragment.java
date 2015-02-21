@@ -17,9 +17,9 @@ import android.view.ViewGroup;
 
 import com.vanzstuff.readdit.DividerItemDecoration;
 import com.vanzstuff.readdit.PredefinedTags;
+import com.vanzstuff.readdit.R;
 import com.vanzstuff.readdit.data.FeedsAdapter;
 import com.vanzstuff.readdit.data.ReadditContract;
-import com.vanzstuff.redditapp.R;
 
 /**
  * Fragment that encapsulate all logic to show a list with all post acquire from a given Uri

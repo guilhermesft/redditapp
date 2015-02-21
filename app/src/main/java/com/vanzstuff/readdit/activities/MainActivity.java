@@ -19,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.vanzstuff.readdit.Logger;
+import com.vanzstuff.readdit.R;
 import com.vanzstuff.readdit.User;
 import com.vanzstuff.readdit.UserSession;
 import com.vanzstuff.readdit.Utils;
@@ -29,7 +30,6 @@ import com.vanzstuff.readdit.fragments.AboutFragment;
 import com.vanzstuff.readdit.fragments.DetailFragment;
 import com.vanzstuff.readdit.fragments.FeedsFragment;
 import com.vanzstuff.readdit.sync.SyncAdapter;
-import com.vanzstuff.redditapp.R;
 
 public class MainActivity extends FragmentActivity implements FeedsFragment.CallBack, ListView.OnItemClickListener, View.OnClickListener, Handler.Callback{
 
@@ -105,11 +105,7 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
     @Override
     protected void onResume() {
         super.onResume();
-        User user = UserSession.getUser(this);
-        if ( user != null ) {
-            ((TextView) findViewById(R.id.drawer_username)).setText(user.name);
-            SyncAdapter.syncNow(this, SyncAdapter.SYNC_TYPE_VOTES);
-        }
+        SyncAdapter.syncNow(this, SyncAdapter.SYNC_TYPE_ALL);
     }
 
     @Override

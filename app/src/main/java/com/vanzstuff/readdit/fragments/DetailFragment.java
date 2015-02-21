@@ -8,35 +8,27 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.toolbox.NetworkImageView;
-import com.vanzstuff.readdit.DividerItemDecoration;
 import com.vanzstuff.readdit.PredefinedTags;
+import com.vanzstuff.readdit.R;
 import com.vanzstuff.readdit.User;
 import com.vanzstuff.readdit.UserSession;
 import com.vanzstuff.readdit.Utils;
 import com.vanzstuff.readdit.VolleyWrapper;
-import com.vanzstuff.readdit.data.CommentAdapter;
 import com.vanzstuff.readdit.data.ReadditContract;
 import com.vanzstuff.readdit.redditapi.VoteRequest;
 import com.vanzstuff.readdit.sync.SyncAdapter;
-import com.vanzstuff.redditapp.R;
 
-import java.util.List;
-import java.util.ArrayList;
 
 /**
  * Fragment that show the detail info about some reddit post

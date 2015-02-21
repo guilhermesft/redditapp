@@ -17,7 +17,7 @@ import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
 import android.text.TextUtils;
 
-import com.vanzstuff.redditapp.R;
+import com.vanzstuff.readdit.R;
 
 import java.util.List;
 

@@ -1,7 +1,6 @@
 package com.vanzstuff.readdit.data;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
@@ -10,8 +9,8 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.vanzstuff.readdit.R;
 import com.vanzstuff.readdit.redditapi.RedditApiUtils;
-import com.vanzstuff.redditapp.R;
 
 import java.util.*;
 

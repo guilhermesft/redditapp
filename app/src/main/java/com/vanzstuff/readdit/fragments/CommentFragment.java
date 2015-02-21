@@ -14,9 +14,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.vanzstuff.readdit.DividerItemDecoration;
+import com.vanzstuff.readdit.R;
 import com.vanzstuff.readdit.data.CommentAdapter;
 import com.vanzstuff.readdit.data.ReadditContract;
-import com.vanzstuff.redditapp.R;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,19 +1,20 @@
 package com.vanzstuff.readdit.activities;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 import android.support.v4.app.FragmentActivity;
-import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
 
 import com.vanzstuff.readdit.Logger;
+import com.vanzstuff.readdit.R;
 import com.vanzstuff.readdit.redditapi.RedditApiUtils;
 import com.vanzstuff.readdit.service.OAuthService;
-import com.vanzstuff.redditapp.R;
 
 import java.util.UUID;
 
@@ -37,8 +38,6 @@ public class OAuthActivity extends FragmentActivity {
         mWebView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                //TODO - handle access denied and other errors
-                Logger.d(url);
                 Uri pUrl = Uri.parse(url);
                 if (url.startsWith(RedditApiUtils.REDIRECT_URI)) {
                     if (pUrl.getQueryParameterNames().contains("error") || !mState.equals(pUrl.getQueryParameter("state"))) {
@@ -55,11 +54,11 @@ public class OAuthActivity extends FragmentActivity {
                 }
                 if ("www.reddit.com".equals(pUrl.getAuthority()))
                     return true;
-                return false;
+                return true;
             }
         });
         mState = UUID.randomUUID().toString();
-        mWebView.loadUrl( RedditApiUtils.generateAuthorizationUri(mState, RedditApiUtils.SCOPE_HISTORY,
+        mWebView.loadUrl(RedditApiUtils.generateAuthorizationUri(mState, RedditApiUtils.SCOPE_HISTORY,
                 RedditApiUtils.SCOPE_IDENTITY, RedditApiUtils.SCOPE_MYSUBREDDITS, RedditApiUtils.SCOPE_READ, RedditApiUtils.SCOPE_VOTE,
                 RedditApiUtils.SCOPE_SAVE, RedditApiUtils.SCOPE_REPORT).toString());
 

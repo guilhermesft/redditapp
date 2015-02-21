@@ -10,9 +10,9 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.vanzstuff.readdit.Logger;
+import com.vanzstuff.readdit.R;
 import com.vanzstuff.readdit.Utils;
 import com.vanzstuff.readdit.data.ReadditContract;
-import com.vanzstuff.redditapp.R;
 
 /**
  * Dialog where the user inserts the post's tags

@@ -12,9 +12,9 @@ import android.widget.TextView;
 
 import com.android.volley.toolbox.NetworkImageView;
 import com.vanzstuff.readdit.FeedsItemTouchListener;
+import com.vanzstuff.readdit.R;
 import com.vanzstuff.readdit.Utils;
 import com.vanzstuff.readdit.VolleyWrapper;
-import com.vanzstuff.redditapp.R;
 
 public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> {
 

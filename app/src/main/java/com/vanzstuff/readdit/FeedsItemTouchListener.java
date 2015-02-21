@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewConfiguration;
 
 import com.vanzstuff.readdit.data.FeedsAdapter;
-import com.vanzstuff.redditapp.R;
 
 public class FeedsItemTouchListener implements View.OnTouchListener{
 
