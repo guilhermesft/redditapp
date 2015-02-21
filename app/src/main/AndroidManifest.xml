@@ -61,6 +61,8 @@
                 android:resource="@xml/syncadapter" />
         </service>
 
+        <service android:name="com.vanzstuff.readdit.service.OAuthService"/>
+
     </application>
 
 </manifest>

@@ -42,8 +42,7 @@ public class RedditApiUtils {
     public static final String KIND_PROMOCAMPAIGN = "t7";
     public static final String KIND_LISTING = "Listing";
 
-    private static final String sClientId = "8r5k0mWbuL-otQ";
-
+    public static final String CLIENT_ID = "8r5k0mWbuL-otQ";
 
 
     /**
@@ -86,9 +85,10 @@ public class RedditApiUtils {
 
     public static Uri generateAuthorizationUri( String state, String ... scopes ){
         return Uri.parse("https://www.reddit.com/api/v1/authorize").buildUpon()
-                .appendQueryParameter("client_id", sClientId)
-                .appendQueryParameter("response_type", "token")
+                .appendQueryParameter("client_id", CLIENT_ID)
+                .appendQueryParameter("response_type", "code")
                 .appendQueryParameter("state", state)
+                .appendQueryParameter("duration", "permanent")
                 .appendQueryParameter("redirect_uri", REDIRECT_URI)
                 .appendQueryParameter("scope", generateScopesString(scopes)).build();
 

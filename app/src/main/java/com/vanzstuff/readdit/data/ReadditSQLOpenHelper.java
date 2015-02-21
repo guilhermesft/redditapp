@@ -163,6 +163,10 @@ public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
                 ReadditContract.User.COLUMN_HAS_MAIL + " INTEGER , " +
                 ReadditContract.User.COLUMN_HAS_MOD_MAIL + " INTEGER , " +
                 ReadditContract.User.COLUMN_SYNC_STATUS + " INTEGER DEFAULT 0 , " +
+                ReadditContract.User.COLUMN_TOKEN_TYPE + " TEXT , " +
+                ReadditContract.User.COLUMN_EXPIRES_IN + " TEXT , " +
+                ReadditContract.User.COLUMN_SCOPE + " TEXT , " +
+                ReadditContract.User.COLUMN_REFRESH_TOKEN + " TEXT , " +
                 ReadditContract.User.COLUMN_ACCESSTOKEN + " TEXT );";
 
         db.execSQL(CREATE_USER);

@@ -79,6 +79,7 @@ public class BaseRedditApiJsonRequest extends JsonObjectRequest {
     public Map<String, String> getHeaders() throws AuthFailureError {
         Map<String, String> headers = new HashMap(1);
         headers.put(HEADER_AUTHORIZATION, "bearer " + mAccessToken);
+        headers.put("User-agent", "com.vanzstuff.redditapp:v0.9 (by /u/jvanz");
         return headers;
     }
 }

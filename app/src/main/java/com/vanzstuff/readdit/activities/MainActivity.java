@@ -16,6 +16,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.vanzstuff.readdit.Logger;
 import com.vanzstuff.readdit.User;
@@ -155,7 +156,7 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
        if ( v.getId() == R.id.drawer_profile_container) {
             Logger.d("Profile");
             Intent intent = new Intent(this, OAuthActivity.class);
-            startActivity(intent);
+            startActivityForResult(intent, OAuthActivity.REQUEST_LOGIN);
         } else if ( v.getId() == R.id.drawer_settings) {
             //open settgins activity
             startActivity(new Intent(this, SettingsActivity.class));
@@ -177,6 +178,16 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
     public boolean handleMessage(Message msg) {
         ((TextView)findViewById(R.id.drawer_username)).setText(UserSession.getUser(this).name);
         return true;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == OAuthActivity.REQUEST_LOGIN) {
+            if (resultCode == RESULT_OK)
+                Toast.makeText(this, "You're logged! =)", Toast.LENGTH_SHORT).show();
+            else
+                Toast.makeText(this, "Something wrong happend. =/", Toast.LENGTH_SHORT).show();
+        }
     }
 }
 

@@ -928,6 +928,10 @@ public class ReadditContract {
          * Type: integer
          */
         public static final String COLUMN_SYNC_STATUS = "sync_status";
+        public static final String COLUMN_TOKEN_TYPE = "token_type";
+        public static final String COLUMN_EXPIRES_IN = "expires_in";
+        public static final String COLUMN_SCOPE = "scope";
+        public static final String COLUMN_REFRESH_TOKEN = "refresh_token";
 
 
 
