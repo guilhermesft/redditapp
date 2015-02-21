@@ -1,10 +1,12 @@
 package com.vanzstuff.readdit.activities;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 import android.support.v4.app.FragmentActivity;
+import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -17,11 +19,11 @@ import java.util.UUID;
 
 public class OAuthActivity extends FragmentActivity {
 
-    private static final String REQUEST_TAG = "request_tag";
     public static final int RESULT_OAUTH_FAILED = 2;
     public static final int REQUEST_LOGIN = 1;
     private WebView mWebView;
     private String mState;
+    private ProgressDialog mProgressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,11 +47,13 @@ public class OAuthActivity extends FragmentActivity {
                         finish();
                         return false;
                     } else {
+                        mProgressDialog = ProgressDialog.show(OAuthActivity.this, "Wait a minute...", "I'm talking with reddit's servers");
                         getAccessToken(pUrl.getQueryParameter("code"));
+                        mWebView.loadUrl("about:blank");
                         return false;
                     }
                 }
-                if ( "www.reddit.com".equals(pUrl.getAuthority()))
+                if ("www.reddit.com".equals(pUrl.getAuthority()))
                     return true;
                 return false;
             }
@@ -67,7 +71,7 @@ public class OAuthActivity extends FragmentActivity {
         intent.putExtra(OAuthService.EXTRA_RESULT_RECIEVER, new ResultReceiver(null){
             @Override
             protected void onReceiveResult(int resultCode, Bundle resultData) {
-                super.onReceiveResult(resultCode, resultData);
+                mProgressDialog.dismiss();
                 if (resultCode == OAuthService.RESULT_OK){
                     setResult(RESULT_OK);
                     finish();
