@@ -7,23 +7,20 @@ import com.android.volley.Response;
 
 import org.json.JSONObject;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
-/**
- * Request to retrieve the OAuth token
- */
-public class OAuthTokenRequest extends BaseRedditApiJsonRequest {
+public class RefreshTokenRequest extends BaseRedditApiJsonRequest {
 
-    public static OAuthTokenRequest newInstance(String code, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener){
+    public static RefreshTokenRequest newInstance(String refreshToken, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener){
         Map<String, Object> params = new HashMap<String, Object>(3);
-        params.put("grant_type", "authorization_code");
-        params.put("code", code);
-        params.put("redirect_uri", RedditApiUtils.REDIRECT_URI);
-        return new OAuthTokenRequest(listener, errorListener, params);
+        params.put("grant_type", "refresh_token");
+        params.put("refresh_token", refreshToken);
+        return new RefreshTokenRequest(listener, errorListener, params);
     }
 
-    public OAuthTokenRequest(Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, Map<String, Object> params) {
+
+    public RefreshTokenRequest(Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, Map<String, Object> params) {
         super(Method.POST, "https://www.reddit.com", "api/v1/access_token", null, listener, errorListener, params, null);
     }
 
@@ -36,4 +33,5 @@ public class OAuthTokenRequest extends BaseRedditApiJsonRequest {
         headers.put("User-agent", "com.vanzstuff.redditapp:v0.9 (by /u/jvanz");
         return headers;
     }
+
 }

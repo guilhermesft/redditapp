@@ -19,7 +19,7 @@ public class SaveRequest extends BaseRedditApiJsonRequest {
     public static final String PARAM_UH = "uh";
 
     public static SaveRequest newInstance(String id, String category, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, String accessToken){
-        Map<String, Object> params = new HashMap<>();
+        Map<String, Object> params = new HashMap<String, Object>();
         if(Utils.stringNotNullOrEmpty(id))
             params.put(PARAM_ID, id);
         if(Utils.stringNotNullOrEmpty(category))

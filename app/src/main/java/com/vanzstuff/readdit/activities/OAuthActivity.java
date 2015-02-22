@@ -9,9 +9,7 @@ import android.os.ResultReceiver;
 import android.support.v4.app.FragmentActivity;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Toast;
 
-import com.vanzstuff.readdit.Logger;
 import com.vanzstuff.readdit.R;
 import com.vanzstuff.readdit.redditapi.RedditApiUtils;
 import com.vanzstuff.readdit.service.OAuthService;
@@ -52,9 +50,11 @@ public class OAuthActivity extends FragmentActivity {
                         return false;
                     }
                 }
-                if ("www.reddit.com".equals(pUrl.getAuthority()))
+                if ("www.reddit.com".equals(pUrl.getAuthority())){
+                    view.loadUrl(url);
                     return true;
-                return true;
+                }
+                return false;
             }
         });
         mState = UUID.randomUUID().toString();

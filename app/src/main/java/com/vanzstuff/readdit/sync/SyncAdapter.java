@@ -13,19 +13,24 @@
  import android.os.RemoteException;
 
  import com.android.volley.RequestQueue;
+ import com.android.volley.Response;
  import com.android.volley.toolbox.RequestFuture;
  import com.android.volley.toolbox.Volley;
  import com.vanzstuff.readdit.Logger;
  import com.vanzstuff.readdit.PredefinedTags;
  import com.vanzstuff.readdit.R;
  import com.vanzstuff.readdit.Utils;
+ import com.vanzstuff.readdit.VolleyWrapper;
  import com.vanzstuff.readdit.data.ReadditContract;
  import com.vanzstuff.readdit.redditapi.AboutRequest;
  import com.vanzstuff.readdit.redditapi.GetCommentRequest;
  import com.vanzstuff.readdit.redditapi.GetLinks;
+ import com.vanzstuff.readdit.redditapi.GetMeRequest;
  import com.vanzstuff.readdit.redditapi.HideLinkRequest;
  import com.vanzstuff.readdit.redditapi.MySubredditRequest;
+ import com.vanzstuff.readdit.redditapi.OAuthTokenRequest;
  import com.vanzstuff.readdit.redditapi.RedditApiUtils;
+ import com.vanzstuff.readdit.redditapi.RefreshTokenRequest;
  import com.vanzstuff.readdit.redditapi.SaveRequest;
  import com.vanzstuff.readdit.redditapi.UnhideRequest;
  import com.vanzstuff.readdit.redditapi.UnsaveRequest;
@@ -57,6 +62,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     public static final int SYNC_TYPE_SAVED_HIDDEN = 0x10;
     public static final int SYNC_TYPE_ALL = SYNC_TYPE_COMMENTS | SYNC_TYPE_VOTES | SYNC_TYPE_SUBREDDIT
             | SYNC_TYPE_LINKS | SYNC_TYPE_USER | SYNC_TYPE_SAVED_HIDDEN;
+    private String mRefreshToken;
 
 
     public SyncAdapter(Context context, boolean autoInitialize) {
@@ -68,10 +74,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         mVolleyQueue = Volley.newRequestQueue(getContext());
         Cursor cursor = null;
         try{
-            cursor = context.getContentResolver().query(ReadditContract.User.CONTENT_URI, new String[]{ReadditContract.User.COLUMN_ACCESSTOKEN},
+            cursor = context.getContentResolver().query(ReadditContract.User.CONTENT_URI, new String[]{ReadditContract.User.COLUMN_ACCESSTOKEN, ReadditContract.User.COLUMN_REFRESH_TOKEN},
                     ReadditContract.User.COLUMN_CURRENT + "=?", new String[]{"1"}, null);
             if (cursor.moveToFirst())
                 mAccessToken = cursor.getString(0);
+                mRefreshToken = cursor.getString(1);
         } finally {
             if ( cursor != null )
                 cursor.close();
@@ -85,19 +92,51 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
-        int syncType = extras.getInt(EXTRA_SYNC_TYPE);
-        if( (syncType & SYNC_TYPE_USER) == SYNC_TYPE_USER )
-            syncUser(provider);
-        if( (syncType & SYNC_TYPE_VOTES) == SYNC_TYPE_VOTES )
-            syncVotes(provider);
-        if( (syncType & SYNC_TYPE_SUBREDDIT) == SYNC_TYPE_SUBREDDIT )
-            syncSubreddit(provider);
-        if( (syncType & SYNC_TYPE_LINKS) == SYNC_TYPE_LINKS )
-            syncLinks(provider);
-        if( (syncType & SYNC_TYPE_COMMENTS) == SYNC_TYPE_COMMENTS )
-            syncComment(provider);
-        if( (syncType & SYNC_TYPE_SAVED_HIDDEN) == SYNC_TYPE_SAVED_HIDDEN )
-            syncSavedHidden(provider);
+        refreshToken(provider);
+//        int syncType = extras.getInt(EXTRA_SYNC_TYPE);
+//        if( (syncType & SYNC_TYPE_USER) == SYNC_TYPE_USER )
+//            syncUser(provider);
+//        if( (syncType & SYNC_TYPE_VOTES) == SYNC_TYPE_VOTES )
+//            syncVotes(provider);
+//        if( (syncType & SYNC_TYPE_SUBREDDIT) == SYNC_TYPE_SUBREDDIT )
+//            syncSubreddit(provider);
+//        if( (syncType & SYNC_TYPE_LINKS) == SYNC_TYPE_LINKS )
+//            syncLinks(provider);
+//        if( (syncType & SYNC_TYPE_COMMENTS) == SYNC_TYPE_COMMENTS )
+//            syncComment(provider);
+//        if( (syncType & SYNC_TYPE_SAVED_HIDDEN) == SYNC_TYPE_SAVED_HIDDEN )
+//            syncSavedHidden(provider);
+    }
+
+    private void refreshToken(ContentProviderClient provider) {
+        try {
+            RequestFuture<JSONObject> future = RequestFuture.newFuture();
+            RefreshTokenRequest oAuthTokenRequest = RefreshTokenRequest.newInstance(mRefreshToken, future,future);
+            mVolleyQueue.add(oAuthTokenRequest);
+            JSONObject response = future.get();
+            if (response.has("error")) {
+                return;
+            }
+            mAccessToken = response.getString("access_token");
+            String tokenType = response.getString("token_type");
+            String expiresIn = response.getString("expires_in");
+            String scope = response.getString("scope");
+            ContentValues content = new ContentValues();
+            content.put(ReadditContract.User.COLUMN_ACCESSTOKEN, mAccessToken);
+            content.put(ReadditContract.User.COLUMN_TOKEN_TYPE, tokenType);
+            content.put(ReadditContract.User.COLUMN_EXPIRES_IN, expiresIn);
+            content.put(ReadditContract.User.COLUMN_SCOPE, scope);
+            content.put(ReadditContract.User.COLUMN_REFRESH_TOKEN, mRefreshToken);
+            provider.update(ReadditContract.User.CONTENT_URI, content, null, null);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
     private void syncSavedHidden(ContentProviderClient provider) {
