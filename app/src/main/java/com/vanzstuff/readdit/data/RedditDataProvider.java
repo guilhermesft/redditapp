@@ -320,6 +320,14 @@ public class RedditDataProvider extends ContentProvider {
                     throw new android.database.SQLException("Failed to insert row into " + uri);
                 break;
             }
+            case TAG_X_LINK: {
+                long id = db.insertOrThrow(ReadditContract.TagXPost.TABLE_NAME, null, values);
+                if (id > 0) {
+                    returnUri = ReadditContract.TagXPost.buildTagXLinkUri(id);
+                } else
+                    throw new android.database.SQLException("Failed to insert row into " + uri);
+                break;
+            }
             default:
                 throw new UnsupportedOperationException("Unknown URI: " + uri);
         }
@@ -366,7 +374,6 @@ public class RedditDataProvider extends ContentProvider {
         ContentValues insertValues = new ContentValues();
         insertValues.put(ReadditContract.TagXPost.COLUMN_LINK, uriValues[0]);
         insertValues.put(ReadditContract.TagXPost.COLUMN_TAG, uriValues[1]);
-        insertValues.put(ReadditContract.TagXPost.COLUMN_SYNC_STATUS, SyncAdapter.SYNC_STATUS_UPDATE);
         long id = db.insertOrThrow(ReadditContract.TagXPost.TABLE_NAME, null, insertValues);
         Uri returnUri;
         if (id > 0)

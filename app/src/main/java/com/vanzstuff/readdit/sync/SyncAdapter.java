@@ -106,7 +106,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             cursor = provider.query(ReadditContract.TagXPost.CONTENT_URI_PREDEFINED, new String[]{
                     ReadditContract.Tag.TABLE_NAME + "." + ReadditContract.Tag.COLUMN_NAME,
                     ReadditContract.Link.TABLE_NAME + "." + ReadditContract.Link.COLUMN_NAME,
-                    ReadditContract.TagXPost.TABLE_NAME + "." + ReadditContract.TagXPost.COLUMN_SYNC_STATUS,
                     ReadditContract.TagXPost.TABLE_NAME + "." + ReadditContract.TagXPost._ID}, null, null, null);
             while(cursor.move(1)){
                 String tag = cursor.getString(0);
@@ -119,7 +118,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         mVolleyQueue.add(SaveRequest.newInstance(fullname, null, future, future, mAccessToken));
                         future.get();
                         ContentValues values = new ContentValues(1);
-                        values.put(ReadditContract.TagXPost.COLUMN_SYNC_STATUS, SYNC_STATUS_NONE);
                         provider.update(ReadditContract.TagXPost.CONTENT_URI, values, ReadditContract.TagXPost._ID + "=?", new String[]{String.valueOf(id)});
                     } else if (syncStatus == SYNC_STATUS_DELETE){
                         mVolleyQueue.add(UnsaveRequest.newInstance(fullname, future, future, mAccessToken));
@@ -132,7 +130,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                         mVolleyQueue.add(HideLinkRequest.newInstance(fullname, future, future, mAccessToken));
                         future.get();
                         ContentValues values = new ContentValues(1);
-                        values.put(ReadditContract.TagXPost.COLUMN_SYNC_STATUS, SYNC_STATUS_NONE);
                         provider.update(ReadditContract.TagXPost.CONTENT_URI, values, ReadditContract.TagXPost._ID + "=?", new String[]{String.valueOf(id)});
                     } else if (syncStatus == SYNC_STATUS_DELETE){
                         mVolleyQueue.add(UnhideRequest.newInstance(fullname, future, future, mAccessToken));

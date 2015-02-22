@@ -1,6 +1,7 @@
 package com.vanzstuff.readdit.fragments;
 
 import android.app.Activity;
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -115,12 +116,55 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
 
     @Override
     public void onLinkSaved(long linkID) {
-        getActivity().getContentResolver().insert(ReadditContract.Link.buildAddTagUri(linkID, PredefinedTags.SAVED.getName()), null);
+        //remove tag
+        removeLinkTag(PredefinedTags.HIDDEN.getName(), linkID);
+        addLinkTag(PredefinedTags.SAVED.getName(), linkID);
+        setSavedHiddenLink(1, 0, linkID);
+    }
+
+    private void setSavedHiddenLink(int saved, int hidden, long linkID) {
+        ContentValues values = new ContentValues(2);
+        values.put(ReadditContract.Link.COLUMN_HIDDEN, hidden);
+        values.put(ReadditContract.Link.COLUMN_SAVED, saved);
+        getActivity().getContentResolver().update(ReadditContract.Link.CONTENT_URI, values,
+                ReadditContract.Link._ID + "=?",
+                new String[]{String.valueOf(linkID)});
+    }
+
+    private void addLinkTag(String tagName, long linkID) {
+        ContentValues values = new ContentValues(2);
+        values.put(ReadditContract.TagXPost.COLUMN_TAG, getTagID(tagName));
+        values.put(ReadditContract.TagXPost.COLUMN_LINK, linkID);
+        getActivity().getContentResolver().insert(ReadditContract.TagXPost.CONTENT_URI, values);
+    }
+
+    private void removeLinkTag(String tagName, long linkID) {
+        getActivity().getContentResolver().delete(ReadditContract.TagXPost.CONTENT_URI,
+                ReadditContract.TagXPost.COLUMN_TAG + "=? AND " + ReadditContract.TagXPost.COLUMN_LINK + "=?",
+                new String[]{String.valueOf(getTagID(tagName)), String.valueOf(linkID)});
+    }
+
+    private long getTagID(String tagName) {
+        Cursor cursor = null;
+        try{
+            cursor = getActivity().getContentResolver().query(ReadditContract.Tag.CONTENT_URI,
+                    new String[]{ReadditContract.Tag._ID},
+                    ReadditContract.Tag.COLUMN_NAME + "=?",
+                    new String[]{tagName}, null);
+            if (cursor.moveToFirst())
+                return cursor.getLong(0);
+        } finally {
+            if (cursor != null)
+                cursor.close();
+        }
+        return 0;
     }
 
     @Override
     public void onLinkHidden(long linkID) {
-        getActivity().getContentResolver().insert(ReadditContract.Link.buildAddTagUri(linkID, PredefinedTags.HIDDEN.getName()), null);
+        removeLinkTag(PredefinedTags.SAVED.getName(), linkID);
+        addLinkTag(PredefinedTags.HIDDEN.getName(), linkID);
+        setSavedHiddenLink(0, 1, linkID);
     }
 
     @Override

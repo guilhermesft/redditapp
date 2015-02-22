@@ -23,7 +23,7 @@ public class ReadditContract {
     public static final String PATH_USER = "user";
     public static final String PATH_VOTE = "vote";
     public static final String PATH_TAGXLINK_PREDEFINED = "tac_x_post_predefined";
-    public static final String PATH_TAGXLINK = "tac_x_post";
+    public static final String PATH_TAGXLINK = "tag_x_post";
     public static final String PATH_COMMENT_LINK = "comment_link";
     public static final String MULTIPLE_ITEM_MIMETYPE = "vnd.android.cursor.dir/";
     public static final String SINGLE_ITEM_MIMETYPE = "vnd.android.cursor.item/";
@@ -410,8 +410,10 @@ public class ReadditContract {
         public static final String TABLE_NAME = "tag_x_link";
         public static final String COLUMN_TAG = "tag";
         public static final String COLUMN_LINK = "post";
-        public static final String COLUMN_SYNC_STATUS = "sync_status";
 
+        public static Uri buildTagXLinkUri(long id) {
+            return ContentUris.withAppendedId(CONTENT_URI, id);
+        }
     }
 
     /**

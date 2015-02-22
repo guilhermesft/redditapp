@@ -63,11 +63,11 @@ public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
                 ReadditContract.Link.COLUMN_GILDED + " INTEGER, " +
                 ReadditContract.Link.COLUMN_SYNC_STATUS + " INTEGER, " +
                 ReadditContract.Link.COLUMN_LIKES + " INTEGER);";
-        final String CREATE_TAG_X_POST = "CREATE TABLE " + ReadditContract.TagXPost.TABLE_NAME + " ( " +
+        final String CREATE_TAG_X_LINK = "CREATE TABLE " + ReadditContract.TagXPost.TABLE_NAME + " ( " +
                 ReadditContract.TagXPost._ID + " INTEGER PRIMARY KEY, " +
                 ReadditContract.TagXPost.COLUMN_TAG + " INTEGER REFERENCES " + ReadditContract.Tag.TABLE_NAME + "( " + ReadditContract.Tag._ID + ") , " +
                 ReadditContract.TagXPost.COLUMN_LINK + " INTEGER REFERENCES " + ReadditContract.Link.TABLE_NAME + "( " + ReadditContract.Link._ID + "), " +
-                ReadditContract.TagXPost.COLUMN_SYNC_STATUS + " INTEGER DEFAULT 0);";
+                "UNIQUE(" + ReadditContract.TagXPost.COLUMN_TAG + "," + ReadditContract.TagXPost.COLUMN_LINK + ") ON CONFLICT UPDATE);";
 
         final String CREATE_COMMENT = "CREATE TABLE " + ReadditContract.Comment.TABLE_NAME + " ( " +
                 ReadditContract.Comment._ID + " INTEGER PRIMARY KEY, " +
@@ -172,7 +172,7 @@ public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_USER);
         db.execSQL(CREATE_TAG);
         db.execSQL(CREATE_LINK);
-        db.execSQL(CREATE_TAG_X_POST);
+        db.execSQL(CREATE_TAG_X_LINK);
         db.execSQL(CREATE_COMMENT);
         db.execSQL(CREATE_SUBSCRIBE);
         db.execSQL(CREATE_VOTE);
