@@ -409,7 +409,7 @@ public class ReadditContract {
 
         public static final String TABLE_NAME = "tag_x_link";
         public static final String COLUMN_TAG = "tag";
-        public static final String COLUMN_LINK = "post";
+        public static final String COLUMN_LINK = "link";
 
         public static Uri buildTagXLinkUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);

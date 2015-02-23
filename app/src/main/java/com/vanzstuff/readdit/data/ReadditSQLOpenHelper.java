@@ -67,8 +67,7 @@ public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
                 ReadditContract.TagXPost._ID + " INTEGER PRIMARY KEY, " +
                 ReadditContract.TagXPost.COLUMN_TAG + " INTEGER REFERENCES " + ReadditContract.Tag.TABLE_NAME + "( " + ReadditContract.Tag._ID + ") , " +
                 ReadditContract.TagXPost.COLUMN_LINK + " INTEGER REFERENCES " + ReadditContract.Link.TABLE_NAME + "( " + ReadditContract.Link._ID + "), " +
-                "UNIQUE(" + ReadditContract.TagXPost.COLUMN_TAG + "," + ReadditContract.TagXPost.COLUMN_LINK + ") ON CONFLICT UPDATE);";
-
+                "UNIQUE(" + ReadditContract.TagXPost.COLUMN_TAG + "," + ReadditContract.TagXPost.COLUMN_LINK + ") ON CONFLICT REPLACE);";
         final String CREATE_COMMENT = "CREATE TABLE " + ReadditContract.Comment.TABLE_NAME + " ( " +
                 ReadditContract.Comment._ID + " INTEGER PRIMARY KEY, " +
                 ReadditContract.Comment.COLUMN_APPROVED_BY + " TEXT, " +

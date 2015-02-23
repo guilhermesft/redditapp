@@ -77,7 +77,9 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
             return;
         mFullname = cursor.getString(cursor.getColumnIndex(ReadditContract.Link.COLUMN_NAME));
         String selfText = cursor.getString(cursor.getColumnIndex(ReadditContract.Link.COLUMN_SELFTEXT));
+        String title = cursor.getString(cursor.getColumnIndex(ReadditContract.Link.COLUMN_TITLE));
         final String url = cursor.getString(cursor.getColumnIndex(ReadditContract.Link.COLUMN_URL));
+        getActivity().getActionBar().setTitle(title);
         View contentView = null;
         if (Utils.stringNotNullOrEmpty(selfText)) {
             //is a text post

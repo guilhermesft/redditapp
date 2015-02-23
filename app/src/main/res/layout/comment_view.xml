@@ -3,13 +3,13 @@
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_gray">
+    android:background="@color/theme_grey_100">
 
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:background="@color/background_green">
+        android:background="@color/theme_color_50">
         <LinearLayout
             android:id="@+id/comment_depth_space"
             android:orientation="horizontal"
