@@ -6,6 +6,11 @@
     android:paddingEnd="@dimen/default_padding"
     android:layout_margin="@dimen/default_margin">
 
+    <com.vanzstuff.readdit.view.BackgroundContainer
+        android:id="@+id/link_background_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
     <com.android.volley.toolbox.NetworkImageView
         android:id="@+id/link_item_thumbnail"
         android:layout_alignParentEnd="true"
