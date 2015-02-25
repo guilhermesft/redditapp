@@ -3,6 +3,7 @@ package com.vanzstuff.readdit.fragments;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -25,6 +26,7 @@ import com.vanzstuff.readdit.User;
 import com.vanzstuff.readdit.UserSession;
 import com.vanzstuff.readdit.Utils;
 import com.vanzstuff.readdit.VolleyWrapper;
+import com.vanzstuff.readdit.data.DataUtils;
 import com.vanzstuff.readdit.data.ReadditContract;
 import com.vanzstuff.readdit.redditapi.VoteRequest;
 import com.vanzstuff.readdit.sync.SyncAdapter;
@@ -38,18 +40,18 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
     private static final String ARG_LINK_ID = "post_id";
     private static final int LINK_LOADER = 2;
     /*Activity that holds the fragment*/
-    private long mPostID;
+    private long mLinkID;
     private String mFullname;
 
     /**
      * Factory method to create a new instance of this fragment
-     * @param postID post's id to load
+     * @param linkID post's id to load
      * @return a DetailFragment new instance
      */
-    public static DetailFragment newInstance(long postID) {
+    public static DetailFragment newInstance(long linkID) {
         DetailFragment fragment = new DetailFragment();
         Bundle args = new Bundle(1);
-        args.putLong(DetailFragment.ARG_LINK_ID, postID);
+        args.putLong(DetailFragment.ARG_LINK_ID, linkID);
         fragment.setArguments(args);
         return fragment;
     }
@@ -65,7 +67,8 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
     public void onResume() {
         super.onResume();
         getLoaderManager().initLoader(LINK_LOADER, getArguments(), this);
-        mPostID = getArguments().getLong(ARG_LINK_ID, -1);
+        mLinkID = getArguments().getLong(ARG_LINK_ID, -1);
+        DataUtils.setLinkRead(getActivity(), mLinkID);
     }
 
     /**
@@ -104,10 +107,12 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
             webView.setWebViewClient(new WebViewClient(){
                 @Override
                 public boolean shouldOverrideUrlLoading(WebView view, String urlLoading) {
-                    return url.equals(urlLoading);
+                    if (url.equals(urlLoading))
+                        return false;
+                    return true;
                 }
             });
-            webView.loadUrl( url );
+            webView.loadUrl(url);
             contentView = webView;
         }
         FrameLayout container = (FrameLayout) getView().findViewById(R.id.content_container);
@@ -141,25 +146,25 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
      * Add tags to the current link
      */
     public void addTag() {
-        InputTagFragment.newInstance(mPostID).show(getActivity().getSupportFragmentManager(), "InputTagFragment");
+        InputTagFragment.newInstance(mLinkID).show(getActivity().getSupportFragmentManager(), "InputTagFragment");
     }
 
     /**
      * Hide the current link
      */
     public void hide() {
-        getActivity().getContentResolver().insert(ReadditContract.Link.buildAddTagUri(mPostID, PredefinedTags.HIDDEN.getName()), null);
+        getActivity().getContentResolver().insert(ReadditContract.Link.buildAddTagUri(mLinkID, PredefinedTags.HIDDEN.getName()), null);
     }
 
     /**
      * Save the current link
      */
     public void save() {
-        getActivity().getContentResolver().insert(ReadditContract.Link.buildAddTagUri(mPostID, PredefinedTags.SAVED.getName()), null);
+        getActivity().getContentResolver().insert(ReadditContract.Link.buildAddTagUri(mLinkID, PredefinedTags.SAVED.getName()), null);
     }
 
     /**
-     * Method insert or update the user vote in the mPostID
+     * Method insert or update the user vote in the mLinkID
      * @param voteDirection vote direction from VoteRequest.VOTE_UP or VoteRequest.VOTE_DOWN
      */
     public void vote(int voteDirection){

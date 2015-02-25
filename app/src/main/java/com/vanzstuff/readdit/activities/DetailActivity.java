@@ -17,7 +17,7 @@ import com.vanzstuff.readdit.redditapi.VoteRequest;
 
 public class DetailActivity extends FragmentActivity implements View.OnClickListener {
 
-    public static final String EXTRA_POST_ID = "post_id";
+    public static final String EXTRA_LINK_ID = "post_id";
     private static final String DETAIL_FRAGMENT_TAG = "detail";
     private FloatingActionsMenu mFloatingMenu;
     private long mLinkID;
@@ -28,8 +28,8 @@ public class DetailActivity extends FragmentActivity implements View.OnClickList
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
-        if ( getIntent().getExtras().containsKey(EXTRA_POST_ID)){
-            mLinkID = getIntent().getLongExtra(EXTRA_POST_ID, -1);
+        if ( getIntent().getExtras().containsKey(EXTRA_LINK_ID)){
+            mLinkID = getIntent().getLongExtra(EXTRA_LINK_ID, -1);
         }
         mDetailFragment = DetailFragment.newInstance(mLinkID);
         getSupportFragmentManager()

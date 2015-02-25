@@ -44,7 +44,6 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
     /* Navigation drawer views */
     private ListView mTagList;
     private ListView mSubredditList;
-    private Button mSettings;
     private Button mAbout;
     private FeedsFragment mFeedsFragment;
 
@@ -123,14 +122,14 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
     }
 
     @Override
-    public void onItemSelected(long postID) {
+    public void onItemSelected(long linkID) {
         if ( mIsTwoPanelLayout ){
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.detail_fragment_container, DetailFragment.newInstance(postID), DETAIL_FRAGMENT_TAG)
+                    .replace(R.id.detail_fragment_container, DetailFragment.newInstance(linkID), DETAIL_FRAGMENT_TAG)
                     .commit();
         }else{
-            Intent intent = new Intent(this, DetailActivity.class).putExtra(DetailActivity.EXTRA_POST_ID, postID);
+            Intent intent = new Intent(this, DetailActivity.class).putExtra(DetailActivity.EXTRA_LINK_ID, linkID);
             startActivity(intent);
         }
     }

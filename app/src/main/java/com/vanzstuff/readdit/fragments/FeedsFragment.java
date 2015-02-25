@@ -2,7 +2,9 @@ package com.vanzstuff.readdit.fragments;
 
 import android.app.Activity;
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -25,9 +27,11 @@ import com.vanzstuff.readdit.DividerItemDecoration;
 import com.vanzstuff.readdit.Logger;
 import com.vanzstuff.readdit.PredefinedTags;
 import com.vanzstuff.readdit.R;
+import com.vanzstuff.readdit.data.DataUtils;
 import com.vanzstuff.readdit.data.FeedsAdapter;
 import com.vanzstuff.readdit.data.ReadditContract;
 import com.vanzstuff.readdit.view.BackgroundContainer;
+import com.vanzstuff.readdit.view.ItemClickListener;
 
 /**
  * Fragment that encapsulate all logic to show a list with all post acquire from a given Uri
@@ -82,6 +86,12 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
         mRecyclerView = (RecyclerView) v.findViewById(R.id.fragment_feeds_recycler_view);
         mRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST));
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mRecyclerView.addOnItemTouchListener(new ItemClickListener(getActivity(), new ItemClickListener.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                mCallback.onItemSelected(mRecyclerView.getAdapter().getItemId(position));
+            }
+        }));
         return v;
     }
 
@@ -197,15 +207,6 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
         return mUri;
     }
 
-    private void setLinkRead(long linkID) {
-        ContentValues values = new ContentValues(1);
-        values.put(ReadditContract.Link.COLUMN_READ, 1);
-        getActivity().getContentResolver().update(ReadditContract.Link.CONTENT_URI, values,
-                ReadditContract.Link._ID + "=?",
-                new String[]{String.valueOf(linkID)});
-        getLoaderManager().restartLoader(LINK_INIT_CURSOR_LOADER, null, this);
-    }
-
     /**
      * Interface to enable communication between the fragment and the activity
      */
@@ -222,15 +223,6 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
 
         float mDownX;
         private int mSwipeSlop = -1;
-        private GestureDetector.SimpleOnGestureListener mGestureListener = new GestureDetector.SimpleOnGestureListener(){
-            @Override
-            public boolean onSingleTapConfirmed(MotionEvent e) {
-                mCallback.onItemSelected(mRecyclerView.getChildItemId(mRecyclerView.findChildViewUnder(e.getX(), e.getY())));
-                return true;
-            }
-        };
-        private GestureDetector mGestureDetector = new GestureDetector(FeedsFragment.this.getActivity(), mGestureListener);
-
 
         @Override
         public boolean onTouch(final View v, MotionEvent event) {
@@ -246,7 +238,6 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
                     }
                     mItemPressed = true;
                     mDownX = event.getX();
-                    mGestureDetector.onTouchEvent(event);
                     break;
                 case MotionEvent.ACTION_CANCEL:
                     v.setAlpha(1);
@@ -258,7 +249,6 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
                     float x = event.getX() + v.getTranslationX();
                     float deltaX = x - mDownX;
                     float deltaXAbs = Math.abs(deltaX);
-                    mGestureDetector.onTouchEvent(event);
                     if (!mSwiping) {
                         if (deltaXAbs > mSwipeSlop) {
                             mSwiping = true;
@@ -311,7 +301,8 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
 //                                        v.setAlpha(1);
 //                                        v.setTranslationX(0);
                                         if (remove) {
-                                            setLinkRead(mRecyclerView.getAdapter().getItemId(mRecyclerView.getChildPosition(v)));
+                                            DataUtils.setLinkRead(getActivity(), mRecyclerView.getAdapter().getItemId(mRecyclerView.getChildPosition(v)));
+                                            getLoaderManager().restartLoader(LINK_INIT_CURSOR_LOADER, null, FeedsFragment.this);
                                         } else {
                                             mSwiping = false;
                                             mRecyclerView.setEnabled(true);
@@ -319,8 +310,6 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
                                     }
                                 });
                     }
-                    if (mGestureDetector.onTouchEvent(event))
-                        return true;
                 }
                 mItemPressed = false;
                 break;
@@ -330,6 +319,4 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
             return true;
         }
     };
-
-
 }
