@@ -49,6 +49,8 @@ public class OAuthService extends IntentService implements Response.ErrorListene
                         mResultReciever.send(RESULT_FAILED, error);
                         return;
                     }
+                    //the app allow just one logged user
+                    getContentResolver().delete(ReadditContract.User.CONTENT_URI, null, null);
                     mAccessToken = response.getString("access_token");
                     mTokenType = response.getString("token_type");
                     mExpiresIn = response.getString("expires_in");
@@ -66,7 +68,6 @@ public class OAuthService extends IntentService implements Response.ErrorListene
                                     content.put(ReadditContract.User.COLUMN_EXPIRES_IN, mExpiresIn);
                                     content.put(ReadditContract.User.COLUMN_SCOPE, mScope);
                                     content.put(ReadditContract.User.COLUMN_REFRESH_TOKEN, mRefreshToken);
-                                    getContentResolver().update(ReadditContract.User.CONTENT_URI, content, null, null);
                                     //new user, insert he/she in the database
                                     content.put(ReadditContract.User.COLUMN_NAME, response.getString("name"));
                                     content.put(ReadditContract.User.COLUMN_CURRENT, 1);

@@ -1,11 +1,13 @@
 package com.vanzstuff.readdit.activities;
 
+import android.app.LoaderManager;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SimpleCursorAdapter;
@@ -20,8 +22,6 @@ import android.widget.Toast;
 
 import com.vanzstuff.readdit.Logger;
 import com.vanzstuff.readdit.R;
-import com.vanzstuff.readdit.User;
-import com.vanzstuff.readdit.UserSession;
 import com.vanzstuff.readdit.Utils;
 import com.vanzstuff.readdit.data.ReadditContract;
 import com.vanzstuff.readdit.data.SubredditLoader;
@@ -31,10 +31,11 @@ import com.vanzstuff.readdit.fragments.DetailFragment;
 import com.vanzstuff.readdit.fragments.FeedsFragment;
 import com.vanzstuff.readdit.sync.SyncAdapter;
 
-public class MainActivity extends FragmentActivity implements FeedsFragment.CallBack, ListView.OnItemClickListener, View.OnClickListener, Handler.Callback{
+public class MainActivity extends FragmentActivity implements FeedsFragment.CallBack, ListView.OnItemClickListener, View.OnClickListener, LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String DETAIL_FRAGMENT_TAG = "detail_fragment_tag";
     private static final int SUBREDDIT_LOADER = 0;
+    private static final int USERNAME_LOADER = 0;
     private static final int TAGS_LOADER = 1;
     /* Indicate if is two panel layout or not */
     private boolean mIsTwoPanelLayout = false;
@@ -46,7 +47,6 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
     private Button mSettings;
     private Button mAbout;
     private FeedsFragment mFeedsFragment;
-    private DetailFragment mDetailFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,12 +100,6 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
         mAbout.setOnClickListener(this);
         findViewById(R.id.drawer_profile_container).setOnClickListener(this);
         getActionBar().setHomeButtonEnabled(true);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        SyncAdapter.syncNow(this, SyncAdapter.SYNC_TYPE_ALL);
     }
 
     @Override
@@ -171,19 +165,33 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
     }
 
     @Override
-    public boolean handleMessage(Message msg) {
-        ((TextView)findViewById(R.id.drawer_username)).setText(UserSession.getUser(this).name);
-        return true;
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == OAuthActivity.REQUEST_LOGIN) {
+            if (resultCode == RESULT_OK) {
+                getLoaderManager().initLoader(USERNAME_LOADER, null, this);
+                Toast.makeText(this, "You're logged! =)", Toast.LENGTH_SHORT).show();
+            } else
+                Toast.makeText(this, "Something wrong happend. =/", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == OAuthActivity.REQUEST_LOGIN) {
-            if (resultCode == RESULT_OK)
-                Toast.makeText(this, "You're logged! =)", Toast.LENGTH_SHORT).show();
-            else
-                Toast.makeText(this, "Something wrong happend. =/", Toast.LENGTH_SHORT).show();
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        Loader<Cursor> loader = null;
+        if (id == USERNAME_LOADER) {
+            loader = new CursorLoader(this, ReadditContract.User.CONTENT_URI, new String[]{ReadditContract.User.COLUMN_NAME}, null, null, null);
         }
+        return loader;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        if (loader.getId() == USERNAME_LOADER && data.moveToFirst())
+            ((TextView)findViewById(R.id.drawer_username)).setText(data.getString(0));
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
     }
 }
 

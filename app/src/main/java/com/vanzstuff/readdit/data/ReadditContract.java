@@ -397,6 +397,10 @@ public class ReadditContract {
          * Type: integer
          */
         public static final String COLUMN_SYNC_STATUS = "sync_status";
+        /**
+         * This flag indicate if the user have already seen this link
+          */
+        public static final String COLUMN_READ = "read";
 
 
 

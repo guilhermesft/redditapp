@@ -13,7 +13,9 @@ import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 
 import com.vanzstuff.readdit.DividerItemDecoration;
@@ -21,6 +23,7 @@ import com.vanzstuff.readdit.PredefinedTags;
 import com.vanzstuff.readdit.R;
 import com.vanzstuff.readdit.data.FeedsAdapter;
 import com.vanzstuff.readdit.data.ReadditContract;
+import com.vanzstuff.readdit.view.BackgroundContainer;
 
 /**
  * Fragment that encapsulate all logic to show a list with all post acquire from a given Uri
@@ -29,12 +32,18 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
 
     private static final int LINK_INIT_CURSOR_LOADER = 0;
     public static final String ARG_URI = "arg_uri";
+    private static final int SWIPE_DURATION = 250;
+    private static final int MOVE_DURATION = 150;
 
     private Uri mUri;
     /** RecyclerView responsable to show all links */
     private RecyclerView mRecyclerView;
     /** Activity listener */
     private CallBack mCallback;
+    private boolean mItemPressed = false;
+    private boolean mSwiping = false;
+    private BackgroundContainer mBackgroundContainer;
+    private FeedsAdapter mAdapter;
 
     /**
      * Factory method to build a new FeedFragment
@@ -93,14 +102,19 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         if( mUri != null)
-            return new CursorLoader(getActivity(), mUri, null, null, null, ReadditContract.Link.COLUMN_CREATED);
+            return new CursorLoader(getActivity(), mUri, null,
+                ReadditContract.Link.COLUMN_READ + "=? ",
+                new String[]{"0"}, ReadditContract.Link.COLUMN_CREATED);
         else
-            return new CursorLoader(getActivity(), ReadditContract.Link.CONTENT_URI, null, null, null, ReadditContract.Link.COLUMN_CREATED);
+            return new CursorLoader(getActivity(), ReadditContract.Link.CONTENT_URI,
+                    null, ReadditContract.Link.COLUMN_READ + "=?",
+                    new String[]{"0"}, ReadditContract.Link.COLUMN_CREATED);
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mRecyclerView.swapAdapter(new FeedsAdapter(data, this, mRecyclerView, getActivity()), false);
+        mAdapter = new FeedsAdapter(data, this, mTouchListener, mRecyclerView, getActivity());
+        mRecyclerView.swapAdapter(mAdapter, false);
     }
 
     @Override
@@ -115,7 +129,7 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
     }
 
     @Override
-    public void onLinkSaved(long linkID) {
+    public void saveLink(long linkID) {
         //remove tag
         removeLinkTag(PredefinedTags.HIDDEN.getName(), linkID);
         addLinkTag(PredefinedTags.SAVED.getName(), linkID);
@@ -183,8 +197,6 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
         return mUri;
     }
 
-
-
     /**
      * Interface to enable communication between the fragment and the activity
      */
@@ -195,5 +207,114 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
          * @param postID ID of the post selected
          */
         public void onItemSelected(long postID);
+    }
+
+    private View.OnTouchListener mTouchListener = new View.OnTouchListener() {
+
+        float mDownX;
+        private int mSwipeSlop = -1;
+
+        @Override
+        public boolean onTouch(final View v, MotionEvent event) {
+            if (mSwipeSlop < 0) {
+                mSwipeSlop = ViewConfiguration.get(FeedsFragment.this.getActivity()).
+                        getScaledTouchSlop();
+            }
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    if (mItemPressed) {
+                        // Multi-item swipes not handled
+                        return false;
+                    }
+                    mItemPressed = true;
+                    mDownX = event.getX();
+                    break;
+                case MotionEvent.ACTION_CANCEL:
+                    v.setAlpha(1);
+                    v.setTranslationX(0);
+                    mItemPressed = false;
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                {
+                    float x = event.getX() + v.getTranslationX();
+                    float deltaX = x - mDownX;
+                    float deltaXAbs = Math.abs(deltaX);
+                    if (!mSwiping) {
+                        if (deltaXAbs > mSwipeSlop) {
+                            mSwiping = true;
+                            mRecyclerView.requestDisallowInterceptTouchEvent(true);
+                        }
+                    }
+                    if (mSwiping) {
+                        v.setTranslationX((x - mDownX));
+                        v.setAlpha(1 - deltaXAbs / v.getWidth());
+                    }
+                }
+                break;
+                case MotionEvent.ACTION_UP:
+                {
+                    // User let go - figure out whether to animate the view out, or back into place
+                    if (mSwiping) {
+                        float x = event.getX() + v.getTranslationX();
+                        float deltaX = x - mDownX;
+                        float deltaXAbs = Math.abs(deltaX);
+                        float fractionCovered;
+                        float endX;
+                        float endAlpha;
+                        final boolean remove;
+                        if (deltaXAbs > v.getWidth() / 4) {
+                            // Greater than a quarter of the width - animate it out
+                            fractionCovered = deltaXAbs / v.getWidth();
+                            endX = deltaX < 0 ? -v.getWidth() : v.getWidth();
+                            endAlpha = 0;
+                            remove = true;
+                        } else {
+                            // Not far enough - animate it back
+                            fractionCovered = 1 - (deltaXAbs / v.getWidth());
+                            endX = 0;
+                            endAlpha = 1;
+                            remove = false;
+                        }
+                        // Animate position and alpha of swiped item
+                        // NOTE: This is a simplified version of swipe behavior, for the
+                        // purposes of this demo about animation. A real version should use
+                        // velocity (via the VelocityTracker class) to send the item off or
+                        // back at an appropriate speed.
+                        long duration = (int) ((1 - fractionCovered) * SWIPE_DURATION);
+                        mRecyclerView.setEnabled(false);
+                        v.animate().setDuration(duration).
+                                alpha(endAlpha).translationX(endX).
+                                withEndAction(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        // Restore animated values
+//                                        v.setAlpha(1);
+//                                        v.setTranslationX(0);
+                                        if (remove) {
+                                            setLinkRead(mAdapter.getItemId(mRecyclerView.getChildPosition(v)));
+                                            getLoaderManager().restartLoader(LINK_INIT_CURSOR_LOADER, null, FeedsFragment.this);
+                                        } else {
+                                            mSwiping = false;
+                                            mRecyclerView.setEnabled(true);
+                                        }
+                                    }
+                                });
+                    }
+                }
+                mItemPressed = false;
+                break;
+                default:
+                    return false;
+            }
+            return true;
+        }
+    };
+
+    private void setLinkRead(long linkID) {
+        ContentValues values = new ContentValues(1);
+        values.put(ReadditContract.Link.COLUMN_READ, 1);
+        getActivity().getContentResolver().update(ReadditContract.Link.CONTENT_URI, values,
+                ReadditContract.Link._ID + "=?",
+                new String[]{String.valueOf(linkID)});
     }
 }

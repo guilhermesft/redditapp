@@ -40,6 +40,7 @@ public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
                 ReadditContract.Link.COLUMN_PERMALINK + " TEXT, " +
                 ReadditContract.Link.COLUMN_SAVED + " INTEGER, " +
                 ReadditContract.Link.COLUMN_SCORE + " INTEGER, " +
+                ReadditContract.Link.COLUMN_READ + " INTEGER DEFAULT 0, " +
                 ReadditContract.Link.COLUMN_SELFTEXT + " TEXT, " +
                 ReadditContract.Link.COLUMN_SELFTEXT_HTML + " TEXT, " +
                 ReadditContract.Link.COLUMN_SUBREDDIT + " TEXT REFERENCES " + ReadditContract.Subreddit.TABLE_NAME + "( " +

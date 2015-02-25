@@ -15,6 +15,7 @@ import com.vanzstuff.readdit.FeedsItemTouchListener;
 import com.vanzstuff.readdit.R;
 import com.vanzstuff.readdit.Utils;
 import com.vanzstuff.readdit.VolleyWrapper;
+import com.vanzstuff.readdit.fragments.FeedsFragment;
 
 public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> {
 
@@ -22,15 +23,17 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> 
     private static final int TYPE_WITHOUT_THUMBNAIL = 2;
     private final Context mContext;
     private final RecyclerView mRecyclerView;
+    private final View.OnTouchListener mTouchListener;
 
     private Cursor mCursor;
     private ItemSelectedListener mListener;
 
-    public FeedsAdapter(Cursor cursor, ItemSelectedListener listener, RecyclerView recyclerView, Context context){
+    public FeedsAdapter(Cursor cursor, ItemSelectedListener listener, View.OnTouchListener touchListener, RecyclerView recyclerView, Context context){
         mCursor = cursor;
         mListener = listener;
         mContext = context;
         mRecyclerView = recyclerView;
+        mTouchListener = touchListener;
         setHasStableIds(true);
     }
 
@@ -42,6 +45,7 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> 
         }else {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.link_item_with_thumbnail, parent, false);
         }
+        view.setOnTouchListener(mTouchListener);
         return new ViewHolder(view , viewType);
     }
 
@@ -107,7 +111,6 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> 
         public ViewHolder(View itemView, int viewType) {
             super(itemView);
             mViewType = viewType;
-            itemView.setOnTouchListener(new FeedsItemTouchListener(mRecyclerView, mListener));
             mThumbnail = (NetworkImageView) itemView.findViewById(R.id.link_item_thumbnail);
             mTxtTitle = (TextView) itemView.findViewById(R.id.link_item_title);
             mTxtVotes = (TextView) itemView.findViewById(R.id.link_item_votes);
@@ -132,7 +135,7 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> 
          * @param linkID clicked item position
          */
         public void onLinkClicked(long linkID);
-        public void onLinkSaved(long linkID);
+        public void saveLink(long linkID);
         public void onLinkHidden(long linkID);
     }
 }

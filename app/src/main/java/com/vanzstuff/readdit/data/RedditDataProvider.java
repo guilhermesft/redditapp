@@ -272,7 +272,7 @@ public class RedditDataProvider extends ContentProvider {
                     long id = db.insertOrThrow(ReadditContract.User.TABLE_NAME, null, values);
                     if (id > 0) {
                         returnUri = ReadditContract.User.buildUserUri(id);
-                        SyncAdapter.syncNow(getContext(), SyncAdapter.SYNC_TYPE_ALL);
+                        SyncAdapter.syncNow(getContext().getApplicationContext(), SyncAdapter.SYNC_TYPE_ALL);
                     } else
                         throw new android.database.SQLException("Failed to insert row into " + uri);
                     break;
@@ -303,7 +303,6 @@ public class RedditDataProvider extends ContentProvider {
             }
             case ADD_TAG_TO_LINK:{
                 returnUri = insertTagToPost(db, uri);
-                SyncAdapter.syncNow(getContext(), SyncAdapter.SYNC_TYPE_SAVED_HIDDEN);
                 break;
             }
             case ADD_TAG_NAME_TO_LINK: {
@@ -315,7 +314,6 @@ public class RedditDataProvider extends ContentProvider {
                 long id = db.insertOrThrow(ReadditContract.Vote.TABLE_NAME, null, values);
                 if (id > 0) {
                     returnUri = ReadditContract.Vote.buildVoteUri(id);
-                    SyncAdapter.syncNow(getContext(), SyncAdapter.SYNC_TYPE_VOTES);
                 } else
                     throw new android.database.SQLException("Failed to insert row into " + uri);
                 break;
@@ -423,6 +421,10 @@ public class RedditDataProvider extends ContentProvider {
             }
             case TAG_X_LINK:{
                 rowsDeleted = db.delete(ReadditContract.TagXPost.TABLE_NAME, selection, selectionArgs);
+                break;
+            }
+            case USER: {
+                rowsDeleted = db.delete(ReadditContract.User.TABLE_NAME, selection, selectionArgs);
                 break;
             }
             default:

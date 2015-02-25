@@ -134,7 +134,7 @@ public class FeedsItemTouchListener implements View.OnTouchListener{
                 .setDuration(ANIMATION_DURATION)
                 .alpha(0)
                 .start();
-        mListener.onLinkSaved(mRecyclerView.getChildItemId(v));
+        mListener.saveLink(mRecyclerView.getChildItemId(v));
     }
 
     public void slideLeft(View v){
