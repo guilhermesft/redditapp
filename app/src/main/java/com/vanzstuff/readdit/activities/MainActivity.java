@@ -165,7 +165,7 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        if(mFeedsFragment.getUri() != null)
+        if(mFeedsFragment != null && mFeedsFragment.getUri() != null)
             outState.putString(FeedsFragment.ARG_URI, mFeedsFragment.getUri().toString());
         super.onSaveInstanceState(outState);
     }

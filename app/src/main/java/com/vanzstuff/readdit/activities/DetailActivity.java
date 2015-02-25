@@ -79,6 +79,7 @@ public class DetailActivity extends FragmentActivity implements View.OnClickList
                 DetailFragment detail = (DetailFragment) getSupportFragmentManager().findFragmentByTag(DETAIL_FRAGMENT_TAG);
                 if (detail != null )
                     detail.hide();
+                finish();
                 break;
             }
             case R.id.action_menu_label: {
