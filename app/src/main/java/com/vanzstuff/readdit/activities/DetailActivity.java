@@ -8,7 +8,6 @@ import android.view.View;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
-import com.vanzstuff.readdit.Logger;
 import com.vanzstuff.readdit.R;
 import com.vanzstuff.readdit.UserSession;
 import com.vanzstuff.readdit.data.ReadditContract;
@@ -23,6 +22,7 @@ public class DetailActivity extends FragmentActivity implements View.OnClickList
     private FloatingActionsMenu mFloatingMenu;
     private long mLinkID;
     private FloatingActionButton mCommentsButton;
+    private DetailFragment mDetailFragment;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -31,9 +31,10 @@ public class DetailActivity extends FragmentActivity implements View.OnClickList
         if ( getIntent().getExtras().containsKey(EXTRA_POST_ID)){
             mLinkID = getIntent().getLongExtra(EXTRA_POST_ID, -1);
         }
+        mDetailFragment = DetailFragment.newInstance(mLinkID);
         getSupportFragmentManager()
                 .beginTransaction()
-                .add(R.id.detail_activity_container, DetailFragment.newInstance(mLinkID), DETAIL_FRAGMENT_TAG)
+                .add(R.id.detail_activity_container, mDetailFragment, DETAIL_FRAGMENT_TAG)
                 .commit();
         mFloatingMenu = (FloatingActionsMenu) findViewById(R.id.floating_menu);
         mCommentsButton = (FloatingActionButton) findViewById(R.id.action_menu_comments);
@@ -60,10 +61,6 @@ public class DetailActivity extends FragmentActivity implements View.OnClickList
     @Override
     public void onClick(View v) {
         switch (v.getId()){
-            case R.id.floating_menu: {
-                Logger.d("Clicou no floating");
-                break;
-            }
             case R.id.action_menu_comments: {
                     mFloatingMenu.collapse();
                     mFloatingMenu.setVisibility(View.INVISIBLE);
@@ -116,8 +113,6 @@ public class DetailActivity extends FragmentActivity implements View.OnClickList
     private boolean linksHasComments() {
         Cursor cursor = null;
         try {
-
-
             cursor = getContentResolver().query(ReadditContract.Comment.buildCommentByLinkIdUri(mLinkID),
                     new String[]{"count(" + ReadditContract.Comment.TABLE_NAME + "." + ReadditContract.Comment._ID + ")"},
                     null, null, null);

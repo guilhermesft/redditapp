@@ -28,7 +28,7 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ViewHolder> 
     private Cursor mCursor;
     private ItemSelectedListener mListener;
 
-    public FeedsAdapter(Cursor cursor, ItemSelectedListener listener, View.OnTouchListener touchListener, RecyclerView recyclerView, Context context){
+    public FeedsAdapter(Cursor cursor, ItemSelectedListener listener, RecyclerView.OnTouchListener touchListener, RecyclerView recyclerView, Context context){
         mCursor = cursor;
         mListener = listener;
         mContext = context;

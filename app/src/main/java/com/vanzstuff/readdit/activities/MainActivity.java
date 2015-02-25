@@ -55,7 +55,7 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
         if (savedInstanceState != null && Utils.stringNotNullOrEmpty(savedInstanceState.getString(FeedsFragment.ARG_URI))) {
             mFeedsFragment = FeedsFragment.newInstance(Uri.parse(savedInstanceState.getString(FeedsFragment.ARG_URI)));
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.feeds_fragments_container, mFeedsFragment , null)
+                    .add(R.id.feeds_fragments_container, mFeedsFragment, null)
                     .commit();
         }
         View detailFragContainer = findViewById(R.id.detail_fragment_container);
@@ -97,12 +97,16 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
         getSupportLoaderManager().initLoader(TAGS_LOADER, null, new TagsLoader(this, tagAdapter));
         mTagList.setAdapter(tagAdapter);
         mTagList.setOnItemClickListener(this);
-        mSettings = (Button) findViewById(R.id.drawer_settings);
-        mSettings.setOnClickListener(this);
         mAbout = (Button) findViewById(R.id.drawer_about);
         mAbout.setOnClickListener(this);
         findViewById(R.id.drawer_profile_container).setOnClickListener(this);
         getActionBar().setHomeButtonEnabled(true);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        getLoaderManager().initLoader(USERNAME_LOADER, null, this);
     }
 
     @Override
@@ -153,9 +157,6 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
             Logger.d("Profile");
             Intent intent = new Intent(this, OAuthActivity.class);
             startActivityForResult(intent, OAuthActivity.REQUEST_LOGIN);
-        } else if ( v.getId() == R.id.drawer_settings) {
-            //open settgins activity
-            startActivity(new Intent(this, SettingsActivity.class));
         } else if ( v.getId() == R.id.drawer_about){
             Logger.d("About");
            SyncAdapter.syncNow(this, SyncAdapter.SYNC_TYPE_SUBREDDIT | SyncAdapter.SYNC_TYPE_LINKS);
