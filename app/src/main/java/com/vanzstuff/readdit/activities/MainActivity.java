@@ -52,9 +52,12 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mFeedsFragment = (FeedsFragment) getSupportFragmentManager().findFragmentById(R.id.feeds_fragments);
-        if (savedInstanceState != null && Utils.stringNotNullOrEmpty(savedInstanceState.getString(FeedsFragment.ARG_URI)))
-            mFeedsFragment.loadUri(Uri.parse(savedInstanceState.getString(FeedsFragment.ARG_URI)));
+        if (savedInstanceState != null && Utils.stringNotNullOrEmpty(savedInstanceState.getString(FeedsFragment.ARG_URI))) {
+            mFeedsFragment = FeedsFragment.newInstance(Uri.parse(savedInstanceState.getString(FeedsFragment.ARG_URI)));
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.feeds_fragments_container, mFeedsFragment , null)
+                    .commit();
+        }
         View detailFragContainer = findViewById(R.id.detail_fragment_container);
         mIsTwoPanelLayout = detailFragContainer != null && detailFragContainer.getVisibility() == View.VISIBLE;
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -132,12 +135,15 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if( parent.getId() == R.id.drawer_tags) {
             //user clicked in a tag
-            mFeedsFragment.loadUri(ReadditContract.Link.buildLinkByTagIdUri(id));
+            mFeedsFragment = FeedsFragment.newInstance(ReadditContract.Link.buildLinkByTagIdUri(id));
         } else {
             //user clicked in a subreddit
             String subreddit = ((TextView)view.findViewById(android.R.id.text1)).getText().toString();
-            mFeedsFragment.loadUri(ReadditContract.Link.buildLinkBySubredditDisplayName(subreddit));
+            mFeedsFragment = FeedsFragment.newInstance(ReadditContract.Link.buildLinkBySubredditDisplayName(subreddit, true));
         }
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.feeds_fragments_container, mFeedsFragment, null)
+                .commit();
     }
 
     @Override

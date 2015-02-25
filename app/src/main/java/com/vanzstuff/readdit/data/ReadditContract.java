@@ -187,8 +187,13 @@ public class ReadditContract {
          * @param subreddit
          * @return correspondent uri
          */
-        public static Uri buildLinkBySubredditDisplayName(String subreddit){
-            return CONTENT_URI_POST_BY_SUBREDDIT.buildUpon().appendPath(subreddit).build();
+        public static Uri buildLinkBySubredditDisplayName(String subreddit, boolean onlyUnread){
+            return CONTENT_URI_POST_BY_SUBREDDIT.buildUpon().appendPath(subreddit)
+                    .appendQueryParameter("read", onlyUnread ? "0" : "1").build();
+        }
+
+        public static String getReadFlagBySubredditDisplayName(Uri uri) {
+            return uri.getQueryParameter("read");
         }
 
         /**

@@ -188,11 +188,6 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
             mUri = Uri.parse(getArguments().getString(ARG_URI));
     }
 
-    public void loadUri(Uri uri){
-        mUri = uri;
-        getLoaderManager().restartLoader(LINK_INIT_CURSOR_LOADER, null, this);
-    }
-
     public Uri getUri() {
         return mUri;
     }
@@ -292,7 +287,6 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
 //                                        v.setTranslationX(0);
                                         if (remove) {
                                             setLinkRead(mAdapter.getItemId(mRecyclerView.getChildPosition(v)));
-                                            getLoaderManager().restartLoader(LINK_INIT_CURSOR_LOADER, null, FeedsFragment.this);
                                         } else {
                                             mSwiping = false;
                                             mRecyclerView.setEnabled(true);
@@ -316,5 +310,6 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
         getActivity().getContentResolver().update(ReadditContract.Link.CONTENT_URI, values,
                 ReadditContract.Link._ID + "=?",
                 new String[]{String.valueOf(linkID)});
+        getLoaderManager().restartLoader(LINK_INIT_CURSOR_LOADER, null, this);
     }
 }

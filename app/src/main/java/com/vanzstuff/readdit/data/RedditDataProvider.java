@@ -174,8 +174,8 @@ public class RedditDataProvider extends ContentProvider {
             case LINK_BY_SUBREDDIT: {
                 cursor = db.query(ReadditContract.Link.TABLE_NAME,
                         projection,
-                        ReadditContract.Link.COLUMN_SUBREDDIT + "=?",
-                        new String[]{ReadditContract.Link.getLinkBySubredditDisplayName(uri)},
+                        ReadditContract.Link.COLUMN_SUBREDDIT + "=? AND " + ReadditContract.Link.COLUMN_READ + "=?",
+                        new String[]{ReadditContract.Link.getLinkBySubredditDisplayName(uri), ReadditContract.Link.getReadFlagBySubredditDisplayName(uri)},
                         null,
                         null,
                         sortOrder);
