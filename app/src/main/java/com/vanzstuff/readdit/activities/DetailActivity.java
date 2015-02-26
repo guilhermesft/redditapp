@@ -72,13 +72,13 @@ public class DetailActivity extends FragmentActivity implements View.OnClickList
             case R.id.action_menu_save: {
                 DetailFragment detail = (DetailFragment) getSupportFragmentManager().findFragmentByTag(DETAIL_FRAGMENT_TAG);
                 if (detail != null )
-                    detail.save();
+                    detail.toggleSave();
                 break;
             }
             case R.id.action_menu_hide: {
                 DetailFragment detail = (DetailFragment) getSupportFragmentManager().findFragmentByTag(DETAIL_FRAGMENT_TAG);
                 if (detail != null )
-                    detail.hide();
+                    detail.toggleHide();
                 finish();
                 break;
             }

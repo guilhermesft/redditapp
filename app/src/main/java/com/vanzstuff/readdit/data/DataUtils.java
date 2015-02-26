@@ -1,5 +1,6 @@
 package com.vanzstuff.readdit.data;
 
+import android.content.ContentProviderClient;
 import android.content.ContentValues;
 import android.content.Context;
 
@@ -12,4 +13,5 @@ public class DataUtils {
                 ReadditContract.Link._ID + "=?",
                 new String[]{String.valueOf(linkID)});
     }
+
 }

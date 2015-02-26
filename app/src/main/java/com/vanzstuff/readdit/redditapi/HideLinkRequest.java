@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Request to hide a link
+ * Request to toggleHide a link
  * http://www.reddit.com/dev/api#POST_api_hide
  */
 public class HideLinkRequest extends BaseRedditApiJsonRequest {

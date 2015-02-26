@@ -25,9 +25,10 @@ public class ReadditContract {
     public static final String PATH_TAGXLINK_PREDEFINED = "tac_x_post_predefined";
     public static final String PATH_TAGXLINK = "tag_x_post";
     public static final String PATH_COMMENT_LINK = "comment_link";
+    public static final String PATH_LINK_SYNC_STATUS = "link_sync_status";
     public static final String MULTIPLE_ITEM_MIMETYPE = "vnd.android.cursor.dir/";
     public static final String SINGLE_ITEM_MIMETYPE = "vnd.android.cursor.item/";
-
+    public static final String START_SYNC = "startSync";
 
 
     /**
@@ -78,10 +79,14 @@ public class ReadditContract {
         public static final Uri CONTENT_URI_POST_BY_SUBREDDIT = BASE_CONTENT_URI.buildUpon().appendPath(PATH_LINK_BY_SUBREDDIT).build();
         public static final Uri CONTENT_URI_ADD_TAG_TO_POST = BASE_CONTENT_URI.buildUpon().appendPath(PATH_ADD_TAG_TO_LINK).build();
         public static final Uri CONTENT_URI_ADD_TAG_NAME_TO_POST = BASE_CONTENT_URI.buildUpon().appendPath(PATH_ADD_TAG_NAME_TO_LINK).build();
+        public static final Uri CONTENT_URI_SYNC_STATUS = BASE_CONTENT_URI.buildUpon().appendPath(PATH_LINK_SYNC_STATUS).build();
         public static final String CONTENT_TYPE = MULTIPLE_ITEM_MIMETYPE +  CONTENT_AUTHORITY + "/" + PATH_LINK;
         public static final String CONTENT_TYPE_POST_BY_TAG = MULTIPLE_ITEM_MIMETYPE +  CONTENT_AUTHORITY + "/" + PATH_LINK_BY_TAG;
 
 
+        public static Uri buildContentUri(boolean startSync){
+            return CONTENT_URI.buildUpon().appendQueryParameter(START_SYNC, startSync ? "true" : "false").build();
+        }
         /**
          * Build a Uri with the last segment of the path is the post ID
          * @param id

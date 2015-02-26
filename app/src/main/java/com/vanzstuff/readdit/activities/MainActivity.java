@@ -158,7 +158,7 @@ public class MainActivity extends FragmentActivity implements FeedsFragment.Call
             startActivityForResult(intent, OAuthActivity.REQUEST_LOGIN);
         } else if ( v.getId() == R.id.drawer_about){
             Logger.d("About");
-           SyncAdapter.syncNow(this, SyncAdapter.SYNC_TYPE_SUBREDDIT | SyncAdapter.SYNC_TYPE_LINKS);
+           SyncAdapter.syncNow(this, SyncAdapter.SYNC_TYPE_SUBREDDIT | SyncAdapter.SYNC_TYPE_ALL);
             new AboutFragment().show(getSupportFragmentManager(), "about");
         }
     }

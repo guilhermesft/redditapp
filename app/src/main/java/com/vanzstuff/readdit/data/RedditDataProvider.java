@@ -449,7 +449,12 @@ public class RedditDataProvider extends ContentProvider {
                 break;
             }
             case LINK:{
+                if (!values.containsKey(ReadditContract.Link.COLUMN_SYNC_STATUS)) {
+                    values.put(ReadditContract.Link.COLUMN_SYNC_STATUS, SyncAdapter.SYNC_STATUS_UPDATE);
+                }
                 rowsUpdated = db.update(ReadditContract.Link.TABLE_NAME, values, selection, selectionArgs );
+                if (!uri.getQueryParameterNames().contains(ReadditContract.START_SYNC) || "1".equals(uri.getQueryParameter(ReadditContract.START_SYNC)))
+                    SyncAdapter.syncNow(getContext(), SyncAdapter.SYNC_TYPE_LINKS);
                 break;
             }
             case COMMENT:{

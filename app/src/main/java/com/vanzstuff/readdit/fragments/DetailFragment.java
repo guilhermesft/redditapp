@@ -3,7 +3,6 @@ package com.vanzstuff.readdit.fragments;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -22,14 +21,12 @@ import android.widget.Toast;
 import com.android.volley.toolbox.NetworkImageView;
 import com.vanzstuff.readdit.PredefinedTags;
 import com.vanzstuff.readdit.R;
-import com.vanzstuff.readdit.User;
 import com.vanzstuff.readdit.UserSession;
 import com.vanzstuff.readdit.Utils;
 import com.vanzstuff.readdit.VolleyWrapper;
 import com.vanzstuff.readdit.data.DataUtils;
 import com.vanzstuff.readdit.data.ReadditContract;
 import com.vanzstuff.readdit.redditapi.VoteRequest;
-import com.vanzstuff.readdit.sync.SyncAdapter;
 
 
 /**
@@ -42,6 +39,9 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
     /*Activity that holds the fragment*/
     private long mLinkID;
     private String mFullname;
+    private boolean mSave;
+    private boolean mHidden;
+    private int mLikes;
 
     /**
      * Factory method to create a new instance of this fragment
@@ -79,6 +79,9 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
         if ( !cursor.moveToFirst() )
             return;
         mFullname = cursor.getString(cursor.getColumnIndex(ReadditContract.Link.COLUMN_NAME));
+        mSave = cursor.getInt(cursor.getColumnIndex(ReadditContract.Link.COLUMN_SAVED)) == 1;
+        mHidden = cursor.getInt(cursor.getColumnIndex(ReadditContract.Link.COLUMN_HIDDEN)) == 1;
+        mLikes = cursor.getInt(cursor.getColumnIndex(ReadditContract.Link.COLUMN_LIKES));
         String selfText = cursor.getString(cursor.getColumnIndex(ReadditContract.Link.COLUMN_SELFTEXT));
         String title = cursor.getString(cursor.getColumnIndex(ReadditContract.Link.COLUMN_TITLE));
         final String url = cursor.getString(cursor.getColumnIndex(ReadditContract.Link.COLUMN_URL));
@@ -133,10 +136,10 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
                 Toast.makeText(getActivity(), getString(R.string.need_login), Toast.LENGTH_LONG).show();
         } else if ( v.getId() == R.id.action_menu_save){
             //add the tag saved to the post
-            save();
+            toggleSave();
         } else if ( v.getId() == R.id.action_menu_hide){
             //add the tag hidden to the post
-            hide();
+            toggleHide();
         } else if ( v.getId() == R.id.action_menu_label){
             addTag();
         }
@@ -152,15 +155,25 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
     /**
      * Hide the current link
      */
-    public void hide() {
-        getActivity().getContentResolver().insert(ReadditContract.Link.buildAddTagUri(mLinkID, PredefinedTags.HIDDEN.getName()), null);
+    public void toggleHide() {
+        ContentValues values = new ContentValues(1);
+        mHidden = !mHidden;
+        values.put(ReadditContract.Link.COLUMN_HIDDEN, mHidden ? 1 : 0);
+        if (mHidden)
+            getActivity().getContentResolver().insert(ReadditContract.Link.buildAddTagUri(mLinkID, PredefinedTags.HIDDEN.getName()), null);
+        getActivity().getContentResolver().update(ReadditContract.Link.CONTENT_URI, values, ReadditContract.Link.COLUMN_NAME + "=?", new String[]{mFullname});
     }
 
     /**
      * Save the current link
      */
-    public void save() {
-        getActivity().getContentResolver().insert(ReadditContract.Link.buildAddTagUri(mLinkID, PredefinedTags.SAVED.getName()), null);
+    public void toggleSave() {
+        ContentValues values = new ContentValues(1);
+        mSave = !mSave;
+        values.put(ReadditContract.Link.COLUMN_SAVED, mSave ? 1 : 0);
+        if (mSave)
+            getActivity().getContentResolver().insert(ReadditContract.Link.buildAddTagUri(mLinkID, PredefinedTags.SAVED.getName()), null);
+        getActivity().getContentResolver().update(ReadditContract.Link.CONTENT_URI, values, ReadditContract.Link.COLUMN_NAME + "=?", new String[]{mFullname});
     }
 
     /**
@@ -168,13 +181,10 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
      * @param voteDirection vote direction from VoteRequest.VOTE_UP or VoteRequest.VOTE_DOWN
      */
     public void vote(int voteDirection){
-        User user = UserSession.getUser(getActivity());
-        ContentValues values = new ContentValues(2);
-        values.put(ReadditContract.Vote.COLUMN_USER, user.name);
-        values.put(ReadditContract.Vote.COLUMN_THING_FULLNAME, mFullname);
-        values.put(ReadditContract.Vote.COLUMN_DIRECTION, voteDirection);
-        values.put(ReadditContract.Vote.COLUMN_SYNC_STATUS, SyncAdapter.SYNC_STATUS_UPDATE);
-        getActivity().getContentResolver().insert(ReadditContract.Vote.CONTENT_URI, values);
+        ContentValues values = new ContentValues(1);
+        values.put(ReadditContract.Link.COLUMN_LIKES, voteDirection);
+        getActivity().getContentResolver().update(ReadditContract.Link.CONTENT_URI, values,
+                ReadditContract.Link.COLUMN_NAME + "=?", new String[]{mFullname});
     }
 
     @Override

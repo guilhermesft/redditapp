@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Request to save a link or comment
+ * Request to toggleSave a link or comment
  * http://www.reddit.com/dev/api#POST_api_save
  */
 public class SaveRequest extends BaseRedditApiJsonRequest {

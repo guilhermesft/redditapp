@@ -61,7 +61,6 @@ public class InputTagFragment extends DialogFragment implements View.OnClickList
             long post = getArguments().getLong(ARG_POST);
             if( post <= 0 ){
                 //post id invalid.Dismiss!
-                Logger.e("Post id " + post + " invalid. The id must be greater the 0");
                 dismiss();
                 return;
             }
