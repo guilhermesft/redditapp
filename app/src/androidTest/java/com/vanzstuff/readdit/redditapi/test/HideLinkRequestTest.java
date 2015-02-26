@@ -65,7 +65,7 @@ public class HideLinkRequestTest extends AndroidTestCase {
         Uri requestUrl = Uri.parse(mMockStack.getLastRequest().getUrl());
         assertEquals( "https", requestUrl.getScheme());
         assertEquals("oauth.reddit.com", requestUrl.getAuthority());
-        assertEquals( "/api/hide", requestUrl.getPath());
+        assertEquals( "/api/toggleHide", requestUrl.getPath());
         assertEquals("application/x-www-form-urlencoded; charset=UTF-8", mMockStack.getLastRequest().getBodyContentType());
         Map<String, String> postParams = Util.getPostParams(new String(mMockStack.getLastRequest().getBody()));
         assertEquals(2, postParams.size());

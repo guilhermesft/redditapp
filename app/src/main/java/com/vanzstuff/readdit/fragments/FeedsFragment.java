@@ -2,11 +2,10 @@ package com.vanzstuff.readdit.fragments;
 
 import android.app.Activity;
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -14,9 +13,6 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.method.Touch;
-import android.util.Log;
-import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -27,7 +23,7 @@ import com.vanzstuff.readdit.DividerItemDecoration;
 import com.vanzstuff.readdit.Logger;
 import com.vanzstuff.readdit.PredefinedTags;
 import com.vanzstuff.readdit.R;
-import com.vanzstuff.readdit.data.DataUtils;
+import com.vanzstuff.readdit.data.DataHelper;
 import com.vanzstuff.readdit.data.FeedsAdapter;
 import com.vanzstuff.readdit.data.ReadditContract;
 import com.vanzstuff.readdit.view.BackgroundContainer;
@@ -301,7 +297,11 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
 //                                        v.setAlpha(1);
 //                                        v.setTranslationX(0);
                                         if (remove) {
-                                            DataUtils.setLinkRead(getActivity(), mRecyclerView.getAdapter().getItemId(mRecyclerView.getChildPosition(v)));
+                                            try {
+                                                DataHelper.setLinkRead(getActivity(), mRecyclerView.getAdapter().getItemId(mRecyclerView.getChildPosition(v)));
+                                            } catch (RemoteException e) {
+                                                Logger.e(e.getLocalizedMessage(), e);
+                                            }
                                             getLoaderManager().restartLoader(LINK_INIT_CURSOR_LOADER, null, FeedsFragment.this);
                                         } else {
                                             mSwiping = false;

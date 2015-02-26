@@ -3,6 +3,7 @@ package com.vanzstuff.readdit.fragments;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -19,12 +20,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.toolbox.NetworkImageView;
+import com.vanzstuff.readdit.Logger;
 import com.vanzstuff.readdit.PredefinedTags;
 import com.vanzstuff.readdit.R;
 import com.vanzstuff.readdit.UserSession;
 import com.vanzstuff.readdit.Utils;
 import com.vanzstuff.readdit.VolleyWrapper;
-import com.vanzstuff.readdit.data.DataUtils;
+import com.vanzstuff.readdit.data.DataHelper;
 import com.vanzstuff.readdit.data.ReadditContract;
 import com.vanzstuff.readdit.redditapi.VoteRequest;
 
@@ -39,7 +41,7 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
     /*Activity that holds the fragment*/
     private long mLinkID;
     private String mFullname;
-    private boolean mSave;
+    private boolean mSaved;
     private boolean mHidden;
     private int mLikes;
 
@@ -68,7 +70,11 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
         super.onResume();
         getLoaderManager().initLoader(LINK_LOADER, getArguments(), this);
         mLinkID = getArguments().getLong(ARG_LINK_ID, -1);
-        DataUtils.setLinkRead(getActivity(), mLinkID);
+        try {
+            DataHelper.setLinkRead(getActivity(), mLinkID);
+        } catch (RemoteException e) {
+            Logger.e(e.getLocalizedMessage(), e);
+        }
     }
 
     /**
@@ -79,7 +85,7 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
         if ( !cursor.moveToFirst() )
             return;
         mFullname = cursor.getString(cursor.getColumnIndex(ReadditContract.Link.COLUMN_NAME));
-        mSave = cursor.getInt(cursor.getColumnIndex(ReadditContract.Link.COLUMN_SAVED)) == 1;
+        mSaved = cursor.getInt(cursor.getColumnIndex(ReadditContract.Link.COLUMN_SAVED)) == 1;
         mHidden = cursor.getInt(cursor.getColumnIndex(ReadditContract.Link.COLUMN_HIDDEN)) == 1;
         mLikes = cursor.getInt(cursor.getColumnIndex(ReadditContract.Link.COLUMN_LIKES));
         String selfText = cursor.getString(cursor.getColumnIndex(ReadditContract.Link.COLUMN_SELFTEXT));
@@ -159,8 +165,19 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
         ContentValues values = new ContentValues(1);
         mHidden = !mHidden;
         values.put(ReadditContract.Link.COLUMN_HIDDEN, mHidden ? 1 : 0);
-        if (mHidden)
+        if (mHidden) {
             getActivity().getContentResolver().insert(ReadditContract.Link.buildAddTagUri(mLinkID, PredefinedTags.HIDDEN.getName()), null);
+        } else {
+            long tagId = 0;
+            try {
+                tagId = DataHelper.getTagId(getActivity(), PredefinedTags.HIDDEN.getName());
+            } catch (RemoteException e) {
+                Logger.e(e.getLocalizedMessage(), e);
+            }
+            getActivity().getContentResolver().delete(ReadditContract.TagXPost.CONTENT_URI,
+                    ReadditContract.TagXPost.COLUMN_LINK + "=? AND " + ReadditContract.TagXPost.COLUMN_TAG + "=?",
+                    new String[]{String.valueOf(mLikes), String.valueOf(tagId)});
+        }
         getActivity().getContentResolver().update(ReadditContract.Link.CONTENT_URI, values, ReadditContract.Link.COLUMN_NAME + "=?", new String[]{mFullname});
     }
 
@@ -169,10 +186,21 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
      */
     public void toggleSave() {
         ContentValues values = new ContentValues(1);
-        mSave = !mSave;
-        values.put(ReadditContract.Link.COLUMN_SAVED, mSave ? 1 : 0);
-        if (mSave)
+        mSaved = !mSaved;
+        values.put(ReadditContract.Link.COLUMN_SAVED, mSaved ? 1 : 0);
+        if (mSaved) {
             getActivity().getContentResolver().insert(ReadditContract.Link.buildAddTagUri(mLinkID, PredefinedTags.SAVED.getName()), null);
+        } else {
+            long tagId = 0;
+            try {
+                tagId = DataHelper.getTagId(getActivity(), PredefinedTags.SAVED.getName());
+            } catch (RemoteException e) {
+                Logger.e(e.getLocalizedMessage(), e);
+            }
+            getActivity().getContentResolver().delete(ReadditContract.TagXPost.CONTENT_URI,
+                    ReadditContract.TagXPost.COLUMN_LINK + "=? AND " + ReadditContract.TagXPost.COLUMN_TAG + "=?",
+                    new String[]{String.valueOf(mLikes), String.valueOf(tagId)});
+        }
         getActivity().getContentResolver().update(ReadditContract.Link.CONTENT_URI, values, ReadditContract.Link.COLUMN_NAME + "=?", new String[]{mFullname});
     }
 
@@ -180,11 +208,14 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
      * Method insert or update the user vote in the mLinkID
      * @param voteDirection vote direction from VoteRequest.VOTE_UP or VoteRequest.VOTE_DOWN
      */
-    public void vote(int voteDirection){
+    public void vote(int voteDirection) {
+        if ((voteDirection > 0 && mLikes > 0) || ((voteDirection < 0 && mLikes < 0)))
+            voteDirection = 0;
         ContentValues values = new ContentValues(1);
         values.put(ReadditContract.Link.COLUMN_LIKES, voteDirection);
         getActivity().getContentResolver().update(ReadditContract.Link.CONTENT_URI, values,
                 ReadditContract.Link.COLUMN_NAME + "=?", new String[]{mFullname});
+        mLikes = voteDirection;
     }
 
     @Override
@@ -212,5 +243,13 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
     public void onActivityCreated(@Nullable Bundle savedInstanceState){
         super.onActivityCreated(savedInstanceState);
         getActivity().getActionBar().setHomeButtonEnabled(true);
+    }
+
+    public boolean isSaved() {
+        return mSaved;
+    }
+
+    public int getLikes() {
+        return mLikes;
     }
 }

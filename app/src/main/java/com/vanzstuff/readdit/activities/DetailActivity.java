@@ -1,6 +1,7 @@
 package com.vanzstuff.readdit.activities;
 
 import android.database.Cursor;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.MenuItem;
@@ -9,7 +10,6 @@ import android.view.View;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.vanzstuff.readdit.R;
-import com.vanzstuff.readdit.UserSession;
 import com.vanzstuff.readdit.data.ReadditContract;
 import com.vanzstuff.readdit.fragments.CommentFragment;
 import com.vanzstuff.readdit.fragments.DetailFragment;
@@ -23,6 +23,11 @@ public class DetailActivity extends FragmentActivity implements View.OnClickList
     private long mLinkID;
     private FloatingActionButton mCommentsButton;
     private DetailFragment mDetailFragment;
+    private FloatingActionButton mButtonSave;
+    private FloatingActionButton mButtonLabel;
+    private FloatingActionButton mButtonHide;
+    private FloatingActionButton mButtonUp;
+    private FloatingActionButton mButtonDown;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -42,11 +47,25 @@ public class DetailActivity extends FragmentActivity implements View.OnClickList
             mFloatingMenu.removeView(mCommentsButton);
         else
             mCommentsButton.setOnClickListener(this);
-        findViewById(R.id.action_menu_save).setOnClickListener(this);
-        findViewById(R.id.action_menu_label).setOnClickListener(this);
-        findViewById(R.id.action_menu_hide).setOnClickListener(this);
-        findViewById(R.id.action_menu_up_vote).setOnClickListener(this);
-        findViewById(R.id.action_menu_down_vote).setOnClickListener(this);
+        mButtonSave = (FloatingActionButton) findViewById(R.id.action_menu_save);
+        mButtonSave.setOnClickListener(this);
+        mButtonLabel = (FloatingActionButton) findViewById(R.id.action_menu_label);
+        mButtonLabel.setOnClickListener(this);
+        mButtonHide = (FloatingActionButton) findViewById(R.id.action_menu_hide);
+        mButtonHide.setOnClickListener(this);
+        mButtonUp = (FloatingActionButton) findViewById(R.id.action_menu_up_vote);
+        mButtonUp.setOnClickListener(this);
+        mButtonDown = (FloatingActionButton) findViewById(R.id.action_menu_down_vote);
+        mButtonDown.setOnClickListener(this);
+        loadMenuIcon();
+    }
+
+    private void loadMenuIcon() {
+        Drawable icon = getResources().getDrawable(mDetailFragment.isSaved() ? R.drawable.ic_action_save_on : R.drawable.ic_action_save);
+        mButtonSave.setIconDrawable(icon);
+        icon = getResources().getDrawable(mDetailFragment.isHidden() ? R.drawable.ic_action_remove_on : R.drawable.ic_action_remove);
+        mButtonHide.setIconDrawable(icon);
+        toggleLikesIcons();
     }
 
     @Override
@@ -70,41 +89,51 @@ public class DetailActivity extends FragmentActivity implements View.OnClickList
                             .commit();
             }
             case R.id.action_menu_save: {
-                DetailFragment detail = (DetailFragment) getSupportFragmentManager().findFragmentByTag(DETAIL_FRAGMENT_TAG);
-                if (detail != null )
-                    detail.toggleSave();
+                mDetailFragment.toggleSave();
                 break;
             }
             case R.id.action_menu_hide: {
-                DetailFragment detail = (DetailFragment) getSupportFragmentManager().findFragmentByTag(DETAIL_FRAGMENT_TAG);
-                if (detail != null )
-                    detail.toggleHide();
+                mDetailFragment.toggleHide();
+                loadMenuIcon();
                 finish();
                 break;
             }
             case R.id.action_menu_label: {
-                DetailFragment detail = (DetailFragment) getSupportFragmentManager().findFragmentByTag(DETAIL_FRAGMENT_TAG);
-                if (detail != null )
-                    detail.addTag();
+                mDetailFragment.addTag();
                 break;
             }
             case R.id.action_menu_up_vote: {
-                if( UserSession.isLogged(this) ) {
-                    DetailFragment detail = (DetailFragment) getSupportFragmentManager().findFragmentByTag(DETAIL_FRAGMENT_TAG);
-                    if (detail != null)
-                        detail.vote(VoteRequest.VOTE_UP);
-                }
+                mDetailFragment.vote(VoteRequest.VOTE_UP);
                 break;
             }
             case R.id.action_menu_down_vote: {
-                if( UserSession.isLogged(this) ) {
                     DetailFragment detail = (DetailFragment) getSupportFragmentManager().findFragmentByTag(DETAIL_FRAGMENT_TAG);
                     if (detail != null)
                         detail.vote(VoteRequest.VOTE_DOWN);
-                }
                 break;
             }
         }
+        loadMenuIcon();
+    }
+
+    /**
+     * Set right images to up and down button in the floating menu
+     */
+    private void toggleLikesIcons() {
+        Drawable iconUp = null;
+        Drawable iconDown = null;
+        if (mDetailFragment.getLikes() > 0) {
+            iconUp = getResources().getDrawable(R.drawable.ic_action_good_on);
+            iconDown = getResources().getDrawable(R.drawable.ic_action_bad);
+        } else if (mDetailFragment.getLikes() < 0) {
+            iconUp = getResources().getDrawable(R.drawable.ic_action_good);
+            iconDown = getResources().getDrawable(R.drawable.ic_action_bad_on);
+        } else {
+            iconUp = getResources().getDrawable(R.drawable.ic_action_good);
+            iconDown = getResources().getDrawable(R.drawable.ic_action_bad);
+        }
+        mButtonUp.setIconDrawable(iconUp);
+        mButtonDown.setIconDrawable(iconDown);
     }
 
     /**
@@ -114,9 +143,10 @@ public class DetailActivity extends FragmentActivity implements View.OnClickList
     private boolean linksHasComments() {
         Cursor cursor = null;
         try {
-            cursor = getContentResolver().query(ReadditContract.Comment.buildCommentByLinkIdUri(mLinkID),
-                    new String[]{"count(" + ReadditContract.Comment.TABLE_NAME + "." + ReadditContract.Comment._ID + ")"},
-                    null, null, null);
+            cursor = getContentResolver().query(ReadditContract.Link.CONTENT_URI,
+                    new String[]{ReadditContract.Link.COLUMN_NUM_COMMENTS},
+                    ReadditContract.Link._ID + "=?",
+                    new String[]{String.valueOf(mLinkID)}, null);
             if (cursor.moveToFirst())
                 return cursor.getInt(0) > 0;
         } finally {

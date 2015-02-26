@@ -13,22 +13,18 @@
  import android.os.RemoteException;
 
  import com.android.volley.RequestQueue;
- import com.android.volley.Response;
  import com.android.volley.toolbox.RequestFuture;
  import com.android.volley.toolbox.Volley;
  import com.vanzstuff.readdit.Logger;
  import com.vanzstuff.readdit.PredefinedTags;
  import com.vanzstuff.readdit.R;
  import com.vanzstuff.readdit.Utils;
- import com.vanzstuff.readdit.VolleyWrapper;
  import com.vanzstuff.readdit.data.ReadditContract;
  import com.vanzstuff.readdit.redditapi.AboutRequest;
  import com.vanzstuff.readdit.redditapi.GetCommentRequest;
  import com.vanzstuff.readdit.redditapi.GetLinks;
- import com.vanzstuff.readdit.redditapi.GetMeRequest;
  import com.vanzstuff.readdit.redditapi.HideLinkRequest;
  import com.vanzstuff.readdit.redditapi.MySubredditRequest;
- import com.vanzstuff.readdit.redditapi.OAuthTokenRequest;
  import com.vanzstuff.readdit.redditapi.RedditApiUtils;
  import com.vanzstuff.readdit.redditapi.RefreshTokenRequest;
  import com.vanzstuff.readdit.redditapi.SaveRequest;
@@ -97,8 +93,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             int syncType = extras.getInt(EXTRA_SYNC_TYPE);
 //            if ((syncType & SYNC_TYPE_USER) == SYNC_TYPE_USER)
 //                syncUser(provider);
-//            if ((syncType & SYNC_TYPE_VOTES) == SYNC_TYPE_VOTES)
-//                syncVotes(provider);
             if ((syncType & SYNC_TYPE_SUBREDDIT) == SYNC_TYPE_SUBREDDIT)
                 syncSubreddit(provider);
             if ((syncType & SYNC_TYPE_LINKS) == SYNC_TYPE_LINKS)
@@ -182,36 +176,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
     }
 
-    /**
-     * Method send to the server the user votes
-     * @param provider
-     */
-    private void syncVotes(ContentProviderClient provider) {
-        Cursor cursor = null;
-        try{
-            cursor = provider.query(ReadditContract.Vote.CONTENT_URI, null,
-                    ReadditContract.Vote.COLUMN_SYNC_STATUS + "=?", new String[]{String.valueOf(SYNC_STATUS_UPDATE)}, null);
-            while (cursor.move(1)) {
-                long id = cursor.getLong(cursor.getColumnIndex(ReadditContract.Vote._ID));
-                int voteDirection = cursor.getInt(cursor.getColumnIndex(ReadditContract.Vote.COLUMN_DIRECTION));
-                String fullname = cursor.getString(cursor.getColumnIndex(ReadditContract.Vote.COLUMN_THING_FULLNAME));
-                RequestFuture<JSONObject> future = RequestFuture.newFuture();
-                mVolleyQueue.add(VoteRequest.newInstance(voteDirection, fullname, mAccessToken, future, future));
-                JSONObject result = future.get();
-                if (setThingToSync(provider, fullname))
-                    provider.delete(ReadditContract.Vote.CONTENT_URI, ReadditContract.Vote._ID + "=?", new String[]{String.valueOf(id)});
-            }
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } finally {
-            if(cursor!=null)
-                cursor.close();
-        }
-    }
 
     private boolean setThingToSync(ContentProviderClient provider, String thing) {
         if(Utils.stringNullOrEmpty(thing))
@@ -355,54 +319,75 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     private void syncLinks(ContentProviderClient provider) {
         syncLocalLink(provider);
-//        Cursor cursor = null;
-//        Cursor subredditCursor = null;
-//        Cursor linkCursor = null;
-//        try {
-//            subredditCursor = provider.query(ReadditContract.Subreddit.CONTENT_URI, null, null, null, null);
-//            while (subredditCursor.move(1)) {
-//                Set<String> databaseLinks = new HashSet();
-//                String subreddit = subredditCursor.getString(subredditCursor.getColumnIndex(ReadditContract.Subreddit.COLUMN_DISPLAY_NAME));
-//                //get all link from database to compare with retrieved ones
-//                linkCursor = provider.query(ReadditContract.Link.CONTENT_URI, new String[]{ReadditContract.Link.COLUMN_ID},
-//                        ReadditContract.Link.COLUMN_SUBREDDIT + "=?", new String[]{subreddit}, null);
-//                while(linkCursor.move(1))
-//                    databaseLinks.add(linkCursor.getString(0));
-//                linkCursor.close();
-//                RequestFuture<JSONObject> future = RequestFuture.newFuture();
-//                mVolleyQueue.add(GetLinks.newInstance(subreddit, null, null, -1, 50, mAccessToken, future, future));
-//                JSONObject result = future.get();
-//                //parse json
-//                ContentValues[] linksValues = loadLinks(result);
-//                Set<ContentValues> newLinks = new HashSet();
-//                for(ContentValues value : linksValues ){
-//                    String linkID = value.getAsString(ReadditContract.Link.COLUMN_ID);
-//                    //check if link is already in database
-//                    if(isLinkInDatabase(provider, linkID)) {
-//                        //update data
-//                        provider.update(ReadditContract.Link.buildContentUri(false), value, ReadditContract.Link.COLUMN_ID + "=?", new String[]{linkID});
-//                        //this link cannot be deleted, remove it
-//                        databaseLinks.remove(linkID);
-//                    } else {
-//                        //new link, needs to be inserted
-//                        newLinks.add(value);
-//                    }
-//                }
-//                provider.bulkInsert(ReadditContract.Link.buildContentUri(false), newLinks.toArray(new ContentValues[newLinks.size()]));
-//                for(String linkID : databaseLinks)
-//                    provider.delete(ReadditContract.Link.CONTENT_URI, ReadditContract.Link.COLUMN_ID + "=?", new String[]{linkID});
-//            }
-//            //TODO - improve exception handling
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        } finally {
-//            if ( cursor != null)
-//                cursor.close();
-//            if ( subredditCursor != null)
-//                subredditCursor.close();
-//            if ( linkCursor != null && !linkCursor.isClosed())
-//                linkCursor.close();
-//        }
+        Cursor cursor = null;
+        Cursor subredditCursor = null;
+        Cursor linkCursor = null;
+        try {
+            subredditCursor = provider.query(ReadditContract.Subreddit.CONTENT_URI, null, null, null, null);
+            while (subredditCursor.move(1)) {
+                Set<String> databaseLinks = new HashSet();
+                String subreddit = subredditCursor.getString(subredditCursor.getColumnIndex(ReadditContract.Subreddit.COLUMN_DISPLAY_NAME));
+                //get all link from database to compare with retrieved ones
+                linkCursor = provider.query(ReadditContract.Link.CONTENT_URI, new String[]{ReadditContract.Link.COLUMN_ID},
+                        ReadditContract.Link.COLUMN_SUBREDDIT + "=?", new String[]{subreddit}, null);
+                while(linkCursor.move(1))
+                    databaseLinks.add(linkCursor.getString(0));
+                linkCursor.close();
+                RequestFuture<JSONObject> future = RequestFuture.newFuture();
+                mVolleyQueue.add(GetLinks.newInstance(subreddit, null, null, -1, 50, mAccessToken, future, future));
+                JSONObject result = future.get();
+                //parse json
+                ContentValues[] linksValues = loadLinks(result);
+                Set<ContentValues> newLinks = new HashSet();
+                for(ContentValues value : linksValues ){
+                    String linkID = value.getAsString(ReadditContract.Link.COLUMN_ID);
+                    //check if link is already in database
+                    if(isLinkInDatabase(provider, linkID)) {
+                        //update data
+                        provider.update(ReadditContract.Link.buildContentUri(false), value, ReadditContract.Link.COLUMN_ID + "=?", new String[]{linkID});
+                        //this link is saved or hidden. We have to add the tag
+                        if (value.getAsInteger(ReadditContract.Link.COLUMN_SAVED) == 1){
+                            //TODO - add saved tag
+                            addTagToLink(value.getAsString(ReadditContract.Link.COLUMN_NAME), getTagId(PredefinedTags.SAVED.getName()));
+                        } else {
+                            //TODO - remove saved tag
+                        }
+                        if (value.getAsInteger(ReadditContract.Link.COLUMN_HIDDEN) == 1){
+                            //TODO - add hidden tag
+                        } else {
+                            //TODO - remove hidden tag
+                        }
+                        //this link cannot be deleted, remove it
+                        databaseLinks.remove(linkID);
+                    } else {
+                        //new link, needs to be inserted
+                        newLinks.add(value);
+                    }
+                }
+                provider.bulkInsert(ReadditContract.Link.buildContentUri(false), newLinks.toArray(new ContentValues[newLinks.size()]));
+                for(String linkID : databaseLinks)
+                    provider.delete(ReadditContract.Link.CONTENT_URI, ReadditContract.Link.COLUMN_ID + "=?", new String[]{linkID});
+            }
+            //TODO - improve exception handling
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if ( cursor != null)
+                cursor.close();
+            if ( subredditCursor != null)
+                subredditCursor.close();
+            if ( linkCursor != null && !linkCursor.isClosed())
+                linkCursor.close();
+        }
+    }
+
+    private void addTagToLink(String asString, long tagId) {
+
+    }
+
+    private long getTagId(String name) {
+        //TODO
+        return 0;
     }
 
     private boolean isLinkInDatabase(ContentProviderClient provider, String linkID) {

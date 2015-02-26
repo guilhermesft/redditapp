@@ -27,7 +27,6 @@ public class RedditDataProvider extends ContentProvider {
     private static final int ADD_TAG_TO_LINK = 106;
     private static final int LINK_BY_TAGID = 107;
     private static final int ADD_TAG_NAME_TO_LINK = 108;
-    private static final int VOTE = 110;
     private static final int LINK_BY_SUBREDDIT = 111;
     private static final int TAG_X_LINK_PREDEFINED = 112;
     private static final int TAG_X_LINK = 113;
@@ -78,7 +77,6 @@ public class RedditDataProvider extends ContentProvider {
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_COMMENT_LINK + "/#",  COMMENT_BY_LINK_ID);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_USER,  USER);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_SUBREDDIT, SUBREDDIT);
-        matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_VOTE, VOTE);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_LINK_BY_SUBREDDIT + "/*", LINK_BY_SUBREDDIT);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_TAGXLINK_PREDEFINED, TAG_X_LINK_PREDEFINED);
         matcher.addURI(ReadditContract.CONTENT_AUTHORITY, ReadditContract.PATH_TAGXLINK, TAG_X_LINK);
@@ -161,16 +159,6 @@ public class RedditDataProvider extends ContentProvider {
                             sortOrder);
                 break;
             }
-            case VOTE: {
-                cursor = db.query(ReadditContract.Vote.TABLE_NAME,
-                        projection,
-                        selection,
-                        selectionArgs,
-                        null,
-                        null,
-                        sortOrder);
-                break;
-            }
             case LINK_BY_SUBREDDIT: {
                 cursor = db.query(ReadditContract.Link.TABLE_NAME,
                         projection,
@@ -245,8 +233,6 @@ public class RedditDataProvider extends ContentProvider {
                 return ReadditContract.Subreddit.CONTENT_TYPE;
             case LINK_BY_TAG:
                 return ReadditContract.Link.CONTENT_TYPE_POST_BY_TAG;
-            case VOTE:
-                return ReadditContract.Vote.CONTENT_TYPE;
             case TAG_X_LINK_PREDEFINED:
                 return ReadditContract.TagXPost.CONTENT_TYPE_TAGXLINK_PREDEFINED;
             default:
@@ -309,14 +295,6 @@ public class RedditDataProvider extends ContentProvider {
                 returnUri = insertTagNameToPost(db, uri);
                 break;
 
-            }
-            case VOTE: {
-                long id = db.insertOrThrow(ReadditContract.Vote.TABLE_NAME, null, values);
-                if (id > 0) {
-                    returnUri = ReadditContract.Vote.buildVoteUri(id);
-                } else
-                    throw new android.database.SQLException("Failed to insert row into " + uri);
-                break;
             }
             case TAG_X_LINK: {
                 long id = db.insertOrThrow(ReadditContract.TagXPost.TABLE_NAME, null, values);
@@ -415,10 +393,6 @@ public class RedditDataProvider extends ContentProvider {
                 rowsDeleted = db.delete(ReadditContract.Subreddit.TABLE_NAME, selection, selectionArgs);
                 break;
             }
-            case VOTE:{
-                rowsDeleted = db.delete(ReadditContract.Vote.TABLE_NAME, selection, selectionArgs);
-                break;
-            }
             case TAG_X_LINK:{
                 rowsDeleted = db.delete(ReadditContract.TagXPost.TABLE_NAME, selection, selectionArgs);
                 break;
@@ -463,10 +437,6 @@ public class RedditDataProvider extends ContentProvider {
             }
             case SUBREDDIT:{
                 rowsUpdated = db.update(ReadditContract.Subreddit.TABLE_NAME, values, selection, selectionArgs );
-                break;
-            }
-            case VOTE:{
-                rowsUpdated = db.update(ReadditContract.Vote.TABLE_NAME, values, selection, selectionArgs );
                 break;
             }
             case TAG_X_LINK:{

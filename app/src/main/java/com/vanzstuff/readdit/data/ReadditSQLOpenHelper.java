@@ -136,12 +136,6 @@ public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
                 ReadditContract.Subreddit.COLUMN_CREATED + " INTEGER," +
                 ReadditContract.Subreddit.COLUMN_CREATED_UTC + " INTEGER," +
                 ReadditContract.Subreddit.COLUMN_USER + " INTEGER REFERENCES " + ReadditContract.User.TABLE_NAME + "(" + ReadditContract.User._ID + "));";
-        final String CREATE_VOTE = "CREATE TABLE " + ReadditContract.Vote.TABLE_NAME + " ( " +
-                ReadditContract.Vote._ID + " INTEGER PRIMARY KEY, " +
-                ReadditContract.Vote.COLUMN_USER + " TEXT NOT NULL , " +
-                ReadditContract.Vote.COLUMN_THING_FULLNAME + " TEXT NOT NULL, " +
-                ReadditContract.Vote.COLUMN_SYNC_STATUS + " INTEGER DEFAULT 0, " +
-                ReadditContract.Vote.COLUMN_DIRECTION + " INTEGER NOT NULL DEFAULT 0 );";
         final String CREATE_USER = "CREATE TABLE " + ReadditContract.User.TABLE_NAME + " ( " +
                 ReadditContract.User._ID + " INTEGER PRIMARY KEY, " +
                 ReadditContract.User.COLUMN_NAME + " TEXT NOT NULL , " +
@@ -175,7 +169,6 @@ public class ReadditSQLOpenHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_TAG_X_LINK);
         db.execSQL(CREATE_COMMENT);
         db.execSQL(CREATE_SUBSCRIBE);
-        db.execSQL(CREATE_VOTE);
         //insert predefined tags
         for (PredefinedTags tag : PredefinedTags.values()){
             ContentValues values = new ContentValues(2);
