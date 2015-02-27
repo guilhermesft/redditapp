@@ -37,7 +37,6 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
     private static final int LINK_INIT_CURSOR_LOADER = 0;
     public static final String ARG_URI = "arg_uri";
     private static final int SWIPE_DURATION = 250;
-    private static final int MOVE_DURATION = 150;
 
     private Uri mUri;
     /** RecyclerView responsable to show all links */
@@ -101,7 +100,7 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
     @Override
     public void onStart() {
         super.onStart();
-        getLoaderManager().initLoader(LINK_INIT_CURSOR_LOADER, null, this);
+        getLoaderManager().restartLoader(LINK_INIT_CURSOR_LOADER, null, this);
     }
 
     @Override
