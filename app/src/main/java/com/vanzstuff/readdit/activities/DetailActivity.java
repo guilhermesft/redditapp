@@ -45,9 +45,10 @@ public class DetailActivity extends FragmentActivity implements View.OnClickList
         mFloatingMenu.setOnFloatingActionsMenuUpdateListener(this);
         mCommentsButton = (FloatingActionButton) findViewById(R.id.action_menu_comments);
         if (!linksHasComments())
-            mFloatingMenu.removeView(mCommentsButton);
+            mFloatingMenu.setVisibility(View.GONE);
         else
-            mCommentsButton.setOnClickListener(this);
+            mFloatingMenu.setVisibility(View.VISIBLE);
+        mCommentsButton.setOnClickListener(this);
         mButtonSave = (FloatingActionButton) findViewById(R.id.action_menu_save);
         mButtonSave.setOnClickListener(this);
         mButtonLabel = (FloatingActionButton) findViewById(R.id.action_menu_label);
