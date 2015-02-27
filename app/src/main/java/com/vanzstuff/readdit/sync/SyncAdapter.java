@@ -139,7 +139,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
      * @param provider ContentProviderClient to access the database
      */
     private void syncLocalLink(ContentProviderClient provider) {
-
         Cursor cursor = null;
         try {
             cursor = provider.query(ReadditContract.Link.CONTENT_URI,
@@ -320,7 +319,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private void syncLinks(ContentProviderClient provider) {
-       // syncLocalLink(provider);
+        syncLocalLink(provider);
         Cursor cursor = null;
         Cursor subredditCursor = null;
         Cursor linkCursor = null;
@@ -362,7 +361,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     else
                         DataHelper.removeTag(getContext(), PredefinedTags.HIDDEN.getName(), linkID);
                 }
-//                provider.bulkInsert(ReadditContract.Link.buildContentUri(false), newLinks.toArray(new ContentValues[newLinks.size()]));
                 for(String linkID : databaseLinks)
                     provider.delete(ReadditContract.Link.CONTENT_URI, ReadditContract.Link.COLUMN_ID + "=?", new String[]{linkID});
             }
