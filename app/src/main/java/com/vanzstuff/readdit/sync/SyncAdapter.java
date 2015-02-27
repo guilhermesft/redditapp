@@ -91,15 +91,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             refreshToken(provider);
         }
             int syncType = extras.getInt(EXTRA_SYNC_TYPE);
-//            if ((syncType & SYNC_TYPE_USER) == SYNC_TYPE_USER)
-//                syncUser(provider);
+            if ((syncType & SYNC_TYPE_USER) == SYNC_TYPE_USER)
+                syncUser(provider);
             if ((syncType & SYNC_TYPE_SUBREDDIT) == SYNC_TYPE_SUBREDDIT)
                 syncSubreddit(provider);
             if ((syncType & SYNC_TYPE_LINKS) == SYNC_TYPE_LINKS)
                 syncLinks(provider);
-//            if ((syncType & SYNC_TYPE_COMMENTS) == SYNC_TYPE_COMMENTS)
-//                syncComment(provider);
-//        }
+            if ((syncType & SYNC_TYPE_COMMENTS) == SYNC_TYPE_COMMENTS)
+                syncComment(provider);
     }
 
     private void refreshToken(ContentProviderClient provider) {

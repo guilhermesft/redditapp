@@ -113,7 +113,7 @@ public class FeedsFragment extends Fragment implements LoaderManager.LoaderCallb
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         if( mUri != null)
-            return new CursorLoader(getActivity(), mUri, null,
+            return new CursorLoader(getActivity(), mUri, new String[]{ReadditContract.Link.TABLE_NAME + ".*"},
                 ReadditContract.Link.COLUMN_READ + "=? ",
                 new String[]{"0"}, ReadditContract.Link.COLUMN_CREATED);
         else

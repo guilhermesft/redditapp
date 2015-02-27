@@ -176,7 +176,7 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
             }
             getActivity().getContentResolver().delete(ReadditContract.TagXPost.CONTENT_URI,
                     ReadditContract.TagXPost.COLUMN_LINK + "=? AND " + ReadditContract.TagXPost.COLUMN_TAG + "=?",
-                    new String[]{String.valueOf(mLikes), String.valueOf(tagId)});
+                    new String[]{String.valueOf(mLinkID), String.valueOf(tagId)});
         }
         getActivity().getContentResolver().update(ReadditContract.Link.CONTENT_URI, values, ReadditContract.Link.COLUMN_NAME + "=?", new String[]{mFullname});
     }
@@ -199,7 +199,7 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
             }
             getActivity().getContentResolver().delete(ReadditContract.TagXPost.CONTENT_URI,
                     ReadditContract.TagXPost.COLUMN_LINK + "=? AND " + ReadditContract.TagXPost.COLUMN_TAG + "=?",
-                    new String[]{String.valueOf(mLikes), String.valueOf(tagId)});
+                    new String[]{String.valueOf(mLinkID), String.valueOf(tagId)});
         }
         getActivity().getContentResolver().update(ReadditContract.Link.CONTENT_URI, values, ReadditContract.Link.COLUMN_NAME + "=?", new String[]{mFullname});
     }
@@ -251,5 +251,9 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
 
     public int getLikes() {
         return mLikes;
+    }
+
+    public boolean isLinkHidden() {
+        return mHidden;
     }
 }

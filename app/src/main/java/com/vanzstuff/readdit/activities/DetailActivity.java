@@ -15,7 +15,7 @@ import com.vanzstuff.readdit.fragments.CommentFragment;
 import com.vanzstuff.readdit.fragments.DetailFragment;
 import com.vanzstuff.readdit.redditapi.VoteRequest;
 
-public class DetailActivity extends FragmentActivity implements View.OnClickListener {
+public class DetailActivity extends FragmentActivity implements View.OnClickListener, FloatingActionsMenu.OnFloatingActionsMenuUpdateListener {
 
     public static final String EXTRA_LINK_ID = "post_id";
     private static final String DETAIL_FRAGMENT_TAG = "detail";
@@ -42,6 +42,7 @@ public class DetailActivity extends FragmentActivity implements View.OnClickList
                 .add(R.id.detail_activity_container, mDetailFragment, DETAIL_FRAGMENT_TAG)
                 .commit();
         mFloatingMenu = (FloatingActionsMenu) findViewById(R.id.floating_menu);
+        mFloatingMenu.setOnFloatingActionsMenuUpdateListener(this);
         mCommentsButton = (FloatingActionButton) findViewById(R.id.action_menu_comments);
         if (!linksHasComments())
             mFloatingMenu.removeView(mCommentsButton);
@@ -57,13 +58,13 @@ public class DetailActivity extends FragmentActivity implements View.OnClickList
         mButtonUp.setOnClickListener(this);
         mButtonDown = (FloatingActionButton) findViewById(R.id.action_menu_down_vote);
         mButtonDown.setOnClickListener(this);
-        loadMenuIcon();
+
     }
 
     private void loadMenuIcon() {
         Drawable icon = getResources().getDrawable(mDetailFragment.isSaved() ? R.drawable.ic_action_save_on : R.drawable.ic_action_save);
         mButtonSave.setIconDrawable(icon);
-        icon = getResources().getDrawable(mDetailFragment.isHidden() ? R.drawable.ic_action_remove_on : R.drawable.ic_action_remove);
+        icon = getResources().getDrawable(mDetailFragment.isLinkHidden() ? R.drawable.ic_action_remove_on : R.drawable.ic_action_remove);
         mButtonHide.setIconDrawable(icon);
         toggleLikesIcons();
     }
@@ -94,7 +95,6 @@ public class DetailActivity extends FragmentActivity implements View.OnClickList
             }
             case R.id.action_menu_hide: {
                 mDetailFragment.toggleHide();
-                loadMenuIcon();
                 finish();
                 break;
             }
@@ -154,5 +154,14 @@ public class DetailActivity extends FragmentActivity implements View.OnClickList
               cursor.close();
         }
         return false;
+    }
+
+    @Override
+    public void onMenuExpanded() {
+        loadMenuIcon();
+    }
+
+    @Override
+    public void onMenuCollapsed() {
     }
 }
