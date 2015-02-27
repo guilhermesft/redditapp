@@ -168,15 +168,7 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
         if (mHidden) {
             getActivity().getContentResolver().insert(ReadditContract.Link.buildAddTagUri(mLinkID, PredefinedTags.HIDDEN.getName()), null);
         } else {
-            long tagId = 0;
-            try {
-                tagId = DataHelper.getTagId(getActivity(), PredefinedTags.HIDDEN.getName());
-            } catch (RemoteException e) {
-                Logger.e(e.getLocalizedMessage(), e);
-            }
-            getActivity().getContentResolver().delete(ReadditContract.TagXPost.CONTENT_URI,
-                    ReadditContract.TagXPost.COLUMN_LINK + "=? AND " + ReadditContract.TagXPost.COLUMN_TAG + "=?",
-                    new String[]{String.valueOf(mLinkID), String.valueOf(tagId)});
+            DataHelper.removeTag(getActivity(), PredefinedTags.HIDDEN.getName(), mLinkID);
         }
         getActivity().getContentResolver().update(ReadditContract.Link.CONTENT_URI, values, ReadditContract.Link.COLUMN_NAME + "=?", new String[]{mFullname});
     }
@@ -191,15 +183,7 @@ public class DetailFragment extends Fragment implements View.OnClickListener, Lo
         if (mSaved) {
             getActivity().getContentResolver().insert(ReadditContract.Link.buildAddTagUri(mLinkID, PredefinedTags.SAVED.getName()), null);
         } else {
-            long tagId = 0;
-            try {
-                tagId = DataHelper.getTagId(getActivity(), PredefinedTags.SAVED.getName());
-            } catch (RemoteException e) {
-                Logger.e(e.getLocalizedMessage(), e);
-            }
-            getActivity().getContentResolver().delete(ReadditContract.TagXPost.CONTENT_URI,
-                    ReadditContract.TagXPost.COLUMN_LINK + "=? AND " + ReadditContract.TagXPost.COLUMN_TAG + "=?",
-                    new String[]{String.valueOf(mLinkID), String.valueOf(tagId)});
+            DataHelper.removeTag(getActivity(),PredefinedTags.SAVED.getName(), mLinkID);
         }
         getActivity().getContentResolver().update(ReadditContract.Link.CONTENT_URI, values, ReadditContract.Link.COLUMN_NAME + "=?", new String[]{mFullname});
     }

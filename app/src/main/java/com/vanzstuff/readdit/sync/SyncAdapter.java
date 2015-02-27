@@ -11,6 +11,7 @@
  import android.database.Cursor;
  import android.os.Bundle;
  import android.os.RemoteException;
+ import android.provider.ContactsContract;
 
  import com.android.volley.RequestQueue;
  import com.android.volley.toolbox.RequestFuture;
@@ -19,6 +20,7 @@
  import com.vanzstuff.readdit.PredefinedTags;
  import com.vanzstuff.readdit.R;
  import com.vanzstuff.readdit.Utils;
+ import com.vanzstuff.readdit.data.DataHelper;
  import com.vanzstuff.readdit.data.ReadditContract;
  import com.vanzstuff.readdit.redditapi.AboutRequest;
  import com.vanzstuff.readdit.redditapi.GetCommentRequest;
@@ -137,6 +139,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
      * @param provider ContentProviderClient to access the database
      */
     private void syncLocalLink(ContentProviderClient provider) {
+
         Cursor cursor = null;
         try {
             cursor = provider.query(ReadditContract.Link.CONTENT_URI,
@@ -317,7 +320,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private void syncLinks(ContentProviderClient provider) {
-        syncLocalLink(provider);
+       // syncLocalLink(provider);
         Cursor cursor = null;
         Cursor subredditCursor = null;
         Cursor linkCursor = null;
@@ -344,26 +347,22 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     if(isLinkInDatabase(provider, linkID)) {
                         //update data
                         provider.update(ReadditContract.Link.buildContentUri(false), value, ReadditContract.Link.COLUMN_ID + "=?", new String[]{linkID});
-                        //this link is saved or hidden. We have to add the tag
-                        if (value.getAsInteger(ReadditContract.Link.COLUMN_SAVED) == 1){
-                            //TODO - add saved tag
-                            addTagToLink(value.getAsString(ReadditContract.Link.COLUMN_NAME), getTagId(PredefinedTags.SAVED.getName()));
-                        } else {
-                            //TODO - remove saved tag
-                        }
-                        if (value.getAsInteger(ReadditContract.Link.COLUMN_HIDDEN) == 1){
-                            //TODO - add hidden tag
-                        } else {
-                            //TODO - remove hidden tag
-                        }
                         //this link cannot be deleted, remove it
                         databaseLinks.remove(linkID);
                     } else {
-                        //new link, needs to be inserted
-                        newLinks.add(value);
+                        provider.insert(ReadditContract.Link.buildContentUri(false), value);
                     }
+                    //this link is saved or hidden. We have to add the tag
+                    if (value.getAsBoolean(ReadditContract.Link.COLUMN_SAVED))
+                        addTagToLink(provider, value.getAsString(ReadditContract.Link.COLUMN_NAME), PredefinedTags.SAVED.getName());
+                    else
+                        DataHelper.removeTag(getContext(), PredefinedTags.SAVED.getName(), linkID);
+                    if (value.getAsBoolean(ReadditContract.Link.COLUMN_HIDDEN))
+                        addTagToLink(provider, value.getAsString(ReadditContract.Link.COLUMN_NAME), PredefinedTags.HIDDEN.getName());
+                    else
+                        DataHelper.removeTag(getContext(), PredefinedTags.HIDDEN.getName(), linkID);
                 }
-                provider.bulkInsert(ReadditContract.Link.buildContentUri(false), newLinks.toArray(new ContentValues[newLinks.size()]));
+//                provider.bulkInsert(ReadditContract.Link.buildContentUri(false), newLinks.toArray(new ContentValues[newLinks.size()]));
                 for(String linkID : databaseLinks)
                     provider.delete(ReadditContract.Link.CONTENT_URI, ReadditContract.Link.COLUMN_ID + "=?", new String[]{linkID});
             }
@@ -380,13 +379,19 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
     }
 
-    private void addTagToLink(String asString, long tagId) {
+    private void addTagToLink(ContentProviderClient provider, String linkFullname, String tag) throws RemoteException {
+        Cursor cursor = null;
+        try{
+            cursor = provider.query(ReadditContract.Link.CONTENT_URI, new String[]{ReadditContract.Link._ID},
+                    ReadditContract.Link.COLUMN_NAME + "=?",
+                    new String[]{String.valueOf(linkFullname)}, null);
+            if (cursor.moveToFirst())
+                provider.insert(ReadditContract.Link.buildAddTagUri(cursor.getLong(0),tag), null);
+        } finally {
+            if (cursor != null)
+                cursor.close();
+        }
 
-    }
-
-    private long getTagId(String name) {
-        //TODO
-        return 0;
     }
 
     private boolean isLinkInDatabase(ContentProviderClient provider, String linkID) {

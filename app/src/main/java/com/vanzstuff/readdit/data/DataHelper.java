@@ -1,11 +1,16 @@
 package com.vanzstuff.readdit.data;
 
-import android.content.ContentProviderClient;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.RemoteException;
+import android.provider.ContactsContract;
 
+import com.vanzstuff.readdit.Logger;
+
+/**
+ * Helper class to avoid code duplication
+ */
 public class DataHelper {
 
     public static int setLinkRead(Context ctx, long linkID) throws RemoteException {
@@ -37,4 +42,29 @@ public class DataHelper {
         return 0;
     }
 
+    public static void removeTag(Context ctx, String tagName, long linkID) {
+        long tagId = 0;
+        try {
+            tagId = DataHelper.getTagId(ctx, tagName);
+        } catch (RemoteException e) {
+            Logger.e(e.getLocalizedMessage(), e);
+        }
+        ctx.getContentResolver().delete(ReadditContract.TagXPost.CONTENT_URI,
+                ReadditContract.TagXPost.COLUMN_LINK + "=? AND " + ReadditContract.TagXPost.COLUMN_TAG + "=?",
+                new String[]{String.valueOf(linkID), String.valueOf(tagId)});
+    }
+
+    public static void removeTag(Context ctx, String tagName, String linkID) {
+        Cursor cursor = null;
+        try{
+            cursor = ctx.getContentResolver().query(ReadditContract.Link.CONTENT_URI, new String[]{ReadditContract.Link._ID},
+                    ReadditContract.Link.COLUMN_ID + "=?",
+                    new String[]{linkID}, null);
+            if (cursor.moveToFirst())
+                DataHelper.removeTag(ctx, tagName, cursor.getLong(0));
+        }finally {
+            if (cursor!=null)
+                cursor.close();
+        }
+    }
 }
