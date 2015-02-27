@@ -67,4 +67,24 @@ public class DataHelper {
                 cursor.close();
         }
     }
+
+    /**
+     * Check if the links has some comments
+     * @return true if link has comments. Otherwise, return false
+     */
+    public static boolean linksHasComments(Context ctx, long linkID) {
+        Cursor cursor = null;
+        try {
+            cursor = ctx.getContentResolver().query(ReadditContract.Link.CONTENT_URI,
+                    new String[]{ReadditContract.Link.COLUMN_NUM_COMMENTS},
+                    ReadditContract.Link._ID + "=?",
+                    new String[]{String.valueOf(linkID)}, null);
+            if (cursor.moveToFirst())
+                return cursor.getInt(0) > 0;
+        } finally {
+            if (cursor != null && !cursor.isClosed())
+                cursor.close();
+        }
+        return false;
+    }
 }
